@@ -1,0 +1,52 @@
+Sirena Technologies Pvt Ltd Mail	Lokesh R M <lokesh@sirenatech.com>
+Opportunity Tracking Agent - Open questions
+2 messages
+Akanksha Anand <akanksha.anand@sirenatech.com>	Wed, Aug 5, 2026 at 1:42 AM
+To: David Nam <dnam@axcelai.com>
+Cc: Gene Sheridan <gene.sheridan@axcelai.com>, Karthikeyan Ponnuswami <karthik@sirenatech.com>, AgentOS <agentos@sirenatech.com>
+Hi David,
+
+Thanks for TrackF.xlsx. I've built a proof of concept around it as well (the pipeline math, sales revenue and confidence-weighted revenue, reproduces your spreadsheet exactly), and a handful of things need your input before I build further on top of it.
+
+First, on naming and scope: Gene's earlier email refers to an opportunity tracking agent, and a later email refers to a business or project tracking agent. Your spreadsheet actually covers both, the sales funnel and pipeline, and the won or lost outcome tracking, in one file. Is this meant to be one agent with that full scope, which is what I'm assuming and calling the Opportunity Tracking Agent for now, or should the sales funnel and the post-win project tracking be two separate agents? Related: should this agent also own the regional quarterly revenue forecast, or does that belong to a separate finance-owned process that just feeds off this agent's output?
+
+On confidence calibration: the Confidence Level column is currently a single number someone enters by hand per project. Should the agent calibrate that number using a rubric, similar to the ROI Agent's discount factors, things like whether the design status matches the validation stage, whether a named competitor is in the same socket, or a person's track record? Or should confidence stay fully human controlled, with the agent only flagging outliers for review? Separately, the sheet uses two parallel fields, design status and stage, what are the valid combinations between them, and what should happen when the agent sees an inconsistent pairing, for example a design win logged against concept stage?
+
+Two data issues I found while reading the file, not blockers, but worth fixing before I automate on top of them: the FCST_Revenue tab has broken formulas in the Europe, Taiwan, and Japan regional roll-up rows, and Sheet1 shows Projection and Stretch numbers by quarter that are close but don't tie back to any other tab by formula. Could you confirm what Projection versus Stretch is supposed to mean, and if you have a corrected version of the regional roll-up, that would help a lot.
+
+On stage transitions: should the agent automatically move a project between tabs, into Mass Production once it's won or into Design Lost once it's lost, or should that stay a manual move made by a person? And should Design Lost entries require a reason code, price, technical fit, relationship, timing, so I can eventually learn something from the losses rather than just recording a zero?
+
+And last, on how this connects to the ROI Agent: once a project reaches design win, should its confidence-weighted revenue feed the ROI Agent's forecast directly, or does the ROI Agent still want its own independently entered number as a check?
+
+Thanks,
+Akanksha
+
+
+2 attachments
+		TrackF (1).xlsx
+44K
+		OppTrack_Step1_Open_Questions.docx
+48K
+Akanksha Anand <akanksha.anand@sirenatech.com>	Mon, Aug 10, 2026 at 12:14 PM
+To: AgentOS <agentos@sirenatech.com>
+FYA
+
+---------- Forwarded message ---------
+From: David Nam <dnam@axcelai.com>
+Date: Wed, Aug 5, 2026 at 8:20 AM
+Subject: Re: Opportunity Tracking Agent - Open questions
+To: Akanksha Anand <akanksha.anand@sirenatech.com>
+Cc: Gene Sheridan <Gene.sheridan@axcelai.com>, Karthikeyan Ponnuswami <karthik@sirenatech.com>, AgentOS <agentos@sirenatech.com>
+
+
+See attached answers to your questions.
+From: Akanksha Anand <akanksha.anand@sirenatech.com>
+Sent: Wednesday, 05 August 2026 05:12:24
+To: David Nam <dnam@axcelai.com>
+Cc: Gene Sheridan <Gene.sheridan@axcelai.com>; Karthikeyan Ponnuswami <karthik@sirenatech.com>; AgentOS <agentos@sirenatech.com>
+Subject: Opportunity Tracking Agent - Open questions
+ 
+[Quoted text hidden]
+
+		OppTrack_Step1_Open_Questions_dn.docx
+67K

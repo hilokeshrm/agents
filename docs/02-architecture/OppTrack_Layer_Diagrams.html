@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OppTrack Layer Stack</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap">
+  <style>html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#F4F6F8; --surface:#FFFFFF; --surface-2:#E9EEF3; --sunk:#EFF3F7;
+  --ink:#111821; --ink-2:#3C4854; --muted:#6A7785;
+  --line:#D2DAE2; --line-soft:#E4E9EF;
+  --det:#1A5787; --det-soft:#E0EBF4; --det-edge:#9CC0DC;
+  --judge:#9E560F; --judge-soft:#F8EADA; --judge-edge:#DDB98C;
+  --human:#57488A; --human-soft:#EBE7F5; --human-edge:#BDB2DD;
+  --stop:#A93129; --stop-soft:#F7E4E2; --stop-edge:#DFA9A3;
+  --shadow:0 1px 2px rgba(17,24,33,.05), 0 8px 24px -12px rgba(17,24,33,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+    --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+    --line:#2A3542; --line-soft:#212B36;
+    --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+    --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+    --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+    --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+  --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+  --line:#2A3542; --line-soft:#212B36;
+  --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+  --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+  --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+  --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+h1,h2,.eyebrow,.plate{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 90px}
+
+header.mast{padding:60px 0 26px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);display:flex;flex-wrap:wrap;gap:13px;align-items:center}
+.eyebrow .sep{color:var(--line);font-weight:400}
+h1{font-size:clamp(34px,5.4vw,54px);line-height:1.04;margin:18px 0 0;font-weight:700;
+  letter-spacing:-.02em;text-wrap:balance}
+.stand{font-family:"IBM Plex Serif",Georgia,serif;font-size:18px;line-height:1.55;
+  color:var(--ink-2);margin:18px 0 0;max-width:64ch}
+.key{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 0}
+
+figure{margin:44px 0 0;background:var(--surface);border:1px solid var(--line);
+  border-radius:3px;overflow:hidden;box-shadow:var(--shadow)}
+.fhead{padding:15px 20px 13px;border-bottom:1px solid var(--line-soft);
+  display:flex;flex-wrap:wrap;gap:12px;align-items:baseline;justify-content:space-between}
+.fhead h2{margin:0;font-size:19px;font-weight:600;letter-spacing:-.01em}
+.plate{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--muted)}
+.figbody{padding:20px 18px 8px;overflow-x:auto}
+figure svg{display:block;width:100%;height:auto;min-width:760px}
+figcaption{font-size:13px;line-height:1.55;color:var(--muted);padding:13px 20px 15px;
+  border-top:1px solid var(--line-soft);background:var(--sunk);max-width:none}
+figcaption b{color:var(--ink-2);font-weight:600}
+
+.chip{display:inline-flex;align-items:center;gap:5px;font-family:"IBM Plex Sans Condensed",sans-serif;
+  font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;border:1px solid;white-space:nowrap}
+.c-det{color:var(--det);background:var(--det-soft);border-color:var(--det-edge)}
+.c-judge{color:var(--judge);background:var(--judge-soft);border-color:var(--judge-edge)}
+.c-human{color:var(--human);background:var(--human-soft);border-color:var(--human-edge)}
+.c-block{color:var(--stop);background:var(--stop-soft);border-color:var(--stop-edge)}
+
+.s-box{fill:var(--surface);stroke:var(--line)}
+.s-det{fill:var(--det-soft);stroke:var(--det-edge)}
+.s-judge{fill:var(--judge-soft);stroke:var(--judge-edge)}
+.s-human{fill:var(--human-soft);stroke:var(--human-edge)}
+.s-stop{fill:var(--stop-soft);stroke:var(--stop-edge)}
+.s-sunk{fill:var(--sunk);stroke:var(--line)}
+.s-band{fill:var(--sunk);stroke:none}
+.s-dash{fill:none;stroke:var(--muted);stroke-dasharray:5 4}
+.t{fill:var(--ink);font-family:"IBM Plex Sans",sans-serif;font-size:11.5px}
+.tb{fill:var(--ink);font-family:"IBM Plex Sans",sans-serif;font-size:12px;font-weight:600}
+.ts{fill:var(--muted);font-family:"IBM Plex Sans",sans-serif;font-size:9.5px}
+.tm{fill:var(--ink-2);font-family:"IBM Plex Mono",monospace;font-size:9.5px}
+.th{fill:var(--muted);font-family:"IBM Plex Sans Condensed",sans-serif;font-size:9.5px;
+  letter-spacing:.13em;text-transform:uppercase;font-weight:600}
+.al{fill:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:9px}
+.t-det{fill:var(--det)} .t-judge{fill:var(--judge)} .t-human{fill:var(--human)} .t-stop{fill:var(--stop)}
+.ln{stroke:var(--muted);stroke-width:1.15;fill:none}
+.ln-d{stroke:var(--judge);stroke-width:1.3;fill:none;stroke-dasharray:5 3}
+.ln-x{stroke:var(--stop);stroke-width:1.2;fill:none;stroke-dasharray:4 3}
+.ln-f{stroke:var(--muted);stroke-width:1.1;fill:none;stroke-dasharray:4 3}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="eyebrow"><span>Opportunity Tracking Agent</span><span class="sep">/</span>
+  <span>Layer stack</span><span class="sep">/</span><span>Six plates</span></div>
+  <h1>Every layer, drawn</h1>
+  <p class="stand">
+    Six plates, each one a mechanism rather than an inventory: how a request descends the stack, what
+    happens on one run, how the code is layered around a parameter registry, what the agent remembers,
+    how the tables join, and what happens inside the single model call.
+  </p>
+  <div class="key">
+    <span class="chip c-det">Deterministic &mdash; no model</span>
+    <span class="chip c-judge">Model</span>
+    <span class="chip c-human">Human</span>
+    <span class="chip c-block">Not built / blocked</span>
+  </div>
+</header>
+
+<figure>
+  <div class="fhead"><h2>Deployment stack</h2><span class="plate">Plate 1 &middot; six planes</span></div>
+  <div class="figbody">
+  <svg viewBox="0 0 1040 600" role="img" aria-label="Deployment diagram: UI, gateway, orchestration, services and data planes stacked with requests moving only downward; inference sits to the side of the services plane and is reached only by the judgment engine; sibling agents attach at the orchestration plane over MCP.">
+    <defs>
+      <marker id="p1a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker>
+      <marker id="p1b" viewBox="0 0 8 8" refX="1" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M8,0 L0,4 L8,8 z" fill="var(--muted)"/></marker>
+    </defs>
+    <text class="th" x="16" y="80">UI</text>
+    <text class="th" x="16" y="176">Gateway</text>
+    <text class="th" x="16" y="266">Orchestr.</text>
+    <text class="th" x="16" y="352">Services</text>
+    <text class="th" x="16" y="500">Data</text>
+    <rect class="s-box" x="140" y="44" width="211" height="64" rx="3"/>
+    <text class="tb" x="152" y="70">Pipeline entry</text>
+    <text class="ts" x="152" y="88">funnel and ProjectTrack rows</text>
+    <rect class="s-box" x="363" y="44" width="211" height="64" rx="3"/>
+    <text class="tb" x="375" y="70">Stage board</text>
+    <text class="ts" x="375" y="88">kanban by Stage, drag to move</text>
+    <rect class="s-box" x="586" y="44" width="211" height="64" rx="3"/>
+    <text class="tb" x="598" y="70">Review console</text>
+    <text class="ts" x="598" y="88">approve, reject, override</text>
+    <rect class="s-box" x="809" y="44" width="211" height="64" rx="3"/>
+    <text class="tb" x="821" y="70">Roll-up views</text>
+    <text class="ts" x="821" y="88">region, stage, concentration</text>
+    <rect class="s-box" x="140" y="140" width="285" height="64" rx="3"/>
+    <text class="tb" x="152" y="166">REST / GraphQL gateway</text>
+    <text class="ts" x="152" y="184">FastAPI, audit writer on every mutation</text>
+    <rect class="s-box" x="437" y="140" width="285" height="64" rx="3"/>
+    <text class="tb" x="449" y="166">AuthN / AuthZ</text>
+    <text class="ts" x="449" y="184">SSO (Okta, Azure AD), RBAC, region scope</text>
+    <rect class="s-box" x="734" y="140" width="286" height="64" rx="3"/>
+    <text class="tb" x="746" y="166">Rate limit, quota, idempotency</text>
+    <text class="ts" x="746" y="184">one run per snapshot, replay-safe</text>
+    <rect class="s-sunk" x="140" y="236" width="612" height="54" rx="3"/>
+    <text class="tb" x="152" y="258">Workflow Manager</text>
+    <text class="ts" x="152" y="276">existing platform orchestrator, routes requests and mediates sibling-agent calls</text>
+    <rect class="s-box" x="800" y="236" width="220" height="54" rx="3"/>
+    <text class="tb" x="812" y="258">Sibling agents</text>
+    <text class="ts" x="812" y="276">ROI Agent, Design Agent</text>
+    <rect class="s-det" x="140" y="318" width="300" height="54" rx="3"/>
+    <text class="tb t-det" x="152" y="340">Calc engine</text>
+    <text class="ts" x="152" y="358">stateless, C1 and C2 and roll-ups, no model</text>
+    <rect class="s-judge" x="452" y="318" width="300" height="54" rx="3"/>
+    <text class="tb t-judge" x="464" y="340">Judgment engine</text>
+    <text class="ts" x="464" y="358">rubric, evidence, proposal. The only model caller</text>
+    <rect class="s-det" x="140" y="384" width="300" height="54" rx="3"/>
+    <text class="tb t-det" x="152" y="406">Stage tracker</text>
+    <text class="ts" x="152" y="424">cron or Temporal: stalls, milestones, promotions</text>
+    <rect class="s-det" x="452" y="384" width="300" height="54" rx="3"/>
+    <text class="tb t-det" x="464" y="406">Alerting</text>
+    <text class="ts" x="464" y="424">stage change, stall, win or loss, with rationale</text>
+    <rect class="s-judge" x="800" y="318" width="220" height="120" rx="3"/>
+    <text class="th t-judge" x="812" y="338">Inference</text>
+    <text class="t" x="812" y="360">Hosted frontier API</text>
+    <text class="ts" x="812" y="376">claude-opus-5, primary</text>
+    <text class="t" x="812" y="400">Local vLLM fallback</text>
+    <text class="ts" x="812" y="416">Llama 3.3 70B 4-bit, 1x RTX PRO 6000</text>
+    <text class="ts" x="812" y="431">plus embeddings, same card</text>
+    <rect class="s-box" x="140" y="468" width="211" height="72" rx="3"/>
+    <text class="tb" x="152" y="492">PostgreSQL</text>
+    <text class="ts" x="152" y="510">opportunity, state_history,</text>
+    <text class="ts" x="152" y="525">snapshot, proposal, finding</text>
+    <rect class="s-box" x="363" y="468" width="211" height="72" rx="3"/>
+    <text class="tb" x="375" y="492">pgvector / Qdrant</text>
+    <text class="ts" x="375" y="510">precedent, loss write-ups,</text>
+    <text class="ts" x="375" y="525">competitor notes. Prose only</text>
+    <rect class="s-box" x="586" y="468" width="211" height="72" rx="3"/>
+    <text class="tb" x="598" y="492">Audit log</text>
+    <text class="ts" x="598" y="510">confidence_event, append-only,</text>
+    <text class="ts" x="598" y="525">immutable for seven years</text>
+    <rect class="s-box" x="809" y="468" width="211" height="72" rx="3"/>
+    <text class="tb" x="821" y="492">S3 / MinIO and Redis</text>
+    <text class="ts" x="821" y="510">source workbooks, uploads,</text>
+    <text class="ts" x="821" y="525">job queue backing</text>
+    <path class="ln" marker-end="url(#p1a)" d="M446,108 V134"/>
+    <text class="al" x="454" y="126">HTTPS, SSO session</text>
+    <path class="ln" marker-end="url(#p1a)" d="M446,204 V230"/>
+    <text class="al" x="454" y="222">region-scoped request</text>
+    <path class="ln" marker-end="url(#p1a)" d="M290,290 V312"/>
+    <text class="al" x="298" y="306">run pipeline</text>
+    <path class="ln" marker-end="url(#p1a)" d="M290,438 V462"/>
+    <text class="al" x="298" y="456">read snapshot, write proposal</text>
+    <path class="ln" marker-start="url(#p1b)" marker-end="url(#p1a)" d="M752,263 H796"/>
+    <text class="al" x="756" y="252">MCP</text>
+    <path class="ln-d" marker-end="url(#p1a)" d="M752,345 H796"/>
+    <text class="al" x="756" y="336">one call / run</text>
+    <path class="ln" marker-end="url(#p1a)" d="M910,438 V452 H470 V462"/>
+    <text class="al" x="600" y="448">embeddings</text>
+    <path class="ln-f" marker-end="url(#p1a)" d="M158,204 H122 V504 H134"/>
+    <text class="al" x="14" y="420">audit</text>
+    <text class="al" x="14" y="434">writer</text>
+    <text class="ts" x="140" y="572">Requests only ever move down. Nothing in the data plane calls back up into a service.</text>
+  </svg>
+  </div>
+  <figcaption>
+    <b>Plate 1 &middot; Deployment.</b> Inference is drawn to the side rather than as a rung in the
+    descent, because it is not on the request path: only the judgment engine reaches it, once per run.
+    The calc engine has no edge to it at all, which is why a revenue figure cannot be model-derived.
+    Sibling agents attach at the orchestration plane rather than to the services directly, so the ROI
+    Agent consumes Adjusted Revenue through the same audited gateway a person does.
+  </figcaption>
+</figure>
+
+<figure>
+  <div class="fhead"><h2>One run</h2><span class="plate">Plate 2 &middot; ten steps, three lanes</span></div>
+  <div class="figbody">
+  <svg viewBox="0 0 1040 400" role="img" aria-label="Swimlane diagram of one run: ten steps across deterministic, judgment and human lanes, with a rejection path from the guard step to a no-change terminal and only band-crossing rows reaching the human lane.">
+    <defs>
+      <marker id="p2a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker>
+    </defs>
+    <rect class="s-band" x="128" y="52" width="892" height="80" rx="3"/>
+    <rect class="s-band" x="128" y="152" width="892" height="80" rx="3"/>
+    <rect class="s-band" x="128" y="252" width="892" height="80" rx="3"/>
+    <text class="th t-det" x="14" y="96">Deterministic</text>
+    <text class="th t-judge" x="14" y="196">Judgment</text>
+    <text class="th t-human" x="14" y="296">Human</text>
+
+    <rect class="s-det" x="140" y="60" width="76" height="64" rx="3"/>
+    <text class="tm t-det" x="150" y="78">01</text>
+    <text class="t" x="150" y="98">Intake</text>
+    <text class="ts" x="150" y="113">snapshot</text>
+
+    <rect class="s-det" x="228" y="60" width="76" height="64" rx="3"/>
+    <text class="tm t-det" x="238" y="78">02</text>
+    <text class="t" x="238" y="98">Validate</text>
+    <text class="ts" x="238" y="113">V-a to V-i</text>
+
+    <rect class="s-det" x="316" y="60" width="76" height="64" rx="3"/>
+    <text class="tm t-det" x="326" y="78">03</text>
+    <text class="t" x="326" y="98">Compute</text>
+    <text class="ts" x="326" y="113">C1, C2</text>
+
+    <rect class="s-stop" x="404" y="160" width="76" height="64" rx="3" stroke-dasharray="4 3"/>
+    <text class="tm t-stop" x="414" y="178">04</text>
+    <text class="t" x="414" y="198">Precedent</text>
+    <text class="ts" x="414" y="213">not built</text>
+
+    <rect class="s-judge" x="492" y="160" width="76" height="64" rx="3"/>
+    <text class="tm t-judge" x="502" y="178">05</text>
+    <text class="t" x="502" y="198">Score</text>
+    <text class="ts" x="502" y="213">one call</text>
+
+    <rect class="s-det" x="580" y="60" width="76" height="64" rx="3"/>
+    <text class="tm t-det" x="590" y="78">06</text>
+    <text class="t" x="590" y="98">Check</text>
+    <text class="ts" x="590" y="113">8 guards</text>
+
+    <rect class="s-det" x="668" y="60" width="76" height="64" rx="3"/>
+    <text class="tm t-det" x="678" y="78">07</text>
+    <text class="t" x="678" y="98">Recompute</text>
+    <text class="ts" x="678" y="113">same fn</text>
+
+    <rect class="s-stop" x="756" y="60" width="76" height="64" rx="3" stroke-dasharray="4 3"/>
+    <text class="tm t-stop" x="766" y="78">08</text>
+    <text class="t" x="766" y="98">Lifecycle</text>
+    <text class="ts" x="766" y="113">not built</text>
+
+    <rect class="s-human" x="844" y="260" width="76" height="64" rx="3"/>
+    <text class="tm t-human" x="854" y="278">09</text>
+    <text class="t" x="854" y="298">Approve</text>
+    <text class="ts" x="854" y="313">queue</text>
+
+    <rect class="s-det" x="932" y="60" width="76" height="64" rx="3"/>
+    <text class="tm t-det" x="942" y="78">10</text>
+    <text class="t" x="942" y="98">Log</text>
+    <text class="ts" x="942" y="113">append-only</text>
+    <path class="ln" marker-end="url(#p2a)" d="M216,92 H224"/>
+    <path class="ln" marker-end="url(#p2a)" d="M304,92 H312"/>
+    <path class="ln-d" marker-end="url(#p2a)" d="M354,124 V144 H442 V156"/>
+    <text class="al" x="360" y="140">evidence bundle, no C1 or C2</text>
+    <path class="ln-d" marker-end="url(#p2a)" d="M480,192 H488"/>
+    <path class="ln-d" marker-end="url(#p2a)" d="M530,160 V144 H618 V128"/>
+    <text class="al" x="536" y="140">adjustment_pp + quote</text>
+    <path class="ln" marker-end="url(#p2a)" d="M656,92 H664"/>
+    <text class="al" x="640" y="52">accepted</text>
+    <path class="ln" marker-end="url(#p2a)" d="M744,92 H752"/>
+    <path class="ln" marker-end="url(#p2a)" d="M794,124 V244 H882 V256"/>
+    <text class="al" x="800" y="240">band-crossing rows only</text>
+    <path class="ln" marker-end="url(#p2a)" d="M920,292 H952 V128"/>
+    <text class="al" x="958" y="200">decision</text>
+    <rect class="s-sunk" x="580" y="288" width="140" height="40" rx="3"/>
+    <text class="t" x="592" y="304">No change</text>
+    <text class="ts" x="592" y="319">failure recorded, run completes</text>
+    <path class="ln-x" marker-end="url(#p2a)" d="M600,124 V284"/>
+    <text class="al t-stop" x="522" y="200">reject:</text>
+    <text class="al t-stop" x="522" y="212">no citation,</text>
+    <text class="al t-stop" x="522" y="224">wrong direction,</text>
+    <text class="al t-stop" x="522" y="236">unknown rule</text>
+    <path class="ln-f" d="M140,346 H1020"/>
+    <text class="ts" x="140" y="366">A run is a pure function of a snapshot: the same input reproduces the same numbers and the same proposals.</text>
+  </svg>
+  </div>
+  <figcaption>
+    <b>Plate 2 &middot; The run.</b> The two dashed steps are architecturally present and deliberately
+    not running &mdash; they need state history that does not exist yet, and the bench reports them as
+    skipped rather than faking them. Note where the lanes are crossed: the model receives an evidence
+    bundle carrying no computed revenue, and returns percentage points that step 6 checks before step 7
+    re-runs step 3's function. Only rows whose proposal would cross a lifecycle band reach a person;
+    everything else applies on its own, which is the difference between a review queue and a rubber stamp.
+  </figcaption>
+</figure>
+
+<figure>
+  <div class="fhead"><h2>Code layers</h2><span class="plate">Plate 3 &middot; seven layers, one registry</span></div>
+  <div class="figbody">
+  <svg viewBox="0 0 1040 400" role="img" aria-label="Layer diagram: a parameter registry spine feeds six layers, each declaring the parameter IDs it requires; only the judgment and review layers are non-deterministic and neither can write a number.">
+    <defs>
+      <marker id="p3a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker>
+    </defs>
+    <rect class="s-sunk" x="16" y="40" width="134" height="314" rx="3"/>
+    <text class="tm" x="30" y="62">01</text>
+    <text class="tb" x="30" y="84">Registry</text>
+    <text class="ts" x="30" y="104">parameters.py</text>
+    <text class="ts" x="30" y="119">enums.py</text>
+    <text class="ts" x="30" y="134">rubric.py</text>
+    <text class="ts" x="30" y="166">One ParamSpec</text>
+    <text class="ts" x="30" y="181">per ID. Every</text>
+    <text class="ts" x="30" y="196">layer declares</text>
+    <text class="ts" x="30" y="211">REQUIRES against</text>
+    <text class="ts" x="30" y="226">these, never</text>
+    <text class="ts" x="30" y="241">against a column</text>
+    <text class="ts" x="30" y="256">name. Unmet means</text>
+    <text class="ts" x="30" y="271">the module stays</text>
+    <text class="ts" x="30" y="286">dark rather than</text>
+    <text class="ts" x="30" y="301">guessing.</text>
+    <text class="th" x="30" y="336">Single source</text>
+    <text class="th" x="30" y="348">of truth</text>
+
+    <rect class="s-det" x="170" y="40" width="850" height="44" rx="3"/>
+    <text class="tm t-det" x="184" y="66">02</text>
+    <text class="tb" x="214" y="60">Intake, normalise, validate</text>
+    <text class="ts" x="214" y="76">xlsx_reader, snapshot, connectors, coerce, canon, rules V-a to V-i</text>
+    <text class="tm" x="812" y="66">reads all 28</text>
+
+    <rect class="s-det" x="170" y="94" width="850" height="44" rx="3"/>
+    <text class="tm t-det" x="184" y="120">03</text>
+    <text class="tb" x="214" y="114">Calculation</text>
+    <text class="ts" x="214" y="130">engine.py, rollup.py, test_engine.py. Every currency figure originates here</text>
+    <text class="tm" x="812" y="120">V1 V3 J1 T1</text>
+
+    <rect class="s-det" x="170" y="148" width="850" height="44" rx="3"/>
+    <text class="tm t-det" x="184" y="174">04</text>
+    <text class="tb" x="214" y="168">Analyses</text>
+    <text class="ts" x="214" y="184">stage_mix, concentration, data_quality, milestones, competitive, margin, demand</text>
+    <text class="tm" x="812" y="174">L1 L2 D1 D7 C1 C2</text>
+
+    <rect class="s-judge" x="170" y="202" width="850" height="44" rx="3"/>
+    <text class="tm t-judge" x="184" y="228">05</text>
+    <text class="tb t-judge" x="214" y="222">Judgment</text>
+    <text class="ts" x="214" y="238">evidence.py, client.py, contract.py, rubric_rules.py. Proposes, cannot write</text>
+    <text class="tm" x="812" y="228">writes J1 only</text>
+
+    <rect class="s-human" x="170" y="256" width="850" height="44" rx="3"/>
+    <text class="tm t-human" x="184" y="282">06</text>
+    <text class="tb t-human" x="214" y="276">Review and audit</text>
+    <text class="ts" x="214" y="292">queue.py, audit.py. A person decides; the log is append-only</text>
+    <text class="tm" x="812" y="282">ratifies J1</text>
+
+    <rect class="s-det" x="170" y="310" width="850" height="44" rx="3"/>
+    <text class="tm t-det" x="184" y="336">07</text>
+    <text class="tb" x="214" y="330">Delivery</text>
+    <text class="ts" x="214" y="346">api/ FastAPI, db/ SQLAlchemy, dashboard, stage board, roll-up views, MCP server</text>
+    <text class="tm" x="812" y="336">serves all</text>
+
+    <path class="ln" marker-end="url(#p3a)" d="M150,62 H166"/>
+    <path class="ln" marker-end="url(#p3a)" d="M150,116 H166"/>
+    <path class="ln" marker-end="url(#p3a)" d="M150,170 H166"/>
+    <path class="ln" marker-end="url(#p3a)" d="M150,224 H166"/>
+    <path class="ln" marker-end="url(#p3a)" d="M150,278 H166"/>
+    <path class="ln" marker-end="url(#p3a)" d="M150,332 H166"/>
+    <text class="th" x="790" y="30">Declares</text>
+    <text class="th" x="214" y="30">Layer</text>
+    <text class="ts" x="170" y="378">Only layers 5 and 6 are non-deterministic, and neither can write a number.</text>
+  </svg>
+  </div>
+  <figcaption>
+    <b>Plate 3 &middot; Code structure.</b> The registry is drawn as a spine rather than a top layer
+    because nothing calls it in sequence &mdash; every layer declares against it. That is what makes the
+    build order additive: adding a parameter activates the modules that had declared a dependency on it,
+    with no hunt through the code for what to switch on. Layers 3 and 4 produce every figure a reviewer
+    reads and contain no model at all.
+  </figcaption>
+</figure>
+
+<figure>
+  <div class="fhead"><h2>Memory and retrieval</h2><span class="plate">Plate 4 &middot; six tiers, one vector store</span></div>
+  <div class="figbody">
+  <svg viewBox="0 0 1040 440" role="img" aria-label="Memory diagram: five persistent tiers feed an evidence assembler that filters in SQL before ranking by similarity and hands a token-budgeted bundle to the judgment engine; the model never queries a store itself.">
+    <defs>
+      <marker id="p4a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker>
+      <marker id="p4x" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--stop)"/></marker>
+    </defs>
+    <text class="th" x="40" y="34">Tiers</text>
+    <text class="th" x="380" y="34">Assembly</text>
+    <text class="th" x="740" y="34">Inference</text>
+
+    <rect class="s-box" x="40" y="50" width="240" height="54" rx="3"/>
+    <text class="tb" x="54" y="72">L1 episodic</text>
+    <text class="ts" x="54" y="90">the snapshot, written once per run, immutable 7y</text>
+
+    <rect class="s-box" x="40" y="120" width="240" height="54" rx="3"/>
+    <text class="tb" x="54" y="142">L2 entity</text>
+    <text class="ts" x="54" y="160">the dossier: state_history, time in stage</text>
+
+    <rect class="s-box" x="40" y="190" width="240" height="54" rx="3"/>
+    <text class="tb" x="54" y="212">L3 semantic</text>
+    <text class="ts" x="54" y="230">pgvector: notes, loss write-ups. Prose only</text>
+
+    <rect class="s-box" x="40" y="260" width="240" height="54" rx="3"/>
+    <text class="tb" x="54" y="282">L4 procedural</text>
+    <text class="ts" x="54" y="300">Matrix A and the rubric, as published versions</text>
+
+    <rect class="s-box" x="40" y="330" width="240" height="54" rx="3"/>
+    <text class="tb" x="54" y="352">L5 calibration</text>
+    <text class="ts" x="54" y="370">owner and region bias, rebuilt quarterly</text>
+
+    <rect class="s-sunk" x="380" y="44" width="260" height="44" rx="3"/>
+    <text class="tb" x="394" y="66">Audit and reproduction</text>
+    <text class="ts" x="394" y="82">re-run a vintage, compare two runs</text>
+
+    <rect class="s-sunk" x="380" y="110" width="260" height="230" rx="3"/>
+    <text class="tb" x="394" y="134">Evidence assembler</text>
+    <text class="ts" x="394" y="158">1. Filter in SQL first</text>
+    <text class="ts" x="406" y="173">region, product line, recency</text>
+    <text class="ts" x="394" y="197">2. Then rank by similarity</text>
+    <text class="ts" x="406" y="212">only over what already passed</text>
+    <text class="ts" x="394" y="236">3. Apply a token budget</text>
+    <text class="ts" x="406" y="251">bundle is bounded, not best-effort</text>
+    <text class="ts t-stop" x="394" y="285">Never embedded:</text>
+    <text class="ts t-stop" x="394" y="300">EAU, ASP, confidence, any total,</text>
+    <text class="ts t-stop" x="394" y="315">customer pricing</text>
+
+    <rect class="s-judge" x="740" y="150" width="280" height="140" rx="3"/>
+    <text class="tb t-judge" x="754" y="174">Judgment engine</text>
+    <text class="ts" x="754" y="196">L0 working memory lives here, in process,</text>
+    <text class="ts" x="754" y="211">and is authoritative for nothing</text>
+    <text class="ts" x="754" y="238">Matrix A as config</text>
+    <text class="ts" x="754" y="253">13 factors, one streaming call</text>
+    <text class="ts" x="754" y="268">json_schema on the request</text>
+
+    <rect class="s-det" x="740" y="320" width="280" height="54" rx="3"/>
+    <text class="tb t-det" x="754" y="342">Proposal, then the guards</text>
+    <text class="ts" x="754" y="360">percentage points and quotes. Never a figure</text>
+
+    <path class="ln" marker-end="url(#p4a)" d="M280,77 H376"/>
+    <path class="ln" marker-end="url(#p4a)" d="M280,147 H340 V180 H376"/>
+    <text class="al" x="286" y="142">dossier</text>
+    <path class="ln" marker-end="url(#p4a)" d="M280,217 H376"/>
+    <text class="al" x="286" y="212">supporting quotes only</text>
+    <path class="ln" marker-end="url(#p4a)" d="M280,287 H340 V254 H376"/>
+    <text class="al" x="286" y="282">rules in force</text>
+    <path class="ln" marker-end="url(#p4a)" d="M280,357 H340 V300 H376"/>
+    <text class="al" x="286" y="352">bias, as a prior</text>
+    <path class="ln" marker-end="url(#p4a)" d="M640,220 H736"/>
+    <text class="al" x="648" y="214">bundle</text>
+    <path class="ln" marker-end="url(#p4a)" d="M880,290 V316"/>
+    <path class="ln-x" marker-end="url(#p4x)" d="M740,270 H725 V404 H160 V390"/>
+    <text class="ts t-stop" x="430" y="399">the model never queries a store itself</text>
+    <text class="ts t-stop" x="700" y="290">&#10005;</text>
+  </svg>
+  </div>
+  <figcaption>
+    <b>Plate 4 &middot; Memory.</b> Agent memory usually gets collapsed into embeddings; here exactly one
+    tier of six is a vector store, and it is authoritative for nothing &mdash; it supplies supporting
+    quotes and nothing else. The ordering inside the assembler is the load-bearing part: similarity
+    alone will happily return a Korean lighting socket as precedent for a European ADAS opportunity, so
+    region, product line and recency are SQL predicates applied before any ranking runs.
+  </figcaption>
+</figure>
+
+<figure>
+  <div class="fhead"><h2>Data model</h2><span class="plate">Plate 5 &middot; ten tables, one ID</span></div>
+  <div class="figbody">
+  <svg viewBox="0 0 1040 450" role="img" aria-label="Entity diagram: eight tables hang off a single opportunity row by foreign key, while rubric_version stamps proposals and confidence events and calibration keys on owner and region.">
+    <defs>
+      <marker id="p5a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker>
+    </defs>
+    <rect class="s-box" x="90" y="44" width="200" height="58" rx="3"/>
+    <text class="tb" x="102" y="66">snapshot</text>
+    <text class="ts" x="102" y="84">write-once input of one run</text>
+    <rect class="s-box" x="310" y="44" width="200" height="58" rx="3"/>
+    <text class="tb" x="322" y="66">state_history</text>
+    <text class="ts" x="322" y="84">every status and stage move</text>
+    <rect class="s-box" x="530" y="44" width="200" height="58" rx="3"/>
+    <text class="tb" x="542" y="66">field_value</text>
+    <text class="ts" x="542" y="84">provenanced connector writes</text>
+    <rect class="s-box" x="750" y="44" width="200" height="58" rx="3"/>
+    <text class="tb" x="762" y="66">forecast</text>
+    <text class="ts" x="762" y="84">quarterly units and phasing</text>
+
+    <rect class="s-box" x="90" y="190" width="200" height="70" rx="3"/>
+    <text class="tb" x="102" y="214">rubric_version</text>
+    <text class="ts" x="102" y="232">Matrix A and the rubric</text>
+    <text class="ts" x="102" y="247">as published, point in time</text>
+
+    <rect class="s-det" x="370" y="190" width="300" height="70" rx="3"/>
+    <text class="tb t-det" x="386" y="216">opportunity</text>
+    <text class="ts" x="386" y="234">the one ID. Identity, owner, region scope,</text>
+    <text class="ts" x="386" y="249">design status, stage, EAU, ASPs, confidence</text>
+
+    <rect class="s-box" x="90" y="340" width="200" height="58" rx="3"/>
+    <text class="tb" x="102" y="362">finding</text>
+    <text class="ts" x="102" y="380">rule, severity, message</text>
+    <rect class="s-box" x="310" y="340" width="200" height="58" rx="3"/>
+    <text class="tb" x="322" y="362">proposal</text>
+    <text class="ts" x="322" y="380">pending, with factors and quotes</text>
+    <rect class="s-box" x="530" y="340" width="200" height="58" rx="3"/>
+    <text class="tb" x="542" y="362">confidence_event</text>
+    <text class="ts" x="542" y="380">append-only, model and versions</text>
+    <rect class="s-box" x="750" y="340" width="200" height="58" rx="3"/>
+    <text class="tb" x="762" y="362">calibration</text>
+    <text class="ts" x="762" y="380">owner and region bias</text>
+
+    <path class="ln" marker-end="url(#p5a)" d="M190,102 L424,186"/>
+    <path class="ln" marker-end="url(#p5a)" d="M410,102 L468,186"/>
+    <path class="ln" marker-end="url(#p5a)" d="M630,102 L570,186"/>
+    <path class="ln" marker-end="url(#p5a)" d="M850,102 L616,186"/>
+    <path class="ln" marker-end="url(#p5a)" d="M190,340 L424,264"/>
+    <path class="ln" marker-end="url(#p5a)" d="M410,340 L468,264"/>
+    <path class="ln" marker-end="url(#p5a)" d="M630,340 L570,264"/>
+    <path class="ln-f" marker-end="url(#p5a)" d="M850,340 L616,264"/>
+    <path class="ln-f" marker-end="url(#p5a)" d="M190,260 L356,336"/>
+    <path class="ln-f" marker-end="url(#p5a)" d="M290,240 L556,336"/>
+    <text class="al" x="700" y="150">opportunity_id, on all eight</text>
+    <text class="al" x="700" y="300">owner, region</text>
+    <text class="al" x="196" y="300">version stamped on each</text>
+    <text class="ts" x="90" y="426">Six tabs with no shared key become one row with real foreign keys. Nothing above requires new data collection, only a stable ID.</text>
+  </svg>
+  </div>
+  <figcaption>
+    <b>Plate 5 &middot; Schema.</b> Every red relation in the workbook closes with one field: a stable
+    Opportunity ID written on every row of every tab. <b>state_history</b> is the table that earns its
+    keep first &mdash; it converts Design Status from a cell that gets overwritten into an event stream,
+    which is simultaneously stall detection, time in stage, velocity, win rate, and the outcome labels
+    the calibration table needs later. That costs a decision to stop overwriting, not a data-collection
+    programme.
+  </figcaption>
+</figure>
+
+<figure>
+  <div class="fhead"><h2>Inside the model call</h2><span class="plate">Plate 6 &middot; judgment layer internals</span></div>
+  <div class="figbody">
+  <svg viewBox="0 0 1040 420" role="img" aria-label="Detail of the judgment layer: config and pipeline rows build one prompt, a single streaming call with a JSON schema and a four-rung degradation ladder returns factors, and eight guards in series either pass a factor to the recompute or drop it onto a violations rail that is always recorded.">
+    <defs>
+      <marker id="p6a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/></marker>
+      <marker id="p6s" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="var(--stop)"/></marker>
+    </defs>
+    <rect class="s-sunk" x="30" y="34" width="200" height="150" rx="3"/>
+    <text class="th" x="42" y="54">Sent</text>
+    <text class="t" x="42" y="76">Matrix A, as config</text>
+    <text class="t" x="42" y="96">13 factors, caps, direction</text>
+    <text class="t" x="42" y="116">stage order, early stages</text>
+    <text class="t" x="42" y="136">rows: status, stage, notes,</text>
+    <text class="ts" x="42" y="151">EAU, ASPs, competitor field</text>
+    <text class="t" x="42" y="171">share percentages only</text>
+
+    <rect class="s-box" x="270" y="80" width="170" height="58" rx="3"/>
+    <text class="tb" x="282" y="104">build_user_prompt</text>
+    <text class="ts" x="282" y="122">one JSON object, whole pipeline</text>
+
+    <rect class="s-judge" x="480" y="34" width="250" height="150" rx="3"/>
+    <text class="th t-judge" x="492" y="54">One streaming call</text>
+    <text class="ts" x="492" y="76">1. schema + thinking + fallbacks</text>
+    <text class="ts" x="492" y="94">2. schema + thinking</text>
+    <text class="ts" x="492" y="112">3. schema only</text>
+    <text class="ts" x="492" y="130">4. plain</text>
+    <text class="ts t-stop" x="492" y="154">all four fail: raise, never mock</text>
+    <text class="ts" x="492" y="172">shape used is stored in provenance</text>
+
+    <rect class="s-box" x="770" y="80" width="240" height="58" rx="3"/>
+    <text class="tb" x="782" y="104">Reply</text>
+    <text class="ts" x="782" y="122">stop_reason checked before parsing</text>
+
+    <text class="th" x="30" y="238">Guards, in series</text>
+    <rect class="s-det" x="32" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="42" y="272">unknown</text>
+    <text class="ts" x="42" y="287">rule id</text>
+    <rect class="s-det" x="155" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="165" y="272">not</text>
+    <text class="ts" x="165" y="287">assessable</text>
+    <rect class="s-det" x="278" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="288" y="272">no</text>
+    <text class="ts" x="288" y="287">citation</text>
+    <rect class="s-det" x="401" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="411" y="272">wrong</text>
+    <text class="ts" x="411" y="287">direction</text>
+    <rect class="s-det" x="524" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="534" y="272">over factor</text>
+    <text class="ts" x="534" y="287">cap</text>
+    <rect class="s-det" x="647" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="657" y="272">over run cap</text>
+    <text class="ts" x="657" y="287">20pp</text>
+    <rect class="s-det" x="770" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="780" y="272">clamp</text>
+    <text class="ts" x="780" y="287">0.05 to 0.95</text>
+    <rect class="s-det" x="893" y="250" width="115" height="54" rx="3"/>
+    <text class="ts" x="903" y="272">band</text>
+    <text class="ts" x="903" y="287">crossing</text>
+
+    <rect class="s-det" x="560" y="346" width="450" height="54" rx="3"/>
+    <text class="tb t-det" x="574" y="368">Accepted, into step 7</text>
+    <text class="ts" x="574" y="386">the same arithmetic as step 3, on approved confidence</text>
+
+    <rect class="s-stop" x="30" y="346" width="470" height="54" rx="3"/>
+    <text class="tb t-stop" x="44" y="368">Violations, and band crossings</text>
+    <text class="ts" x="44" y="386">recorded on the run; crossings queue for a person, they never auto-apply</text>
+    <path class="ln" marker-end="url(#p6a)" d="M230,109 H266"/>
+    <path class="ln" marker-end="url(#p6a)" d="M440,109 H476"/>
+    <path class="ln" marker-end="url(#p6a)" d="M730,109 H766"/>
+    <path class="ln" marker-end="url(#p6a)" d="M890,138 V210 H90 V246"/>
+    <text class="al" x="360" y="204">factors, per project, per rule id</text>
+    <path class="ln" marker-end="url(#p6a)" d="M147,277 H151"/>
+    <path class="ln" marker-end="url(#p6a)" d="M270,277 H274"/>
+    <path class="ln" marker-end="url(#p6a)" d="M393,277 H397"/>
+    <path class="ln" marker-end="url(#p6a)" d="M516,277 H520"/>
+    <path class="ln" marker-end="url(#p6a)" d="M639,277 H643"/>
+    <path class="ln" marker-end="url(#p6a)" d="M762,277 H766"/>
+    <path class="ln" marker-end="url(#p6a)" d="M885,277 H889"/>
+    <path class="ln" marker-end="url(#p6a)" d="M950,304 V342"/>
+    <path class="ln-x" d="M89,304 V326"/>
+    <path class="ln-x" d="M212,304 V326"/>
+    <path class="ln-x" d="M335,304 V326"/>
+    <path class="ln-x" d="M458,304 V326"/>
+    <path class="ln-x" d="M581,304 V326"/>
+    <path class="ln-x" d="M704,304 V326"/>
+    <path class="ln-x" d="M827,304 V326"/>
+    <path class="ln-x" marker-end="url(#p6s)" d="M905,326 H265 V342"/>
+    <text class="al t-stop" x="272" y="322">a dropped factor is never silently dropped</text>
+  </svg>
+  </div>
+  <figcaption>
+    <b>Plate 6 &middot; The judgment layer.</b> The guards are drawn as gates in series because that is
+    what they are: a factor has to survive all eight to reach the recompute, and whatever each gate
+    removes falls onto the violations rail rather than vanishing. Two of the eight exist because of
+    specific failures on the first live run &mdash; the 0.95 clamp, because clamping to 1.0 discarded
+    every positive adjustment and made the layer a one-way haircut, and the schema on the request,
+    because a markdown fence once took out all nine projects and fell through to a mock scorer without
+    saying so.
+  </figcaption>
+</figure>
+
+</div>
+</body>
+</html>

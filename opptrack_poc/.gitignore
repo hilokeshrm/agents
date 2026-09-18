@@ -1,0 +1,6 @@
+# Never commit credentials.
+.anthropic_key
+*.key
+.env
+__pycache__/
+*.pyc

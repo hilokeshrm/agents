@@ -1,0 +1,1562 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OppTrack Work Breakdown</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap">
+  <style>html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#F4F6F8; --surface:#FFFFFF; --surface-2:#E9EEF3; --sunk:#EFF3F7;
+  --ink:#111821; --ink-2:#3C4854; --muted:#6A7785;
+  --line:#D2DAE2; --line-soft:#E4E9EF;
+  --det:#1A5787; --det-soft:#E0EBF4; --det-edge:#9CC0DC;
+  --judge:#9E560F; --judge-soft:#F8EADA; --judge-edge:#DDB98C;
+  --human:#57488A; --human-soft:#EBE7F5; --human-edge:#BDB2DD;
+  --stop:#A93129; --stop-soft:#F7E4E2; --stop-edge:#DFA9A3;
+  --ok:#1B6F55; --ok-soft:#DFF0E9; --ok-edge:#9BCBB8;
+  --shadow:0 1px 2px rgba(17,24,33,.05), 0 8px 24px -12px rgba(17,24,33,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+    --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+    --line:#2A3542; --line-soft:#212B36;
+    --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+    --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+    --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+    --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+    --ok:#5FC49E; --ok-soft:#132821; --ok-edge:#2F5F4C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+  --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+  --line:#2A3542; --line-soft:#212B36;
+  --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+  --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+  --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+  --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+  --ok:#5FC49E; --ok-soft:#132821; --ok-edge:#2F5F4C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+h1,h2,h3,.eyebrow,.pk,.chip{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+code,.mono,.tid{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.wrap{max-width:1140px;margin:0 auto;padding:0 22px 90px}
+.cols{display:grid;gap:0}
+@media(min-width:1040px){.cols{grid-template-columns:186px minmax(0,1fr);gap:44px;align-items:start}}
+main{min-width:0}
+header.mast{padding:58px 0 24px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  display:flex;flex-wrap:wrap;gap:13px;align-items:center}
+.eyebrow .sep{color:var(--line);font-weight:400}
+h1{font-size:clamp(33px,5.2vw,52px);line-height:1.05;margin:18px 0 0;font-weight:700;
+  letter-spacing:-.02em;text-wrap:balance}
+.stand{font-family:"IBM Plex Serif",Georgia,serif;font-size:18px;line-height:1.55;color:var(--ink-2);
+  margin:18px 0 0;max-width:64ch}
+.rail{display:none}
+@media(min-width:1040px){
+  .rail{display:block;position:sticky;top:20px;padding-top:58px}
+  .rail ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+  .rail a{display:flex;gap:8px;padding:4px 0 4px 12px;margin-left:-1px;border-left:2px solid transparent;
+    font-size:12px;line-height:1.35;color:var(--muted);text-decoration:none}
+  .rail a:hover{color:var(--ink);border-left-color:var(--det-edge)}
+  .rail a:focus-visible{outline:2px solid var(--det);outline-offset:2px}
+  .rail a i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--line)}
+}
+section{padding:46px 0 0;scroll-margin-top:16px}
+h2{font-size:11.5px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--det);
+  margin:0 0 5px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+h2 .num{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);font-weight:400}
+h3{font-size:clamp(22px,3vw,28px);line-height:1.16;margin:0 0 12px;font-weight:600;
+  letter-spacing:-.015em;text-wrap:balance}
+p{margin:0 0 14px;max-width:70ch;color:var(--ink-2)}
+p.lead{color:var(--ink)}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--det)}
+code{font-size:.87em;background:var(--surface-2);border:1px solid var(--line-soft);
+  padding:.06em .34em;border-radius:2px;color:var(--ink-2)}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid;white-space:nowrap}
+.c-done{color:var(--ok);background:var(--ok-soft);border-color:var(--ok-edge)}
+.c-part{color:var(--judge);background:var(--judge-soft);border-color:var(--judge-edge)}
+.c-todo{color:var(--muted);background:var(--surface-2);border-color:var(--line)}
+.c-block{color:var(--stop);background:var(--stop-soft);border-color:var(--stop-edge)}
+.c-det{color:var(--det);background:var(--det-soft);border-color:var(--det-edge)}
+.c-human{color:var(--human);background:var(--human-soft);border-color:var(--human-edge)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);margin:28px 0 0;border-radius:3px;overflow:hidden}
+.fact{background:var(--surface);padding:11px 13px}
+.fact b{display:block;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:21px;font-weight:700;
+  letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.fact span{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.pk{display:flex;flex-wrap:wrap;gap:9px;align-items:center;justify-content:space-between;
+  background:var(--sunk);border:1px solid var(--line);border-radius:3px;padding:10px 14px;margin:0 0 16px}
+.pk .pkl{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pk .pkn{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--det);font-weight:600}
+.pk .pkd{font-size:11.5px;color:var(--muted)}
+.tasks{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:var(--surface);margin:0 0 8px}
+.task{display:grid;grid-template-columns:52px minmax(0,1fr);border-bottom:1px solid var(--line-soft)}
+.task:last-child{border-bottom:0}
+.tid{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);padding:14px 0 0;
+  text-align:center;background:var(--sunk);border-right:1px solid var(--line-soft)}
+.tb{padding:12px 15px 13px;min-width:0}
+.th{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:5px}
+.th b{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:15px;font-weight:600;letter-spacing:-.005em}
+.tb p{font-size:13.5px;line-height:1.55;margin:0 0 8px;color:var(--ink-2);max-width:76ch}
+.tb p:last-of-type{margin-bottom:0}
+.dod{font-size:12px;line-height:1.5;color:var(--ink-2);background:var(--sunk);border-left:2px solid var(--ok-edge);
+  padding:6px 10px;border-radius:0 2px 2px 0;margin:8px 0 0;max-width:76ch}
+.dod b{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:9.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+.dep{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);margin-top:7px}
+.dep s{text-decoration:none;color:var(--stop)}
+.tw{overflow-x:auto;margin:20px 0;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;padding:9px 12px;background:var(--sunk);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink);font-weight:600}
+td.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.pull{border-left:3px solid var(--det);background:var(--sunk);padding:14px 18px;margin:22px 0;
+  border-radius:0 3px 3px 0}
+.pull p{margin:0;color:var(--ink);font-size:16px;line-height:1.5;max-width:none}
+.pull p+p{margin-top:8px;font-size:13.5px;color:var(--ink-2)}
+.pull.warn{border-left-color:var(--stop)}
+.note{font-size:12.5px;line-height:1.55;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:10px;margin:20px 0;max-width:78ch}
+hr{border:0;border-top:1px solid var(--line);margin:50px 0 0}
+footer{padding:22px 0 0;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="eyebrow"><span>Opportunity Tracking Agent</span><span class="sep">/</span>
+  <span>Work breakdown structure</span><span class="sep">/</span><span>15 packages, 108 tasks</span></div>
+  <h1>Everything that has to be built</h1>
+  <p class="stand">
+    The numbering is dependency order, not preference. Package 2.0 blocks most of what follows, and
+    9.0 blocks the learning half of 4.0. Each task states what it actually is, what counts as done, and
+    what it waits on &mdash; because on this project most of the remaining risk is a missing field or
+    an unratified decision, not a hard piece of engineering.
+  </p>
+  <div class="facts">
+    <div class="fact"><b>15</b><span>packages</span></div>
+    <div class="fact"><b>108</b><span>tasks</span></div>
+    <div class="fact"><b>12</b><span>done or partial</span></div>
+    <div class="fact"><b>10</b><span>blocked</span></div>
+    <div class="fact"><b>6</b><span>phases</span></div>
+    <div class="fact"><b>4</b><span>questions unblock 4</span></div>
+  </div>
+</header>
+
+<div class="cols">
+<nav class="rail" aria-label="Packages">
+  <ol>
+    <li><a href="#w0"><i>&mdash;</i>How to read this</a></li>
+    <li><a href="#w1"><i>1.0</i>Project control</a></li>
+    <li><a href="#w2"><i>2.0</i>Parameter registry</a></li>
+    <li><a href="#w3"><i>3.0</i>Intake, normalisation</a></li>
+    <li><a href="#w4"><i>4.0</i>Validation, findings</a></li>
+    <li><a href="#w5"><i>5.0</i>Calculation engine</a></li>
+    <li><a href="#w6"><i>6.0</i>Analysis registry</a></li>
+    <li><a href="#w7"><i>7.0</i>Judgment layer</a></li>
+    <li><a href="#w8"><i>8.0</i>Review, audit, lifecycle</a></li>
+    <li><a href="#w9"><i>9.0</i>Data platform, identity</a></li>
+    <li><a href="#w10"><i>10.0</i>Interfaces</a></li>
+    <li><a href="#w11"><i>11.0</i>Connectors</a></li>
+    <li><a href="#w12"><i>12.0</i>Quality</a></li>
+    <li><a href="#w13"><i>13.0</i>Deployment, ops</a></li>
+    <li><a href="#w14"><i>14.0</i>Assistant</a></li>
+    <li><a href="#w15"><i>15.0</i>Documentation</a></li>
+    <li><a href="#wcp"><i>&mdash;</i>Critical path</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="w0">
+  <h2><span class="num">00</span> Conventions</h2>
+  <h3>How to read this</h3>
+  <p class="lead">
+    Every task carries a status, a phase and, where it matters, what blocks it. Sizes are engineering
+    estimates for one developer and are mine, not committed &mdash; treat them as relative weights, not
+    dates.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Mark</th><th>Means</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip c-done">Done</span></td><td>Code exists and is covered by a test. Only 5.1 and parts of 7.0 qualify today</td></tr>
+      <tr><td><span class="chip c-part">Partial</span></td><td>A working implementation exists in the POC or bench, but not in the shape the platform needs</td></tr>
+      <tr><td><span class="chip c-todo">To do</span></td><td>Not started, and nothing prevents starting</td></tr>
+      <tr><td><span class="chip c-block">Blocked</span></td><td>Waiting on a decision, a field that does not exist, or history that has not accumulated</td></tr>
+      <tr><td><code>S M L XL</code></td><td>Roughly: under a day, a few days, one to two weeks, longer</td></tr>
+      <tr><td><b>Phase 0&ndash;5</b></td><td>0 read-only, 1 numbers, 2 identity, 3 judgment, 4 learning, 5 outside-in</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull warn">
+    <p>Ten tasks are blocked. Four of them clear the moment the four questions are answered.</p>
+    <p>Ratifying Matrix A, setting the confidence ceiling, deciding whether a person gates an auto-move,
+    and confirming which workbook is current &mdash; those release 2.3, 2.4, 4.3 and 8.3, and unfreeze
+    the tuning of 7.3. The remaining six wait on a field that does not exist, a licence, or history that
+    has to accumulate, and no decision shortens those.</p>
+  </div>
+</section>
+
+<section id="w1">
+  <h2><span class="num">1.0</span> Package</h2>
+  <h3>Project control and stakeholder resolution</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">1.0</span>
+    <span class="pkd">6 tasks &middot; ongoing &middot; releases 4 blocked tasks directly</span></div>
+    <div><span class="chip c-human">Not engineering</span></div></div>
+  <p>
+    This package exists because the largest remaining risk on the project is not technical. Four
+    unanswered questions determine what the judgment layer is allowed to do; until they land, that code
+    can be written but not tuned, and the numbers it produces cannot be defended in a review.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">1.1</div><div class="tb">
+      <div class="th"><b>Send the four blocking questions</b><span class="chip c-block">Blocked</span><span class="chip c-todo">S</span></div>
+      <p>Q1 ratify the Matrix A baseline per valid (Design Status, Stage) cell. Q2 set the confidence
+      ceiling &mdash; if a design win is not 1.00, what is the maximum any record may carry, and roughly
+      how many points should dual sourcing or cancellation risk remove. Q3 does a person gate an
+      auto-move to Mass Production or Design Lost. Q4 which workbook is current.</p>
+      <p>Q1 and Q2 are the expensive ones. Without Q1 the agent invents a confidence number rather than
+      justifying a deviation from an agreed one, and the file itself contradicts the stage-driven rule:
+      three Evaluation-at-EVT rows carry 0.30, 0.50 and 0.50. Without Q2 the clamp discards every
+      positive adjustment, so the calibrated total can only ever move down.</p>
+      <div class="dod"><b>Done when</b> All four answered in writing and recorded in the open-questions
+        register, with the Matrix A table signed off cell by cell.</div>
+      <div class="dep">unblocks 2.3, 2.4, 4.3, 7.3, 8.3 &middot; owner: Akanksha</div></div></div>
+
+    <div class="task"><div class="tid">1.2</div><div class="tb">
+      <div class="th"><b>Confirm the current workbook</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>David refers to "the sheet I updated"; our copy still contains the Projection/Stretch block his
+      does not. Validation rules get written against a specific file, so writing them against the wrong
+      one wastes the whole of package 4.0. Low risk in itself &mdash; that block is the only stated
+      difference &mdash; but it has to be settled before rules are authored.</p>
+      <p>Note while confirming: the <code>#REF!</code> roll-up rows are not pending fixes. They were
+      broken deliberately when the forecast moved to a separate agent, and a validation rule that flags
+      them as errors will produce noise on every run.</p>
+      <div class="dod"><b>Done when</b> One file is named as canonical, hashed, and stored as the
+        Phase 0 fixture.</div>
+      <div class="dep">blocks 3.1, 4.1, 12.6</div></div></div>
+
+    <div class="task"><div class="tid">1.3</div><div class="tb">
+      <div class="th"><b>Maintain the open-questions register</b><span class="chip c-part">Partial</span><span class="chip c-todo">S</span></div>
+      <p>Currently 6 answered, 7 partly answered, 15 open, 4 internal. The register is the artefact that
+      stops a partly-answered question being treated as settled &mdash; the auto-move policy is the live
+      example, where two answers given separately combine to mean nobody signs off before an opportunity
+      is closed as lost, which is almost certainly not what anyone intended.</p>
+      <div class="dod"><b>Done when</b> Every open item has an owner and a date, and partial answers are
+        marked as partial rather than closed.</div>
+      <div class="dep">ongoing</div></div></div>
+
+    <div class="task"><div class="tid">1.4</div><div class="tb">
+      <div class="th"><b>Settle the four internal decisions</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Service signature for the two POC modules, when the audit log is written relative to the
+      decision returning, the exact rubric wording published to reviewers, and the intake field list.
+      These need no external input, only a decision, and each one diverges the codebase if left open.</p>
+      <div class="dod"><b>Done when</b> Written into the repo as decisions with dates, not held in
+        conversation.</div>
+      <div class="dep">blocks 7.1, 8.2, 10.2</div></div></div>
+
+    <div class="task"><div class="tid">1.5</div><div class="tb">
+      <div class="th"><b>Agree the intake field list with the UI owner</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Must be settled before the form and the service diverge. It has to include Opportunity ID,
+      owner, Unit/Set, competitor part number and loss reason &mdash; the five fields whose absence
+      currently blocks a rubric factor or a join. Agreeing it late means either the form or the schema
+      gets rebuilt.</p>
+      <div class="dod"><b>Done when</b> One schema document signed off by both the service and UI
+        owners, covering all four intake paths, not only the form.</div>
+      <div class="dep">blocks 10.3, 11.1 &middot; owners: Lokesh + Dimple</div></div></div>
+
+    <div class="task"><div class="tid">1.6</div><div class="tb">
+      <div class="th"><b>Agree the ROI Agent cross-validation contract</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The ROI Agent consumes this agent's Adjusted Revenue as its revenue-forecast input. Fix the
+      shape once, shared, rather than having both sides invent it: which figure, at what grain, carrying
+      which snapshot identifier, and what happens when the two disagree. Without a snapshot ID on the
+      hand-off the two agents will eventually present different totals for the same month and nobody
+      will be able to say which is stale.</p>
+      <div class="dod"><b>Done when</b> A written contract exists and both agents' tests assert against
+        the same fixture.</div>
+      <div class="dep">blocks 10.9, 11.5</div></div></div>
+  </div>
+</section>
+
+<section id="w2">
+  <h2><span class="num">2.0</span> Package</h2>
+  <h3>Parameter registry and canonical model</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">2.0</span>
+    <span class="pkd">6 tasks &middot; Phase 0 &middot; blocks most of what follows</span></div>
+    <div><span class="chip c-det">Layer 1</span></div></div>
+  <p>
+    The registry is the single source of truth every other layer declares against. Building it first is
+    what makes the rest of the plan additive: adding a parameter later activates the validators,
+    analyses and rubric factors that had declared a dependency on it, instead of requiring a hunt
+    through the code for what to switch on.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">2.1</div><div class="tb">
+      <div class="th"><b>ParamSpec for every parameter</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>One frozen dataclass per parameter: id, name, dtype, unit, enum, required, which tabs supply it,
+      and whether it is present in the current file. Twenty-eight live entries plus the twenty-six
+      proposed ones, so a proposed parameter is registered as absent rather than missing.</p>
+      <p>The rule that makes this worth doing: nothing downstream may reference a spreadsheet column
+      name. Rules and analyses cite <code>V1</code>, never <code>column K</code>, so a sheet reshuffle
+      is an intake change and not a codebase change.</p>
+      <div class="dod"><b>Done when</b> Every parameter in the dictionary has a spec, and a test asserts
+        the registry covers every column the intake reads.</div>
+      <div class="dep">blocks 2.5, 3.6, 4.1, 6.1, 7.2</div></div></div>
+
+    <div class="task"><div class="tid">2.2</div><div class="tb">
+      <div class="th"><b>Canonical enums</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Region, design status, stage, product line, application and loss reason, each with its accepted
+      variants. This is where <code>KR</code> becomes Korea and <code>D-IN</code> becomes Design In. It
+      has to exist before the roll-ups are rebuilt, because a regional total computed over
+      <code>EU</code> and <code>Europe</code> as separate keys is wrong in a way nobody notices.</p>
+      <p>Open item to resolve inside this task: the file holds <code>EU</code>, <code>KR</code> and
+      <code>North America</code>, none of which appear on David's region list. Confirm the mapping,
+      including whether North America means US only.</p>
+      <div class="dod"><b>Done when</b> Every enum value in the real file maps to exactly one canonical
+        value, with no fallthrough.</div>
+      <div class="dep">blocks 3.4, 5.3</div></div></div>
+
+    <div class="task"><div class="tid">2.3</div><div class="tb">
+      <div class="th"><b>Matrix A as versioned config</b><span class="chip c-block">Blocked</span><span class="chip c-todo">S</span></div>
+      <p>Valid pairings plus baseline confidence per cell, stored as a published version with an ID, not
+      as a constant in a module. The bench already carries a proposed table; this task turns it into
+      ratified, versioned configuration that a run records against every proposal it produces.</p>
+      <p>Also needs deciding here: whether MP is a legal Stage value at all, given the Stage column in
+      the file holds only Concept, EVT, DVT and PVT.</p>
+      <div class="dod"><b>Done when</b> The table is published with a version ID and a run stamps that ID
+        on every event.</div>
+      <div class="dep"><s>blocked on 1.1 (Q1, Q2)</s> &middot; blocks 4.3, 7.3, 10.7</div></div></div>
+
+    <div class="task"><div class="tid">2.4</div><div class="tb">
+      <div class="th"><b>Opportunity ID scheme and backfill plan</b><span class="chip c-block">Blocked</span><span class="chip c-todo">M</span></div>
+      <p>The single highest-value item in the whole plan. Five cross-tab relations do not exist today
+      because no two tabs share a key; all five close with one stable ID written on every row of every
+      tab. This task covers the format, who issues it, and the one-time backfill of existing rows.</p>
+      <p>Cheap to build, awkward to agree, and nothing that depends on joining tabs can be automated
+      until it lands. It should be treated as the project's first deliverable, not a schema detail.</p>
+      <div class="dod"><b>Done when</b> Every row in the canonical workbook carries an ID and the five
+        joins are computed rather than eyeballed.</div>
+      <div class="dep"><s>blocked on 1.1 (identity questions)</s> &middot; blocks 9.1, 9.2, 11.3</div></div></div>
+
+    <div class="task"><div class="tid">2.5</div><div class="tb">
+      <div class="th"><b>Registry-driven runnable()</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>A single function that answers, for any module, whether the parameters it declared are present
+      in the current snapshot. This is the mechanism behind the whole not-assessable behaviour: an
+      analysis or rubric factor whose inputs are absent reports that it cannot run, rather than running
+      on nulls and producing a confident number from nothing.</p>
+      <div class="dod"><b>Done when</b> Every analysis and rubric factor reports runnable or not, and the
+        run output lists which are dark and why.</div>
+      <div class="dep">depends on 2.1 &middot; blocks 6.1, 7.2</div></div></div>
+
+    <div class="task"><div class="tid">2.6</div><div class="tb">
+      <div class="th"><b>Reason-code vocabulary</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Closed lists for loss reason, stage-exit reason and override reason. These are the labels the
+      calibration model will eventually learn from, so a free-text field here costs a year: outcomes
+      recorded as prose cannot be aggregated into owner bias without re-reading them by hand.</p>
+      <div class="dod"><b>Done when</b> The lists are agreed and enforced at the API, not just offered in
+        a dropdown.</div>
+      <div class="dep">blocks 8.4, 6.5, 11.2</div></div></div>
+  </div>
+</section>
+
+<section id="w3">
+  <h2><span class="num">3.0</span> Package</h2>
+  <h3>Intake and normalisation</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">3.0</span>
+    <span class="pkd">7 tasks &middot; Phase 0 &middot; no database, no auth, no model</span></div>
+    <div><span class="chip c-det">Layer 2</span></div></div>
+  <p>
+    Turns whatever arrives &mdash; a form submission, a CRM record, a workbook, an API call &mdash; into
+    one canonical snapshot with provenance on every value. Nothing here interprets: coercion and
+    canonicalisation only, so that a wrong value stays visibly wrong rather than being quietly repaired.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">3.1</div><div class="tb">
+      <div class="th"><b>Workbook reader</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Handles the two-row header on rows 3 and 4, and the shifted column letters on the terminal tabs.
+      Reads six tabs into raw rows with no interpretation applied. This is import-path work, not the
+      primary intake &mdash; direct entry is &mdash; but it is how the current book of business gets in
+      and how Phase 0 demonstrates value before any platform exists.</p>
+      <div class="dod"><b>Done when</b> All six tabs read into raw rows with the header quirks handled and
+        no silent column drift.</div>
+      <div class="dep">depends on 1.2 &middot; blocks 4.5, 10.11</div></div></div>
+
+    <div class="task"><div class="tid">3.2</div><div class="tb">
+      <div class="th"><b>Snapshot writer</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Write-once record of one run's input: sha256 of the source, source URI, row count per tab,
+      timestamp. This is L1 episodic memory and the thing that makes a run reproducible &mdash; without
+      it, "re-run last month" means re-reading a file that may have changed underneath you.</p>
+      <div class="dod"><b>Done when</b> A snapshot cannot be modified after sealing, and two runs over the
+        same snapshot produce byte-identical calc output.</div>
+      <div class="dep">blocks 12.4, 9.7</div></div></div>
+
+    <div class="task"><div class="tid">3.3</div><div class="tb">
+      <div class="th"><b>Coercion</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p><code>Dec'24</code> and <code>June'27</code> to dates, <code>TBD</code> to null, thousands
+      separators to float, percentages to fractions. The important behaviour is that
+      <code>TBD</code> becomes null and is <em>reported</em>, not defaulted to zero &mdash; seven numeric
+      fields in the current file carry TBD, and a zero there silently deflates a regional total.</p>
+      <div class="dod"><b>Done when</b> Every coercion is reversible to the source string, which is what
+        the milestone factor must cite.</div>
+      <div class="dep">blocks 4.4, 6.3</div></div></div>
+
+    <div class="task"><div class="tid">3.4</div><div class="tb">
+      <div class="th"><b>Canonicalisation</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Applies the enums from 2.2 to real values: <code>KR</code> to Korea, <code>MOBIS</code> to
+      Mobis, <code>D-IN</code> to Design In, <code>M/P</code> to Mass Production. An unmapped value is a
+      finding, never a new category invented at read time.</p>
+      <div class="dod"><b>Done when</b> The regional roll-up over the real file produces three regions,
+        not five spellings of three regions.</div>
+      <div class="dep">depends on 2.2 &middot; blocks 5.3</div></div></div>
+
+    <div class="task"><div class="tid">3.5</div><div class="tb">
+      <div class="th"><b>NRE line splitter</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Seven of ten FCST_Revenue rows are non-recurring engineering charges sitting in the volume
+      columns. They are not silicon revenue and must not be phased like it. This task lifts them into
+      their own record type so C10 can recognise NRE by quarter separately from unit revenue.</p>
+      <p>Left unsplit, every quarterly revenue figure is inflated by one-off charges, and the error is
+      invisible because the totals still tie to the sheet.</p>
+      <div class="dod"><b>Done when</b> Volume revenue and NRE reconcile separately to the workbook, and
+        their sum ties to the original column.</div>
+      <div class="dep">blocks 5.4</div></div></div>
+
+    <div class="task"><div class="tid">3.6</div><div class="tb">
+      <div class="th"><b>Provenance wrapper</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p><code>FieldValue(param, value, source, at, trust)</code> on every value, from every path. This
+      is what the Opportunities list renders as source badges, what the precedence ladder arbitrates
+      over, and what lets a reviewer answer "who put that there" without opening a log.</p>
+      <div class="dod"><b>Done when</b> No value reaches the calc engine without a source and a trust
+        level attached.</div>
+      <div class="dep">depends on 2.1 &middot; blocks 10.4, 11.1, 11.2</div></div></div>
+
+    <div class="task"><div class="tid">3.7</div><div class="tb">
+      <div class="th"><b>Direct-entry intake service</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The primary path, and the one the earlier documents under-specify because they all read the
+      workbook. Accepts a single opportunity from the form or API, applies the same coercion,
+      canonicalisation and validation as a bulk read, and captures owner, region and the confidence
+      rationale at source. Values it writes carry the highest trust level, above every connector.</p>
+      <div class="dod"><b>Done when</b> A row created through the form is indistinguishable downstream
+        from one imported, except that its provenance says a person entered it.</div>
+      <div class="dep">depends on 1.5, 3.3, 3.4, 3.6 &middot; blocks 10.3</div></div></div>
+  </div>
+</section>
+
+<section id="w4">
+  <h2><span class="num">4.0</span> Package</h2>
+  <h3>Validation and findings engine</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">4.0</span>
+    <span class="pkd">6 tasks &middot; Phase 0 &middot; the demo that needs no platform</span></div>
+    <div><span class="chip c-det">Layer 2</span></div></div>
+  <p>
+    The whole of Phase 0 is this package plus 3.0, and it already has something to say: on the current
+    file, a company total that will not compute, seven TBD values in numeric fields, five skeleton rows
+    carrying design wins worth zero, and a Funnel row implying a third of global light-vehicle
+    production.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">4.1</div><div class="tb">
+      <div class="th"><b>One rule per finding</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Rules V-a through V-i, each declaring the parameters it requires so it goes dark rather than
+      throwing when a field is absent. Rules are data-quality checks, not judgment: they answer whether
+      the file is internally consistent, and every one of them must be explainable to a sales owner in a
+      sentence.</p>
+      <div class="dod"><b>Done when</b> Each rule has a passing and a failing fixture drawn from the real
+        file.</div>
+      <div class="dep">depends on 2.1, 1.2 &middot; blocks 4.5</div></div></div>
+
+    <div class="task"><div class="tid">4.2</div><div class="tb">
+      <div class="th"><b>Blocking vs advisory severity</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>A blocking finding excludes the row from totals and counts it separately; an advisory one
+      annotates and lets it through. The distinction matters more than it sounds: a design win worth
+      zero silently included in a weighted total is how a forecast becomes wrong without anyone editing
+      a number.</p>
+      <div class="dod"><b>Done when</b> Roll-ups report an included total, an excluded count, and never
+        blend the two.</div>
+      <div class="dep">blocks 5.3, 10.2</div></div></div>
+
+    <div class="task"><div class="tid">4.3</div><div class="tb">
+      <div class="th"><b>Matrix A pairing check</b><span class="chip c-block">Blocked</span><span class="chip c-todo">S</span></div>
+      <p>Rejects, corrects or flags a row whose (Design Status, Stage) combination is forbidden. The
+      check itself is a table lookup; what is undecided is the behaviour on failure, and that is a
+      policy question, not an engineering one &mdash; rejecting at intake stops bad data entering,
+      flagging lets a real edge case through with a warning.</p>
+      <div class="dod"><b>Done when</b> The agreed behaviour is implemented at both intake paths, form
+        and import, identically.</div>
+      <div class="dep"><s>blocked on 1.1 (Q1 and invalid-pairing policy)</s> &middot; depends on 2.3</div></div></div>
+
+    <div class="task"><div class="tid">4.4</div><div class="tb">
+      <div class="th"><b>Cross-tab contradiction checks</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The two EAU definitions (ID801 reads 57,175 Kpcs on Funnel and 1,343 on FCST_Revenue), SoP dates
+      that disagree across sheets, and totals that do not compute. These are the checks that most need
+      the Opportunity ID from 2.4 &mdash; without a shared key they can only compare rows a human has
+      paired up.</p>
+      <div class="dod"><b>Done when</b> Every contradiction in the current file is reproduced as a
+        generated finding rather than a documented observation.</div>
+      <div class="dep">depends on 2.4, 3.3</div></div></div>
+
+    <div class="task"><div class="tid">4.5</div><div class="tb">
+      <div class="th"><b>Findings report renderer</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The Phase 0 deliverable: the data-quality section of the specification, generated from the file
+      instead of written by hand. Runs with no database, no auth and no model, which is what makes it
+      demonstrable before any platform decision is made.</p>
+      <div class="dod"><b>Done when</b> All twelve documented findings are reproduced from the real
+        workbook by running one command.</div>
+      <div class="dep">depends on 3.1, 4.1 &middot; blocks 10.11</div></div></div>
+
+    <div class="task"><div class="tid">4.6</div><div class="tb">
+      <div class="th"><b>Dry-run validation for bulk import</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Runs the full rule set against a proposed import and shows what would fail, before anything
+      commits. Column mapping is confirmed by a person, the preview lists blocking and advisory
+      findings per row, and nothing is written until the mapping is accepted.</p>
+      <div class="dod"><b>Done when</b> An import with a bad mapping can be abandoned with zero rows
+        written and zero side effects.</div>
+      <div class="dep">depends on 4.1 &middot; blocks 10.11</div></div></div>
+  </div>
+</section>
+
+<section id="w5">
+  <h2><span class="num">5.0</span> Package</h2>
+  <h3>Calculation engine</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">5.0</span>
+    <span class="pkd">7 tasks &middot; Phase 1 &middot; partly built and regression-tested</span></div>
+    <div><span class="chip c-done">5.1 done</span></div></div>
+  <p>
+    Every currency figure a reviewer sees originates here, in plain Python with no model involvement.
+    The invariant to protect throughout: the base case and the calibrated case must be the same function
+    called twice, because that is the only reason the delta between them means anything.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">5.1</div><div class="tb">
+      <div class="th"><b>C1, C2 and T2</b><span class="chip c-done">Done</span></div>
+      <p>Sales revenue as EAU times distributor ASP, adjusted revenue as sales revenue times confidence,
+      and quarterly revenue as quarterly units times ASP. Implemented in <code>calc_engine.py</code> and
+      asserted against the workbook's own numbers for all nine sample projects by
+      <code>test_calc_engine.py</code>.</p>
+      <div class="dod"><b>Done when</b> Already met. The test is the contract: if it fails, the financial
+        maths changed, and that should never happen silently.</div>
+      <div class="dep">&mdash;</div></div></div>
+
+    <div class="task"><div class="tid">5.2</div><div class="tb">
+      <div class="th"><b>C3 to C7</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Set volume, attach rate, channel margin in currency and percent, and part-level demand. None of
+      these exist in the workbook; they are figures the sheet collects the inputs for and never
+      computes. Channel margin in particular turns Resale ASP from a dead-end column into something that
+      feeds an analysis and a rubric factor.</p>
+      <div class="dod"><b>Done when</b> Each has a regression assertion, and attach rate reconciles
+        against the Unit/Set definition rather than contradicting it.</div>
+      <div class="dep">depends on 5.1</div></div></div>
+
+    <div class="task"><div class="tid">5.3</div><div class="tb">
+      <div class="th"><b>C8, C9 and C12 roll-ups</b><span class="chip c-part">Partial</span><span class="chip c-todo">M</span></div>
+      <p>Regional roll-up rebuilt on canonical regions, stage roll-up by funnel stage, and concentration
+      shares by every dimension at once: row, customer, end customer and part. A basic version exists in
+      <code>portfolio_rollup</code>; this extends it to the full dimension set and to the exclusion
+      behaviour from 4.2.</p>
+      <p>Concentration is the analysis with the most immediate value and the least new data. The current
+      file already shows one project carrying 48% of the Korea pipeline, and no existing report says so.</p>
+      <div class="dod"><b>Done when</b> Roll-up totals tie to row-level sums and excluded rows are
+        reported separately rather than dropped.</div>
+      <div class="dep">depends on 3.4, 4.2</div></div></div>
+
+    <div class="task"><div class="tid">5.4</div><div class="tb">
+      <div class="th"><b>C10 NRE recognition by quarter</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Recognises non-recurring engineering separately from silicon volume, by quarter. Depends
+      entirely on the splitter in 3.5; until that lands, every quarterly revenue figure carries one-off
+      charges phased as though they were units.</p>
+      <div class="dod"><b>Done when</b> NRE and volume revenue are reported separately and sum to the
+        workbook's original figure.</div>
+      <div class="dep">depends on 3.5</div></div></div>
+
+    <div class="task"><div class="tid">5.5</div><div class="tb">
+      <div class="th"><b>C11 quarterly phasing rule</b><span class="chip c-block">Blocked</span><span class="chip c-todo">M</span></div>
+      <p>How one annual EAU becomes quarterly revenue: flat across four quarters, a ramp from the M/P
+      date, or driven by programme build data. Undecided, and it matters because automotive sockets run
+      several years at varying volume while the ROI hand-off expects a year list.</p>
+      <p>Related open question to settle here: whether each opportunity needs a per-year volume profile
+      rather than one annual figure. If it does, this is a schema change and not a formula.</p>
+      <div class="dod"><b>Done when</b> One rule is chosen, implemented, and its assumption stated on
+        every export that uses it.</div>
+      <div class="dep"><s>blocked on the phasing decision and 1.6</s></div></div></div>
+
+    <div class="task"><div class="tid">5.6</div><div class="tb">
+      <div class="th"><b>Extend the regression suite</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Every new output from 5.2 to 5.5 gets an assertion against the workbook or, where the workbook
+      never computed it, against a hand-worked example checked by a second person. The existing test is
+      the pattern; the discipline is that no calculation ships without one.</p>
+      <div class="dod"><b>Done when</b> The suite covers every C-number the product displays.</div>
+      <div class="dep">depends on 5.2&ndash;5.5 &middot; rolls into 12.1</div></div></div>
+
+    <div class="task"><div class="tid">5.7</div><div class="tb">
+      <div class="th"><b>Scenario recompute service</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Takes a set of confidence overrides and returns recomputed roll-ups without persisting
+      anything. It backs the assistant's what-if answers, the review console's preview of an approval,
+      and the rubric editor's impact estimate. One implementation, three consumers, which is what stops
+      those three disagreeing in front of a customer.</p>
+      <div class="dod"><b>Done when</b> A scenario call leaves no trace in the database and returns the
+        same numbers a real approval would produce.</div>
+      <div class="dep">depends on 5.3 &middot; blocks 10.5, 10.7, 14.3</div></div></div>
+  </div>
+</section>
+
+<section id="w6">
+  <h2><span class="num">6.0</span> Package</h2>
+  <h3>Analysis registry</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">6.0</span>
+    <span class="pkd">6 tasks &middot; Phase 1 &middot; six live today, two blocked upstream</span></div>
+    <div><span class="chip c-det">Layer 4</span></div></div>
+  <p>
+    Analyses are deterministic reports over the computed figures. They are separated from the judgment
+    layer deliberately: an analysis states a fact about the portfolio, a rubric factor argues about a
+    confidence level, and conflating the two is how a report becomes an opinion.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">6.1</div><div class="tb">
+      <div class="th"><b>Analysis protocol and registry</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>A protocol with a <code>requires</code> declaration, and a registry that discovers modules and
+      decides which may run against the current snapshot. Same mechanism as 2.5, applied to analyses:
+      the run output should list what ran, what was dark, and which parameter was missing.</p>
+      <div class="dod"><b>Done when</b> Adding an analysis module requires no registration code, only a
+        requires declaration.</div>
+      <div class="dep">depends on 2.1, 2.5</div></div></div>
+
+    <div class="task"><div class="tid">6.2</div><div class="tb">
+      <div class="th"><b>Six live analyses</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Stage mix and pipeline health, concentration risk, contradiction and data quality, milestone and
+      stall detection, competitive exposure, and channel margin. All six run on today's data. Stage mix
+      answers whether the weighted total is top-heavy with Concept-stage optimism; concentration answers
+      what a single loss would cost.</p>
+      <div class="dod"><b>Done when</b> Each produces a figure a reviewer can act on, not a chart, and
+        each names the rows it is talking about.</div>
+      <div class="dep">depends on 5.3, 6.1</div></div></div>
+
+    <div class="task"><div class="tid">6.3</div><div class="tb">
+      <div class="th"><b>Milestone extractor</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Pulls PPAP, ES, Design Review and SoP dates out of the Funnel prose into real date fields, then
+      flags what is overdue or missing an action. The parsed date goes into a field; the source string is
+      kept, because the rubric factor that cites a slip must quote what was written, never the parse.</p>
+      <div class="dod"><b>Done when</b> Every date the extractor claims can be traced back to the exact
+        substring it came from.</div>
+      <div class="dep">depends on 3.3 &middot; blocks 7.2 (J-10)</div></div></div>
+
+    <div class="task"><div class="tid">6.4</div><div class="tb">
+      <div class="th"><b>Coverage against target</b><span class="chip c-block">Blocked</span><span class="chip c-todo">S</span></div>
+      <p>Compares weighted pipeline against a regional target to answer whether there is enough in the
+      funnel. Blocked because no targets are defined anywhere in the file or the documents; the analysis
+      is trivial once a number exists to compare against.</p>
+      <div class="dod"><b>Done when</b> Targets exist per region and per period, and coverage is reported
+        against them.</div>
+      <div class="dep"><s>blocked: targets undefined</s></div></div></div>
+
+    <div class="task"><div class="tid">6.5</div><div class="tb">
+      <div class="th"><b>Forecast accuracy and owner calibration</b><span class="chip c-block">Blocked</span><span class="chip c-todo">L</span></div>
+      <p>Compares what was forecast against what shipped, per region and per owner, producing the bias
+      figures that become L5 memory. Blocked twice over: no actuals are connected, and no owner field
+      exists anywhere in the workbook. Needs two quarters of retained history before it says anything
+      trustworthy.</p>
+      <p>This is the task that eventually makes the agent better rather than merely consistent, and it
+      is worth starting the clock on early &mdash; the data has to accumulate before the analysis can be
+      written.</p>
+      <div class="dod"><b>Done when</b> Owner bias is computed from resolved outcomes and fed to the
+        judgment layer as a prior, never as a current number.</div>
+      <div class="dep"><s>blocked on 2.6, 9.2, 11.4 and two quarters of history</s></div></div></div>
+
+    <div class="task"><div class="tid">6.6</div><div class="tb">
+      <div class="th"><b>Run-to-run comparison</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Diffs two snapshots and attributes every change to a cause: a person edited a field, a connector
+      wrote a value, a proposal was approved, or the rubric version changed. This is what makes the
+      director's view answer "why is the number different from last month" without anyone reconstructing
+      it by hand.</p>
+      <div class="dod"><b>Done when</b> Every delta between two runs is attributable to a recorded event,
+        with no unexplained residual.</div>
+      <div class="dep">depends on 3.2, 8.2 &middot; supports 12.4</div></div></div>
+  </div>
+</section>
+
+<section id="w7">
+  <h2><span class="num">7.0</span> Package</h2>
+  <h3>Judgment layer</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">7.0</span>
+    <span class="pkd">9 tasks &middot; Phase 3 &middot; largely prototyped in judgment_bench.py</span></div>
+    <div><span class="chip c-part">Mostly partial</span></div></div>
+  <p>
+    The only layer that touches a model, and the one with the most existing work. The bench already
+    implements Matrix A as config, the thirteen factors, the schema on the request, the guards and the
+    provenance block. What remains is turning a bench into a service, and connecting the factors that
+    currently cannot fire.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">7.1</div><div class="tb">
+      <div class="th"><b>score_confidence service signature</b><span class="chip c-part">Partial</span><span class="chip c-todo">M</span></div>
+      <p>Wrap the bench as <code>score_confidence(opportunity, portfolio_context, rubric_version)</code>
+      returning a proposal rather than applying one. The portfolio context argument is not optional:
+      under the original one-row signature the concentration factor could never fire at all, because it
+      had nothing to compare a row against.</p>
+      <div class="dod"><b>Done when</b> The service returns a proposal object, writes nothing, and the
+        concentration factor fires on the Korea case.</div>
+      <div class="dep">depends on 1.4 &middot; blocks 8.1</div></div></div>
+
+    <div class="task"><div class="tid">7.2</div><div class="tb">
+      <div class="th"><b>Matrix B as declaring rules</b><span class="chip c-part">Partial</span><span class="chip c-todo">M</span></div>
+      <p>Each of the thirteen factors declares the parameters it requires and its cap, so a factor whose
+      input is absent returns not-assessable instead of guessing. Six can fire on today's data; the
+      correct behaviour for the other seven is to say so, and that is a property of the design rather
+      than a gap in it.</p>
+      <div class="dod"><b>Done when</b> Every factor reports runnable or not, and no factor produces an
+        adjustment from a null field.</div>
+      <div class="dep">depends on 2.1, 2.5</div></div></div>
+
+    <div class="task"><div class="tid">7.3</div><div class="tb">
+      <div class="th"><b>Rewrite J-01 and J-04 against Matrix A</b><span class="chip c-part">Partial</span><span class="chip c-todo">S</span></div>
+      <p>The two misfires that between them accounted for 44% of the entire calibration effect on the
+      first live run: J-01 docked Aphrodite for a Design In at DVT pairing the rules allow, and J-04 read
+      DVT as an early stage. Both are fixed by giving the model the table and the stage order as config
+      rather than expecting it to infer them from prose.</p>
+      <div class="dod"><b>Done when</b> Aphrodite and Montana no longer misfire, asserted as explicit
+        negative fixtures.</div>
+      <div class="dep">depends on 2.3 &middot; <s>tuning blocked on 1.1</s></div></div></div>
+
+    <div class="task"><div class="tid">7.4</div><div class="tb">
+      <div class="th"><b>ConfidenceProposal contract</b><span class="chip c-part">Partial</span><span class="chip c-todo">S</span></div>
+      <p>A typed contract with the bounds asserted at construction: rule ID drawn from the current
+      rubric, signed adjustment within the factor cap, non-empty evidence, and a validity flag.
+      Asserting in the constructor rather than checking later means an invalid proposal cannot exist as
+      an object, let alone reach a reviewer.</p>
+      <div class="dod"><b>Done when</b> Constructing an out-of-bounds proposal raises, and the guards
+        cannot be bypassed by a caller.</div>
+      <div class="dep">depends on 7.2</div></div></div>
+
+    <div class="task"><div class="tid">7.5</div><div class="tb">
+      <div class="th"><b>Evidence assembler</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Filters by region, product line, part and recency as SQL predicates first, then ranks by
+      similarity, then applies a token budget. The order is the point: similarity alone will happily
+      return a Korean lighting socket as precedent for a European ADAS opportunity, and the filter is
+      what stops it. The model never queries the store itself.</p>
+      <p>Two rules enforced inside the assembler: numbers of any kind are never embedded, and customer
+      pricing is never embedded &mdash; retrieval crosses region boundaries by design, and pricing must
+      not.</p>
+      <div class="dod"><b>Done when</b> A bundle is bounded, reproducible for a given snapshot, and
+        contains no figure the calc engine produced.</div>
+      <div class="dep">depends on 9.3 &middot; <s>content blocked until outcomes resolve</s></div></div></div>
+
+    <div class="task"><div class="tid">7.6</div><div class="tb">
+      <div class="th"><b>Model client</b><span class="chip c-done">Done</span></div>
+      <p>JSON schema on the request rather than an instruction in the prompt,
+      <code>stop_reason</code> checked before parsing, text block located by type, a four-rung
+      degradation ladder, and a loud failure. Implemented in <code>judgment_bench.py</code>. The rule it
+      enforces: a failed call raises and never substitutes hard-coded numbers behind a
+      successful-looking run.</p>
+      <div class="dod"><b>Done when</b> Already met in the bench. Carries into the service unchanged.</div>
+      <div class="dep">&mdash;</div></div></div>
+
+    <div class="task"><div class="tid">7.7</div><div class="tb">
+      <div class="th"><b>Print the written reasons</b><span class="chip c-part">Partial</span><span class="chip c-todo">S</span></div>
+      <p>Run output must carry the model's rationale and its quote, not only factor names and deltas. A
+      reviewer cannot calibrate their trust in a layer that only ever shows them arithmetic, and the
+      quote is the thing that makes a wrong factor obviously wrong at a glance.</p>
+      <div class="dod"><b>Done when</b> Every factor on every output surface carries its evidence string
+        verbatim.</div>
+      <div class="dep">depends on 7.4 &middot; blocks 10.5</div></div></div>
+
+    <div class="task"><div class="tid">7.8</div><div class="tb">
+      <div class="th"><b>Prompt and rubric versioning</b><span class="chip c-done">Done</span></div>
+      <p>Model ID, prompt version, rubric version, request shape, schema-enforced flag and token counts
+      stored per event. This is what lets two runs be compared rather than argued about, and it is
+      already in the bench's provenance block.</p>
+      <div class="dod"><b>Done when</b> Already met. Must survive the move into the service unchanged.</div>
+      <div class="dep">feeds 8.2, 6.6</div></div></div>
+
+    <div class="task"><div class="tid">7.9</div><div class="tb">
+      <div class="th"><b>Unblock J-02 and J-07</b><span class="chip c-block">Blocked</span><span class="chip c-todo">S</span></div>
+      <p>Copying Competitor Part&#35; onto the tracked row restores the named-competitor factor
+      immediately &mdash; the single cheapest unblock in the plan. Dual sourcing needs the same column
+      plus the note field. Both are data-model changes, not modelling work.</p>
+      <div class="dod"><b>Done when</b> Both factors fire on a real row and cite the competitor part
+        string.</div>
+      <div class="dep"><s>blocked on the competitor column reaching the tracked row</s></div></div></div>
+  </div>
+</section>
+
+<section id="w8">
+  <h2><span class="num">8.0</span> Package</h2>
+  <h3>Review, audit and lifecycle</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">8.0</span>
+    <span class="pkd">7 tasks &middot; Phase 3 &middot; the safety property of the whole design</span></div>
+    <div><span class="chip c-human">Human in the loop</span></div></div>
+  <p>
+    Because the judge writes to a pending queue rather than to the record, a bad model run degrades to
+    noise a reviewer dismisses rather than a wrong number in a board pack. Everything in this package
+    exists to keep that true.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">8.1</div><div class="tb">
+      <div class="th"><b>Proposal queue and human gate</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Approve, reject, override with a value, or mark needs-follow-up. Only rows whose proposal
+      crosses a lifecycle band queue; everything else applies automatically, which is the difference
+      between a review queue and a rubber stamp. Nobody may decide their own proposal, checked in code
+      against the actor rather than hidden in the interface.</p>
+      <div class="dod"><b>Done when</b> All four outcomes write an audit row, and an owner attempting to
+        approve their own row is refused by the API, not by a missing button.</div>
+      <div class="dep">depends on 7.1, 9.5 &middot; blocks 10.5</div></div></div>
+
+    <div class="task"><div class="tid">8.2</div><div class="tb">
+      <div class="th"><b>Append-only confidence_event writer</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Every proposal and every override, with actor, role, scope, model ID and both version stamps,
+      written before the decision returns. Rejections are logged too &mdash; they are the calibration
+      signal, and a log that only records accepted proposals cannot answer whether the layer was worth
+      running.</p>
+      <div class="dod"><b>Done when</b> No mutation path exists that can change or delete an event, for
+        any role including admin.</div>
+      <div class="dep">depends on 1.4, 9.1 &middot; feeds 6.6, 12.4</div></div></div>
+
+    <div class="task"><div class="tid">8.3</div><div class="tb">
+      <div class="th"><b>Auto-move to Mass Production or Design Lost</b><span class="chip c-block">Blocked</span><span class="chip c-todo">M</span></div>
+      <p>Step 8 of a run. The mechanics are simple; the policy is not. Read together with auto-entered
+      confidence, the answers given so far mean nobody signs off before an opportunity is closed as
+      lost, and those two answers were given separately &mdash; which is exactly the kind of gap the
+      open-questions register exists to catch.</p>
+      <div class="dod"><b>Done when</b> The agreed gate is implemented, and a close cannot happen without
+        whatever sign-off the policy requires.</div>
+      <div class="dep"><s>blocked on 1.1 (Q3)</s> &middot; depends on 9.2</div></div></div>
+
+    <div class="task"><div class="tid">8.4</div><div class="tb">
+      <div class="th"><b>Mandatory loss reason at close</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>A closed-list reason code required on the way out, enforced at the API. Cheap to build, and it
+      is the single field that makes loss write-ups worth embedding later &mdash; without it, precedent
+      retrieval has nothing to retrieve and the calibration model has no labels.</p>
+      <div class="dod"><b>Done when</b> No opportunity can reach a terminal state without a reason code
+        from the agreed vocabulary.</div>
+      <div class="dep">depends on 2.6</div></div></div>
+
+    <div class="task"><div class="tid">8.5</div><div class="tb">
+      <div class="th"><b>Stall and milestone alerting</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Nightly sweeps that flag anything sitting in one stage beyond its historic median, and any
+      parsed PPAP, ES or SoP date now past due. The alert carries the rationale, not just the flag: days
+      in stage against the median, or the source string the date came from.</p>
+      <div class="dod"><b>Done when</b> An alert can be acted on without opening the record to work out
+        why it fired.</div>
+      <div class="dep">depends on 6.3, 9.2</div></div></div>
+
+    <div class="task"><div class="tid">8.6</div><div class="tb">
+      <div class="th"><b>Deterministic recompute on approval</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Approving a proposal re-runs the calc engine over the approved confidence. No second model
+      call, no cached figure from the proposal. This is the task that keeps the base case and the
+      calibrated case the same function called twice, and it should be asserted, not assumed.</p>
+      <div class="dod"><b>Done when</b> The post-approval figure is byte-identical to running the calc
+        engine directly on the approved value.</div>
+      <div class="dep">depends on 5.7, 8.1</div></div></div>
+
+    <div class="task"><div class="tid">8.7</div><div class="tb">
+      <div class="th"><b>Reviewer feedback capture</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>When a reviewer rejects or overrides, capture why against a closed list plus optional prose.
+      This is the fastest available signal on whether the rubric is calibrated, and it arrives months
+      before any won-lost outcome does. Without it, the first real evidence that a factor is wrong is a
+      lost deal a year later.</p>
+      <div class="dod"><b>Done when</b> Rejection reasons are aggregable per rubric factor, and a factor
+        rejected repeatedly is visible on the rubric admin screen.</div>
+      <div class="dep">depends on 2.6, 8.1 &middot; feeds 10.7</div></div></div>
+  </div>
+</section>
+
+<section id="w9">
+  <h2><span class="num">9.0</span> Package</h2>
+  <h3>Data platform and identity</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">9.0</span>
+    <span class="pkd">8 tasks &middot; Phase 2 &middot; blocks the learning half of the plan</span></div>
+    <div><span class="chip c-det">Layer 7</span></div></div>
+  <p>
+    Phase 2 is where the workbook stops being the system of record. The task that earns its keep first
+    is <code>state_history</code>: it converts Design Status from a cell that gets overwritten into an
+    event stream, which is simultaneously stall detection, time in stage, velocity, win rate and the
+    outcome labels the calibration model will need.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">9.1</div><div class="tb">
+      <div class="th"><b>Postgres schema and migrations</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Ten tables, SQLAlchemy models, migrations: opportunity, state_history, snapshot, field_value,
+      forecast, proposal, confidence_event, finding, rubric_version, calibration. Everything hangs off
+      one opportunity row, which is what turns five eyeballed relations into real foreign keys.</p>
+      <div class="dod"><b>Done when</b> The five severed cross-tab joins are computed by the database
+        rather than by a person reading two sheets.</div>
+      <div class="dep">depends on 2.4 &middot; blocks 8.2, 9.2, 10.1</div></div></div>
+
+    <div class="task"><div class="tid">9.2</div><div class="tb">
+      <div class="th"><b>state_history as an event stream</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Append-only rows for every Design Status and Stage transition, with actor, timestamp and reason
+      code. Requires no new data collection, only a decision to stop overwriting &mdash; and it unblocks
+      four otherwise-blocked rubric factors and two analyses at once.</p>
+      <div class="dod"><b>Done when</b> Time in stage and win rate are computed from the stream, not
+        estimated, and a moved card writes an event rather than an update.</div>
+      <div class="dep">depends on 9.1 &middot; unblocks 6.5, 7.2 (J-08, J-09), 8.3, 8.5</div></div></div>
+
+    <div class="task"><div class="tid">9.3</div><div class="tb">
+      <div class="th"><b>pgvector store and chunking rules</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>One chunk per comment per run vintage, one per next-action prose with dates extracted
+      separately, one per loss write-up, one per competitor note per socket. Eight-quarter expiry,
+      because stale precedent is worse than none. Numbers and customer pricing are never embedded.</p>
+      <div class="dod"><b>Done when</b> Nothing numeric is retrievable from the vector store, asserted by
+        a test that tries.</div>
+      <div class="dep">depends on 9.1 &middot; blocks 7.5</div></div></div>
+
+    <div class="task"><div class="tid">9.4</div><div class="tb">
+      <div class="th"><b>SSO and provisioning</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>OIDC against the corporate directory, admin provisioning, MFA enforced at the identity
+      provider, and no self-registration at all. This is an internal tool holding unreleased design wins
+      and customer pricing; a public sign-up path is not a feature to defer, it is one that must never
+      exist.</p>
+      <div class="dod"><b>Done when</b> No account can be created except by an admin against the
+        directory, and role and region arrive in the assertion rather than being set in the app.</div>
+      <div class="dep">blocks 9.5, 10.1</div></div></div>
+
+    <div class="task"><div class="tid">9.5</div><div class="tb">
+      <div class="th"><b>Six roles and region scope in SQL</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Regional sales owner, sales manager, regional director, finance, admin, service account. Scope
+      is injected into every query at the SQL level, never applied as a filter in the interface. Three
+      separations carry the model: an owner cannot approve their own number, a manager cannot edit the
+      rubric that judges it, and an admin who can edit the rubric cannot ratify what it produces.</p>
+      <div class="dod"><b>Done when</b> Calling the API with a manager token for another region returns
+        404, not a filtered list and not a 403 &mdash; a 403 confirms the row exists.</div>
+      <div class="dep">depends on 9.4 &middot; blocks 8.1, 10.8, 12.5</div></div></div>
+
+    <div class="task"><div class="tid">9.6</div><div class="tb">
+      <div class="th"><b>Redis and object storage</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Redis backs the job queue and sessions; S3 or MinIO holds source workbooks, uploads and
+      generated exports. Uploaded files are retained because they are the evidence behind a snapshot,
+      not a transient input.</p>
+      <div class="dod"><b>Done when</b> A snapshot can be re-read from object storage months later and
+        reproduces the same figures.</div>
+      <div class="dep">depends on 9.1</div></div></div>
+
+    <div class="task"><div class="tid">9.7</div><div class="tb">
+      <div class="th"><b>Retention and deletion policy</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Seven years immutable on L1 episodic memory, because it is the audit trail behind revenue
+      figures shown to leadership. Eight quarters on L3 semantic. Deleting a person's account anonymises
+      the display name and leaves their decisions in place &mdash; removing the actor would break the
+      audit chain.</p>
+      <div class="dod"><b>Done when</b> The deletion path is implemented and tested, and a restore drill
+        has been run against the seven-year promise.</div>
+      <div class="dep">depends on 3.2, 8.2 &middot; blocks 13.5</div></div></div>
+
+    <div class="task"><div class="tid">9.8</div><div class="tb">
+      <div class="th"><b>One-time backfill</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Load the current book of business into the schema with IDs assigned, owners attached and
+      provenance marked as import. Everything it writes carries the lowest trust level, so a later
+      human edit or connector value supersedes it without a conflict.</p>
+      <div class="dod"><b>Done when</b> Every existing row exists in the database with an ID and an
+        owner, and the workbook stops being the system of record.</div>
+      <div class="dep">depends on 2.4, 9.1, 4.6</div></div></div>
+  </div>
+</section>
+
+<section id="w10">
+  <h2><span class="num">10.0</span> Package</h2>
+  <h3>Interfaces</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">10.0</span>
+    <span class="pkd">13 tasks &middot; Phases 1&ndash;3 &middot; ten screens, three machine surfaces</span></div>
+    <div><span class="chip c-det">Layer 7</span></div></div>
+  <p>
+    The role does not merely gate buttons, it changes what a landing page is for. Building one dashboard
+    with conditional blocks would serve none of the four audiences well, so the per-role landing views
+    are their own task rather than a styling pass over a shared page.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">10.1</div><div class="tb">
+      <div class="th"><b>FastAPI gateway</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Thirteen REST endpoints, OpenAPI 3.1 generated from the route signatures, request IDs on
+      everything, idempotency keys on mutations, and an audit write before any mutation returns. One
+      rule enforced at the gateway: confidence is rejected on the opportunity PATCH for every role,
+      always, so there is no path to a confidence value except through a decision.</p>
+      <div class="dod"><b>Done when</b> The generated OpenAPI document is the reference, and no endpoint
+        exists that is not in it.</div>
+      <div class="dep">depends on 9.1, 9.4 &middot; blocks 10.2&ndash;10.12</div></div></div>
+
+    <div class="task"><div class="tid">10.2</div><div class="tb">
+      <div class="th"><b>Pipeline dashboard</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Weighted and unweighted totals, effective confidence, regional roll-up with concentration
+      alongside the money, and the run banner naming the snapshot. Concentration sits next to the total
+      deliberately: one project carrying 48% of a region is a different risk from the same total spread
+      across six, and a regional roll-up hides that.</p>
+      <div class="dod"><b>Done when</b> Every figure on the page names the snapshot it came from.</div>
+      <div class="dep">depends on 5.3, 4.2, 10.1</div></div></div>
+
+    <div class="task"><div class="tid">10.3</div><div class="tb">
+      <div class="th"><b>Opportunity intake form</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>The primary intake path. Grouped fields for identity, lifecycle, commercial and confidence,
+      with live Matrix A validation on the status-stage pairing and the baseline shown next to the
+      confidence field as the person types. A deviation greater than 0.05 requires a written reason,
+      which is stored and becomes evidence in the next run's bundle.</p>
+      <p>That last detail is the point of the screen. It turns the agent's monthly job from arguing with
+      a bare number into checking a stated rationale, and it captures the reasoning at the one moment
+      someone actually has it.</p>
+      <div class="dod"><b>Done when</b> A row created here is indistinguishable downstream from an
+        imported one except in its provenance.</div>
+      <div class="dep">depends on 1.5, 3.7, 2.3</div></div></div>
+
+    <div class="task"><div class="tid">10.4</div><div class="tb">
+      <div class="th"><b>Opportunities list</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Filterable table with field-level provenance badges and confidence shown as entered against
+      baseline. Showing both turns the list into a deviation report: rows sitting on their baseline are
+      uninteresting, and the one entered at 1.00 against a 0.90 baseline is the row worth a conversation
+      &mdash; visible without running anything.</p>
+      <div class="dod"><b>Done when</b> Every displayed value can show its source without leaving the
+        page.</div>
+      <div class="dep">depends on 3.6, 10.1</div></div></div>
+
+    <div class="task"><div class="tid">10.5</div><div class="tb">
+      <div class="th"><b>Review console</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>The screen the whole architecture exists to serve. Each proposal renders as its factors with
+      rule IDs and verbatim quotes, plus everything the guards threw away: clipped factors showing both
+      the ask and the ceiling, dropped factors with the reason, and factors considered but not applied.
+      Approve, reject and override all write audit rows.</p>
+      <p>Rejected factors are shown as prominently as accepted ones. A reviewer who only ever sees what
+      the model got right has no way to calibrate how much to trust it next month.</p>
+      <div class="dod"><b>Done when</b> A reviewer can reconstruct the entire proposal without opening
+        the audit log or asking anyone.</div>
+      <div class="dep">depends on 7.7, 8.1, 5.7</div></div></div>
+
+    <div class="task"><div class="tid">10.6</div><div class="tb">
+      <div class="th"><b>Stage board</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Kanban by stage in funnel order, cards carrying their pending delta. Dragging a card writes a
+      state_history event and requires a reason code to leave a stage &mdash; the interaction is the
+      mechanism by which the event stream gets populated, so it cannot be a convenience that skips it.</p>
+      <div class="dod"><b>Done when</b> No drag can move a card without producing an event and a reason.</div>
+      <div class="dep">depends on 9.2, 10.1</div></div></div>
+
+    <div class="task"><div class="tid">10.7</div><div class="tb">
+      <div class="th"><b>Rubric and Matrix A admin</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>L4 memory with a user interface. Editing produces a draft; publishing stamps a version ID.
+      Existing proposals keep the version that produced them, and the next run picks up the new one. The
+      draft view shows a diff with a stated reason per change and the impact if re-run against the
+      current snapshot.</p>
+      <p>Showing impact before committing is what stops a cap being quietly tuned until the model agrees
+      with you &mdash; which is how a calibration layer stops being evidence and becomes decoration.</p>
+      <div class="dod"><b>Done when</b> Publishing is versioned, reversible, and cannot be done by anyone
+        who can approve a proposal.</div>
+      <div class="dep">depends on 2.3, 5.7, 9.5 &middot; consumes 8.7</div></div></div>
+
+    <div class="task"><div class="tid">10.8</div><div class="tb">
+      <div class="th"><b>Users and access admin</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Provisioning against the directory, role assignment, region scope, service-account key rotation
+      and a periodic access review. The screen must make the separation of duties visible: an admin sees
+      plainly that they cannot approve, so the constraint reads as design rather than as a bug.</p>
+      <div class="dod"><b>Done when</b> Every permission in the matrix is settable here and enforced in
+        SQL, with no permission that exists only in the interface.</div>
+      <div class="dep">depends on 9.4, 9.5</div></div></div>
+
+    <div class="task"><div class="tid">10.9</div><div class="tb">
+      <div class="th"><b>Runs and audit viewer</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Run list, the ten-step trace with per-step status, provenance and token counts, and the
+      append-only event stream underneath. Failed runs stay in the list: a run that raised rather than
+      silently substituting a mock scorer is a successful outcome of the design, and hiding it removes
+      the only evidence the no-silent-fallback rule is holding.</p>
+      <div class="dod"><b>Done when</b> Any figure on any screen can be traced to the run and event that
+        produced it in two clicks.</div>
+      <div class="dep">depends on 8.2, 6.6</div></div></div>
+
+    <div class="task"><div class="tid">10.10</div><div class="tb">
+      <div class="th"><b>Per-role landing views</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Four distinct landing pages: the owner opens what is incomplete on their own rows, the manager
+      opens the queue, the director opens concentration before totals, finance opens the quarterly feed.
+      Controls a role cannot use are absent from the markup, not disabled &mdash; a greyed-out approve
+      button teaches an owner that approving is part of their job and someone is withholding it.</p>
+      <p>Flagged as a real cost: this is four landing pages rather than one with conditional blocks.
+      Worth confirming before it reaches a backlog.</p>
+      <div class="dod"><b>Done when</b> Each role's first screen answers that role's first question with
+        no navigation, and no unusable control is rendered anywhere.</div>
+      <div class="dep">depends on 9.5, 10.2, 10.5</div></div></div>
+
+    <div class="task"><div class="tid">10.11</div><div class="tb">
+      <div class="th"><b>Import wizard and findings view</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Column mapping with a preview, a dry-run validation pass showing what would fail per row, and no
+      commit until the mapping is confirmed. Also renders the Phase 0 findings report in-app, which is
+      the deliverable that exists before any of the rest of this package.</p>
+      <div class="dod"><b>Done when</b> A bad mapping can be abandoned with zero rows written, and the
+        findings report is the same output the command line produces.</div>
+      <div class="dep">depends on 4.5, 4.6</div></div></div>
+
+    <div class="task"><div class="tid">10.12</div><div class="tb">
+      <div class="th"><b>MCP server</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Eleven tools for sibling agents, exposed through the Workflow Manager rather than directly at
+      the services, so the ROI Agent consumes Adjusted Revenue through the same audited, region-scoped
+      gateway a person does. Nine are read-only; two write, and neither writes confidence. There is no
+      <code>set_confidence</code> tool, which makes the constraint structural rather than policed.</p>
+      <div class="dod"><b>Done when</b> The manifest is generated from the same definitions the server
+        serves, and the forecast feed carries a snapshot ID.</div>
+      <div class="dep">depends on 1.6, 10.1</div></div></div>
+
+    <div class="task"><div class="tid">10.13</div><div class="tb">
+      <div class="th"><b>Webhooks and exports</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Eight events, from <code>run.completed</code> through <code>connector.conflict</code>, and six
+      export formats: a TrackF-shaped workbook for the transition, CSV, a PDF board pack, a JSON run
+      trace, a Parquet snapshot and an ICS milestone feed. Every export carries the snapshot ID and
+      rubric version in its header or filename.</p>
+      <p>That last rule is the one most easily lost. A forecast circulating without a vintage is the
+      failure this whole system exists to remove, and an export is exactly where the discipline slips.</p>
+      <div class="dod"><b>Done when</b> No export can be produced without a vintage stamp, and every
+        webhook payload is replayable.</div>
+      <div class="dep">depends on 10.1, 3.2</div></div></div>
+  </div>
+</section>
+
+<section id="w11">
+  <h2><span class="num">11.0</span> Package</h2>
+  <h3>Connectors</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">11.0</span>
+    <span class="pkd">7 tasks &middot; Phases 2&ndash;5 &middot; one needs a licence</span></div>
+    <div><span class="chip c-det">Layer 2</span></div></div>
+  <p>
+    Every connector writes provenanced field values, never raw cells, and never silently overwrites a
+    human edit. A disagreement becomes a conflict a person resolves &mdash; which is the only basis on
+    which an automated feed can be trusted with a forecast input.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">11.1</div><div class="tb">
+      <div class="th"><b>Connector framework</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>A base class declaring <code>SUPPLIES</code>, <code>TRUST</code> and <code>CADENCE</code>, plus
+      conflict detection when two sources disagree above a threshold. Write it once: every connector
+      after the first is then a mapping and a schedule rather than a new integration.</p>
+      <div class="dod"><b>Done when</b> Adding a connector requires declaring what it supplies and at
+        what trust, and nothing else.</div>
+      <div class="dep">depends on 3.6, 1.5 &middot; blocks 11.2&ndash;11.6</div></div></div>
+
+    <div class="task"><div class="tid">11.2</div><div class="tb">
+      <div class="th"><b>Precedence ladder and reconciliation queue</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Human edit beats ERP beats CRM beats POS beats import, decided by rank rather than by whichever
+      ran last. A lower-trust source that disagrees with a higher one raises a conflict instead of losing
+      silently, so a wrong ERP price becomes visible rather than absorbed.</p>
+      <div class="dod"><b>Done when</b> No connector write can overwrite a human edit, and every
+        suppressed write appears in the reconciliation queue.</div>
+      <div class="dep">depends on 11.1, 2.6</div></div></div>
+
+    <div class="task"><div class="tid">11.3</div><div class="tb">
+      <div class="th"><b>CRM sync</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Owner, customer, end customer and design status from Salesforce, on a four-hour cadence. Creates
+      the row on opportunity creation so the sales owner completes the commercial fields in-app rather
+      than re-keying identity. This is intake path 02 and the one that removes the most manual work.</p>
+      <div class="dod"><b>Done when</b> A new CRM opportunity appears in OppTrack with owner and region
+        attached, awaiting only the commercial fields.</div>
+      <div class="dep">depends on 2.4, 11.1</div></div></div>
+
+    <div class="task"><div class="tid">11.4</div><div class="tb">
+      <div class="th"><b>Distributor POS / POR</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Sell-through actuals by part and region &mdash; the highest-value feed in the plan and the
+      cheapest to ask for, since it is usually an existing report on an existing schedule. It writes
+      actuals only and never a forecast field, and it is what eventually makes forecast accuracy
+      measurable.</p>
+      <div class="dod"><b>Done when</b> Actuals land on a schedule and the accuracy analysis has data to
+        start accumulating against.</div>
+      <div class="dep">depends on 11.1 &middot; unblocks 6.5</div></div></div>
+
+    <div class="task"><div class="tid">11.5</div><div class="tb">
+      <div class="th"><b>ERP extract</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Bookings, backlog, invoiced ASP, part numbers and SoP dates from SAP, nightly. Authoritative for
+      price fields, which means it overwrites CRM there and flags when the delta exceeds a threshold
+      rather than applying a large price change without comment.</p>
+      <div class="dod"><b>Done when</b> Price fields come from ERP with provenance, and a large swing
+        raises a conflict rather than landing silently.</div>
+      <div class="dep">depends on 11.1, 11.2</div></div></div>
+
+    <div class="task"><div class="tid">11.6</div><div class="tb">
+      <div class="th"><b>Vehicle programme data</b><span class="chip c-block">Blocked</span><span class="chip c-todo">L</span></div>
+      <p>Build volumes for the EAU plausibility cross-check and for white-space detection &mdash;
+      programmes in the horizon with no opportunity registered against them. The only item in the plan
+      with a recurring external cost, and the only unblock for J-11.</p>
+      <p>Worth pricing early even if deferred: it is what would catch a Funnel row implying a third of
+      global light-vehicle production before it reaches a board pack.</p>
+      <div class="dod"><b>Done when</b> A licence exists and EAU can be checked against a real programme
+        build forecast.</div>
+      <div class="dep"><s>blocked: licence required</s> &middot; unblocks 7.2 (J-11)</div></div></div>
+
+    <div class="task"><div class="tid">11.7</div><div class="tb">
+      <div class="th"><b>Outbound notifications</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Slack or Teams delivery for stall, stage-change, win-loss and conflict alerts, with the
+      rationale attached rather than a bare flag. Outbound only, with no write path back &mdash; an
+      approval must happen in the console where the full proposal is visible, not from a chat button
+      that shows a delta and nothing else.</p>
+      <div class="dod"><b>Done when</b> Alerts carry enough context to act on, and no alert offers an
+        approve action.</div>
+      <div class="dep">depends on 8.5, 10.13</div></div></div>
+  </div>
+</section>
+
+<section id="w12">
+  <h2><span class="num">12.0</span> Package</h2>
+  <h3>Quality</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">12.0</span>
+    <span class="pkd">7 tasks &middot; throughout &middot; not a phase</span></div>
+    <div><span class="chip c-det">Continuous</span></div></div>
+  <p>
+    The test strategy has an unusual shape here because the risk is unusual: the arithmetic must be
+    provably identical to a spreadsheet, and the model path must be provably incapable of writing a
+    number. Those need different kinds of test, and both are cheap compared to being wrong in a board
+    review.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">12.1</div><div class="tb">
+      <div class="th"><b>Calc regression against the workbook</b><span class="chip c-part">Partial</span><span class="chip c-todo">M</span></div>
+      <p>The existing pattern, extended to every new output. Nine projects are asserted today against
+      ProjectTrack columns O and R. This is the contract with the business: if the test fails, the
+      financial maths changed, and that must never happen silently.</p>
+      <div class="dod"><b>Done when</b> Every C-number the product displays has an assertion.</div>
+      <div class="dep">extends 5.6</div></div></div>
+
+    <div class="task"><div class="tid">12.2</div><div class="tb">
+      <div class="th"><b>Rubric fixtures per factor</b><span class="chip c-todo">To do</span><span class="chip c-todo">L</span></div>
+      <p>Every Matrix B row gets a fixture that should fire and one that should not, including the
+      Aphrodite and Montana misfires as explicit negative cases. Those two are the regression that
+      matters most: they were 44% of the first live run's entire effect, and nothing but a test stops
+      them recurring after a prompt edit.</p>
+      <div class="dod"><b>Done when</b> All thirteen factors have both a positive and a negative fixture,
+        and the two known misfires are asserted as must-not-fire.</div>
+      <div class="dep">depends on 7.2, 7.3</div></div></div>
+
+    <div class="task"><div class="tid">12.3</div><div class="tb">
+      <div class="th"><b>Model-path failure tests</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Schema violation, truncation at max_tokens, refusal, missing citation, cap breach, unknown rule
+      ID and a markdown-fenced reply. Each must produce the documented behaviour: raise, clip and flag,
+      or drop the factor onto the violations rail. None may produce a silent mock.</p>
+      <p>The fenced-reply case is not hypothetical &mdash; it took out all nine projects on the first
+      live run and fell through to a hard-coded scorer without saying so.</p>
+      <div class="dod"><b>Done when</b> Every guard has a test that proves it fires, and no failure path
+        returns fabricated numbers.</div>
+      <div class="dep">depends on 7.4, 7.6</div></div></div>
+
+    <div class="task"><div class="tid">12.4</div><div class="tb">
+      <div class="th"><b>Reproducibility test</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Same snapshot, same numbers. Any difference between two runs must be attributable to a recorded
+      version change &mdash; rubric, prompt or model. This is the test that makes the audit trail a
+      claim rather than an aspiration.</p>
+      <div class="dod"><b>Done when</b> Re-running a stored snapshot reproduces its calc output exactly,
+        and every judgment difference maps to a version stamp.</div>
+      <div class="dep">depends on 3.2, 7.8, 6.6</div></div></div>
+
+    <div class="task"><div class="tid">12.5</div><div class="tb">
+      <div class="th"><b>Authorisation tests</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Region scope enforced in SQL rather than in the interface, and nobody approving their own
+      proposal. Tested by calling the API directly with a token from the wrong region and asserting 404
+      &mdash; a 403 would confirm the row exists, which on unannounced design wins is itself a leak.</p>
+      <div class="dod"><b>Done when</b> Every row in the permission matrix has a test, including the ones
+        that assert an action is impossible.</div>
+      <div class="dep">depends on 9.5, 8.1</div></div></div>
+
+    <div class="task"><div class="tid">12.6</div><div class="tb">
+      <div class="th"><b>Normalisation fixtures from the real file</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The seven TBD values, the two EAU definitions, the date formats, the region spellings and the
+      shifted terminal-tab columns, captured as fixtures from the actual workbook rather than invented.
+      Synthetic fixtures here would pass while the real file fails.</p>
+      <div class="dod"><b>Done when</b> Every quirk documented in the specification has a fixture that
+        reproduces it.</div>
+      <div class="dep">depends on 1.2, 3.3, 3.4</div></div></div>
+
+    <div class="task"><div class="tid">12.7</div><div class="tb">
+      <div class="th"><b>Assistant grounding tests</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Asserts that the assistant never reports a figure without a snapshot ID, never claims a factor
+      the stored proposal does not contain, refuses every write it has no tool for, and cannot be
+      prompted across a region boundary. Grounding failures are the likeliest way an unaudited number
+      reaches a person, so they need tests rather than review.</p>
+      <div class="dod"><b>Done when</b> A suite of adversarial prompts produces refusals and citations,
+        never a bare number.</div>
+      <div class="dep">depends on 14.1&ndash;14.4</div></div></div>
+  </div>
+</section>
+
+<section id="w13">
+  <h2><span class="num">13.0</span> Package</h2>
+  <h3>Deployment and operations</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">13.0</span>
+    <span class="pkd">6 tasks &middot; Phase 2 onward</span></div>
+    <div><span class="chip c-det">Platform</span></div></div>
+  <div class="tasks">
+    <div class="task"><div class="tid">13.1</div><div class="tb">
+      <div class="th"><b>Containerised services</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Calc engine stateless, judgment engine, stage tracker and alerting as separate containers, with
+      managed Postgres and Redis. The calc engine being stateless is a design constraint, not a
+      convenience: it must be callable identically from a run, a scenario and an approval.</p>
+      <div class="dod"><b>Done when</b> The same calc container serves all three callers with no
+        per-caller behaviour.</div>
+      <div class="dep">depends on 9.1, 9.6</div></div></div>
+
+    <div class="task"><div class="tid">13.2</div><div class="tb">
+      <div class="th"><b>Scheduler for the seven jobs</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Monthly run at the start of the month, event runs on any stage or status change, a nightly stall
+      sweep, a nightly milestone check, an embedding refresh after each ingest, a quarterly calibration
+      rebuild, and connector syncs on their own schedules. Runs must be idempotent on the snapshot so a
+      retry cannot double-apply.</p>
+      <div class="dod"><b>Done when</b> All seven run on schedule, and a re-triggered run over the same
+        snapshot is a no-op rather than a duplicate.</div>
+      <div class="dep">depends on 13.1, 3.2</div></div></div>
+
+    <div class="task"><div class="tid">13.3</div><div class="tb">
+      <div class="th"><b>Model hosting and fallback</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Hosted frontier API as primary, with vLLM on the shared RTX PRO 6000 Blackwell as the data
+      residency fallback and the embedding host. Western weights only &mdash; Llama, Mistral, Gemma or
+      Command R+, never Qwen or DeepSeek. One card serves this agent and the ROI Agent.</p>
+      <div class="dod"><b>Done when</b> A residency-restricted run completes on local inference with the
+        same guards applied and the fallback recorded in provenance.</div>
+      <div class="dep">depends on 7.6, 13.1</div></div></div>
+
+    <div class="task"><div class="tid">13.4</div><div class="tb">
+      <div class="th"><b>Run observability</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Per run: mode, cost, latency, failure rate, which request rung was used, how many factors were
+      dropped and why, and how many rows queued. Two metrics deserve alerts of their own &mdash; any
+      mock-fallback occurrence, which should be zero forever, and a rising not-assessable rate, which
+      means a connector has quietly stopped supplying a field.</p>
+      <div class="dod"><b>Done when</b> A degraded run is visible from a dashboard before a reviewer
+        notices it in the queue.</div>
+      <div class="dep">depends on 7.8, 13.2</div></div></div>
+
+    <div class="task"><div class="tid">13.5</div><div class="tb">
+      <div class="th"><b>Backup and restore drill</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>An actual restore, performed and timed, against the seven-year retention promise on L1. A
+      backup that has never been restored is a belief rather than a control, and the promise here is
+      attached to revenue figures shown to leadership.</p>
+      <div class="dod"><b>Done when</b> A snapshot from the oldest retained vintage is restored and
+        reproduces its original figures.</div>
+      <div class="dep">depends on 9.7</div></div></div>
+
+    <div class="task"><div class="tid">13.6</div><div class="tb">
+      <div class="th"><b>Cost and quota controls</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>One model call per run keeps this small, but the assistant is per-question and unbounded. Needs
+      a per-user quota, a per-run token ceiling, and an alert when either trends up &mdash; the failure
+      mode is a chat surface quietly becoming the dominant cost centre without anyone deciding it
+      should.</p>
+      <div class="dod"><b>Done when</b> Cost per run and per active user are reported, with a hard
+        ceiling that degrades gracefully rather than failing a run.</div>
+      <div class="dep">depends on 13.4, 14.5</div></div></div>
+  </div>
+</section>
+
+<section id="w14">
+  <h2><span class="num">14.0</span> Package</h2>
+  <h3>Assistant</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">14.0</span>
+    <span class="pkd">6 tasks &middot; Phase 3 &middot; a reader, not a second write path</span></div>
+    <div><span class="chip c-judge">Model</span></div></div>
+  <p>
+    Ask OppTrack answers from the same tables the dashboard renders and quotes the same audit events a
+    reviewer would open. It has no tool that writes a confidence value, so a chat answer and a board
+    pack cannot disagree, and the constraint is structural rather than instructed.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">14.1</div><div class="tb">
+      <div class="th"><b>Tool surface</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Six read tools, one pure scenario tool, and two writes that a person completes:
+      <code>open_review(prefill)</code> which opens the console rather than deciding, and
+      <code>add_note</code> which is attributed to the user. No <code>set_confidence</code>, no approve,
+      no reject. Every tool inherits the caller's region scope from the session, applied in SQL.</p>
+      <div class="dod"><b>Done when</b> The tool list contains no path to a confidence write, and scope
+        is applied server-side rather than passed as a parameter.</div>
+      <div class="dep">depends on 9.5, 10.1 &middot; blocks 12.7</div></div></div>
+
+    <div class="task"><div class="tid">14.2</div><div class="tb">
+      <div class="th"><b>Grounding and citation rules</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Every reported figure names its snapshot and the engine that produced it. Every claim about a
+      proposal quotes the stored factors verbatim rather than re-deriving them &mdash; re-deriving would
+      produce a second opinion that disagrees with the one in the audit log, which is worse than no
+      answer.</p>
+      <div class="dod"><b>Done when</b> No answer containing a number can be produced without a citation
+        chip attached to it.</div>
+      <div class="dep">depends on 14.1</div></div></div>
+
+    <div class="task"><div class="tid">14.3</div><div class="tb">
+      <div class="th"><b>What-if answering</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Routes scenario questions through the same recompute service the review console uses, so "what
+      is the total if I approve everything" returns the number an approval would actually produce, not
+      an estimate. Persists nothing.</p>
+      <div class="dod"><b>Done when</b> A scenario answer matches the post-approval figure exactly, and
+        leaves no database trace.</div>
+      <div class="dep">depends on 5.7, 14.1</div></div></div>
+
+    <div class="task"><div class="tid">14.4</div><div class="tb">
+      <div class="th"><b>Refusal and redirect behaviour</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>When asked to write a confidence value the assistant declines, offers the two things it can
+      actually do, and adds the one fact that changes the decision &mdash; for example that the proposed
+      value would sit above the Matrix A baseline and is likely to be challenged next run.</p>
+      <p>Both simpler behaviours are wrong. Quietly doing the write puts an unaudited number into a
+      board pack; only saying no is useless. The useful behaviour is the third option, and it needs
+      writing deliberately.</p>
+      <div class="dod"><b>Done when</b> Every refusal is paired with a concrete alternative and, where
+        one exists, the fact that changes the decision.</div>
+      <div class="dep">depends on 14.1, 14.2</div></div></div>
+
+    <div class="task"><div class="tid">14.5</div><div class="tb">
+      <div class="th"><b>Conversation logging</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Log the question, the tools called, the scope applied and the citations returned &mdash; not
+      for surveillance, but because the assistant is the surface most likely to produce a figure someone
+      later quotes in a meeting. When that happens, the log is how anyone establishes what was actually
+      said and from which vintage.</p>
+      <div class="dod"><b>Done when</b> Any answer a user quotes can be reconstructed from the log,
+        including the snapshot it was drawn from.</div>
+      <div class="dep">depends on 14.1 &middot; feeds 13.6</div></div></div>
+
+    <div class="task"><div class="tid">14.6</div><div class="tb">
+      <div class="th"><b>Embed the panel in the Workflow Manager</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The conversational panel lives inside the existing platform shell rather than as a separate
+      app, sharing the session and the scope. A second login for the chat surface would be both an
+      irritation and a security seam.</p>
+      <div class="dod"><b>Done when</b> The panel authenticates from the host session with no separate
+        credential.</div>
+      <div class="dep">depends on 9.4, 14.1</div></div></div>
+  </div>
+</section>
+
+<section id="w15">
+  <h2><span class="num">15.0</span> Package</h2>
+  <h3>Documentation and adoption</h3>
+  <div class="pk"><div class="pkl"><span class="pkn">15.0</span>
+    <span class="pkd">7 tasks &middot; alongside Phases 1&ndash;3</span></div>
+    <div><span class="chip c-human">Adoption</span></div></div>
+  <p>
+    The rule running through this package: if a document can drift from the code, generate it. A
+    reviewer trusting a stale factor cap is worse than having no page at all, which makes the rubric
+    page in particular a build task rather than a writing one.
+  </p>
+  <div class="tasks">
+    <div class="task"><div class="tid">15.1</div><div class="tb">
+      <div class="th"><b>Reviewer handbook</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>What each of the thirteen factors means, when to override, what approving commits you to, and
+      what a not-assessable result is telling you. Linked from every proposal in the console rather than
+      filed somewhere.</p>
+      <p>This is the single document that decides whether the product works. Everything upstream is
+      engineering discipline; the value only lands if a sales manager reading a proposal at 8am
+      understands what J-05 is claiming and feels able to reject it.</p>
+      <div class="dod"><b>Done when</b> A manager who has never seen the system can action a queue item
+        correctly using only the handbook.</div>
+      <div class="dep">depends on 7.2, 10.5</div></div></div>
+
+    <div class="task"><div class="tid">15.2</div><div class="tb">
+      <div class="th"><b>Getting started for sales owners</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>In-app, first-run: how to enter an opportunity, what happens to it afterwards, why the baseline
+      appears next to the confidence field, and why a deviation asks for a reason. Short, and shown
+      once.</p>
+      <div class="dod"><b>Done when</b> A new owner completes their first opportunity without asking a
+        colleague.</div>
+      <div class="dep">depends on 10.3</div></div></div>
+
+    <div class="task"><div class="tid">15.3</div><div class="tb">
+      <div class="th"><b>Generated rubric and parameter pages</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>The rubric page from the rubric module and Matrix A, versioned and diffable. The parameter
+      dictionary from the ParamSpec registry. The validation rules page from each rule's requires
+      declaration. All three generated at build time, never maintained by hand.</p>
+      <div class="dod"><b>Done when</b> Changing a cap in code changes the published page in the same
+        commit, with no manual step.</div>
+      <div class="dep">depends on 2.1, 2.3, 4.1</div></div></div>
+
+    <div class="task"><div class="tid">15.4</div><div class="tb">
+      <div class="th"><b>API and MCP reference</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>OpenAPI 3.1 from the FastAPI route signatures and the MCP manifest from the same tool
+      definitions the server serves. Auth, idempotency, error shapes and webhook payloads documented
+      alongside, with a worked example for the approve flow.</p>
+      <div class="dod"><b>Done when</b> An integrator can call the forecast feed without asking anyone a
+        question.</div>
+      <div class="dep">depends on 10.1, 10.12</div></div></div>
+
+    <div class="task"><div class="tid">15.5</div><div class="tb">
+      <div class="th"><b>Connector guide</b><span class="chip c-todo">To do</span><span class="chip c-todo">S</span></div>
+      <p>Per-connector field mapping, trust level, cadence, and how conflicts are resolved. Written for
+      the IT team who will own the integrations, not for the team who built them.</p>
+      <div class="dod"><b>Done when</b> A new connector can be configured by someone who has not read
+        the codebase.</div>
+      <div class="dep">depends on 11.1, 11.2</div></div></div>
+
+    <div class="task"><div class="tid">15.6</div><div class="tb">
+      <div class="th"><b>Architecture and audit pack</b><span class="chip c-part">Partial</span><span class="chip c-todo">S</span></div>
+      <p>The layers, the guards, the retention rules and how to reproduce a run, for engineering and
+      compliance. Largely written &mdash; the architecture document, the six layer plates and the
+      product surface cover it &mdash; and needs updating as the build diverges from the plan rather
+      than being authored fresh.</p>
+      <div class="dod"><b>Done when</b> The pack describes what was built, not what was designed, with
+        the differences called out.</div>
+      <div class="dep">ongoing</div></div></div>
+
+    <div class="task"><div class="tid">15.7</div><div class="tb">
+      <div class="th"><b>Rollout and training</b><span class="chip c-todo">To do</span><span class="chip c-todo">M</span></div>
+      <p>Region by region rather than all at once, starting with the region whose data is cleanest, and
+      running the workbook in parallel for one cycle so the two can be reconciled. The first month's
+      proposals should be reviewed together as a group, because that is where the rubric gets calibrated
+      against how the business actually reasons.</p>
+      <div class="dod"><b>Done when</b> One region is running without the workbook and its totals
+        reconcile to the last parallel cycle.</div>
+      <div class="dep">depends on 9.8, 15.1, 15.2</div></div></div>
+  </div>
+</section>
+
+<section id="wcp">
+  <h2><span class="num">&mdash;</span> Sequencing</h2>
+  <h3>Critical path, and what to do first</h3>
+  <p class="lead">
+    Two chains carry most of the schedule risk, and they are both short. Neither is difficult
+    engineering; both are waiting on a decision or a field.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Chain</th><th>Sequence</th><th>Gates</th></tr></thead>
+    <tbody>
+      <tr><td><b>Identity chain</b></td>
+        <td class="mono">1.1 &rarr; 2.4 &rarr; 9.1 &rarr; 9.2 &rarr; 9.8</td>
+        <td>Every cross-tab join, four rubric factors, two analyses, and the whole of Phase 4</td></tr>
+      <tr><td><b>Judgment chain</b></td>
+        <td class="mono">1.1 &rarr; 2.3 &rarr; 7.3 &rarr; 8.1 &rarr; 10.5</td>
+        <td>Whether a proposal is defensible; whether positive adjustments are possible at all</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull warn">
+    <p>Start the Opportunity ID and <code>state_history</code> now, ahead of anything else.</p>
+    <p>Neither needs new data collection, and both accumulate value with time rather than on delivery:
+    the event stream is worthless the day it ships and indispensable two quarters later. Every month
+    spent overwriting Design Status is a month of calibration data that cannot be recovered.</p>
+  </div>
+  <h4>Order of work</h4>
+  <div class="tw">
+  <table>
+    <thead><tr><th>#</th><th>Do this</th><th>Because</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td><b>Send 1.1 and confirm 1.2</b></td><td>Four blocked tasks clear on four answers, the judgment layer stops being untunable, and no code gets written against the wrong file</td></tr>
+      <tr><td class="n">2</td><td><b>Ship Phase 0 (3.0 + 4.0)</b></td><td>Demonstrable with no database, no auth and no model, and it already has a dozen real findings to report</td></tr>
+      <tr><td class="n">3</td><td><b>Land 2.4 and 9.2 early</b></td><td>They unblock the most and they need calendar time to become useful</td></tr>
+      <tr><td class="n">4</td><td><b>Finish 5.0, then 6.2</b></td><td>Every figure the product shows, plus six analyses the spreadsheet never computed</td></tr>
+      <tr><td class="n">5</td><td><b>Promote 7.0 from bench to service</b></td><td>Most of it exists; what is missing is shape, not logic</td></tr>
+      <tr><td class="n">6</td><td><b>Build 8.1 and 10.5 together</b></td><td>The queue and the console are one feature; neither is useful alone</td></tr>
+      <tr><td class="n">7</td><td><b>Then 9.4, 9.5, 10.8</b></td><td>Identity before the tool leaves the pilot region</td></tr>
+      <tr><td class="n">8</td><td><b>Connectors, assistant, learning</b></td><td>All three need the platform underneath them, and 6.5 needs two quarters of history regardless</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull">
+    <p>One task in this plan is worth more than its size suggests: 8.7, reviewer feedback capture.</p>
+    <p>It is the only signal on whether the rubric is calibrated that arrives in weeks rather than in a
+    year of resolved outcomes. Without it, the first real evidence that a factor is wrong is a deal lost
+    twelve months from now.</p>
+  </div>
+</section>
+
+<hr>
+<footer>
+  Opportunity Tracking Agent &middot; work breakdown &middot; 15 packages &middot; companion to the
+  architecture, layer plates and product surface
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OppTrack Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&display=swap">
+  <style>html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#F4F6F8; --surface:#FFFFFF; --surface-2:#E9EEF3; --sunk:#EFF3F7;
+  --ink:#111821; --ink-2:#3C4854; --muted:#6A7785;
+  --line:#D2DAE2; --line-soft:#E4E9EF;
+  --det:#1A5787; --det-soft:#E0EBF4; --det-edge:#9CC0DC;
+  --judge:#9E560F; --judge-soft:#F8EADA; --judge-edge:#DDB98C;
+  --human:#57488A; --human-soft:#EBE7F5; --human-edge:#BDB2DD;
+  --stop:#A93129; --stop-soft:#F7E4E2; --stop-edge:#DFA9A3;
+  --ok:#1B6F55;
+  --shadow:0 1px 2px rgba(17,24,33,.05), 0 8px 24px -12px rgba(17,24,33,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+    --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+    --line:#2A3542; --line-soft:#212B36;
+    --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+    --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+    --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+    --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+    --ok:#5FC49E;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+  --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+  --line:#2A3542; --line-soft:#212B36;
+  --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+  --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+  --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+  --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+  --ok:#5FC49E;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Serif",Georgia,serif;
+  font-size:16.5px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.eyebrow,th,.chip,.lane,.num{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",system-ui,sans-serif}
+code,kbd,.mono,.pid{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+.ui,td,figcaption,.note,.legend{font-family:"IBM Plex Sans",system-ui,sans-serif}
+
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px 96px}
+.cols{display:grid;gap:0}
+@media(min-width:1080px){
+  .cols{grid-template-columns:216px minmax(0,1fr);gap:52px;align-items:start}
+}
+main{min-width:0;max-width:74ch}
+
+/* ---------- masthead ---------- */
+.mast{padding:64px 0 30px;border-bottom:1px solid var(--line)}
+.eyebrow{
+  font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);display:flex;flex-wrap:wrap;gap:14px;align-items:center
+}
+.eyebrow span.sep{color:var(--line);font-weight:400}
+h1{
+  font-size:clamp(38px,6.2vw,62px);line-height:1.02;margin:20px 0 0;
+  font-weight:700;letter-spacing:-.02em;text-wrap:balance
+}
+h1 em{font-family:"IBM Plex Serif",Georgia,serif;font-style:italic;font-weight:400;color:var(--det)}
+.standfirst{
+  font-size:19px;line-height:1.55;color:var(--ink-2);margin:22px 0 0;max-width:62ch
+}
+.facts{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(122px,1fr));
+  gap:1px;background:var(--line);border:1px solid var(--line);
+  margin:34px 0 0;border-radius:3px;overflow:hidden
+}
+.fact{background:var(--surface);padding:13px 15px}
+.fact b{display:block;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:23px;font-weight:700;letter-spacing:-.01em}
+.fact span{display:block;font-family:"IBM Plex Sans",sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:3px}
+
+/* ---------- index rail ---------- */
+.rail{display:none}
+@media(min-width:1080px){
+  .rail{display:block;position:sticky;top:24px;padding-top:64px}
+  .rail ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--line)}
+  .rail li{margin:0}
+  .rail a{
+    display:block;padding:5px 0 5px 13px;margin-left:-1px;border-left:2px solid transparent;
+    font-family:"IBM Plex Sans",sans-serif;font-size:12.5px;line-height:1.35;
+    color:var(--muted);text-decoration:none
+  }
+  .rail a:hover{color:var(--ink);border-left-color:var(--det-edge)}
+  .rail a:focus-visible{outline:2px solid var(--det);outline-offset:2px}
+  .rail a i{font-style:normal;font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--line);margin-right:7px}
+}
+
+/* ---------- sections ---------- */
+section{padding:52px 0 0;scroll-margin-top:20px}
+h2{
+  font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--det);margin:0 0 6px;display:flex;align-items:baseline;gap:11px
+}
+h2 .num{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);font-weight:400}
+h3{font-size:clamp(24px,3.4vw,31px);line-height:1.16;margin:0 0 16px;font-weight:600;letter-spacing:-.015em;text-wrap:balance}
+h4{font-size:15px;margin:34px 0 10px;font-weight:600;letter-spacing:.005em}
+p{margin:0 0 16px;max-width:66ch}
+strong{font-weight:500;color:var(--ink);box-shadow:inset 0 -0.42em 0 var(--det-soft)}
+a{color:var(--det)}
+
+.pid,code{
+  font-size:.87em;background:var(--surface-2);border:1px solid var(--line-soft);
+  padding:.06em .34em;border-radius:2px;color:var(--ink-2);white-space:nowrap
+}
+
+.pull{
+  border-left:3px solid var(--det);background:var(--sunk);
+  padding:16px 20px;margin:26px 0;border-radius:0 3px 3px 0
+}
+.pull p{margin:0;font-size:17px;line-height:1.5}
+.pull p+p{margin-top:9px;font-size:14.5px;font-family:"IBM Plex Sans",sans-serif;color:var(--ink-2)}
+.pull.warn{border-left-color:var(--stop)}
+.pull.judge{border-left-color:var(--judge)}
+
+/* ---------- tables ---------- */
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-family:"IBM Plex Sans",sans-serif;font-size:13.5px}
+th{
+  text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;padding:10px 13px;background:var(--sunk);
+  border-bottom:1px solid var(--line);white-space:nowrap
+}
+td{padding:9px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:"IBM Plex Mono",monospace}
+td b{color:var(--ink);font-weight:600}
+td .pid{white-space:nowrap}
+.matrix td{text-align:center;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.matrix td:first-child{text-align:left;font-family:"IBM Plex Sans",sans-serif;color:var(--ink);font-weight:500;white-space:nowrap}
+.matrix th:not(:first-child){text-align:center}
+.cell-ok{background:var(--det-soft);color:var(--det);font-weight:600}
+.cell-no{color:var(--stop);background:var(--stop-soft);opacity:.85}
+.cell-lost{color:var(--muted)}
+
+/* ---------- chips ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;
+  letter-spacing:.07em;text-transform:uppercase;padding:2px 7px;border-radius:2px;
+  border:1px solid;white-space:nowrap
+}
+.c-det{color:var(--det);background:var(--det-soft);border-color:var(--det-edge)}
+.c-judge{color:var(--judge);background:var(--judge-soft);border-color:var(--judge-edge)}
+.c-human{color:var(--human);background:var(--human-soft);border-color:var(--human-edge)}
+.c-live{color:var(--ok);background:var(--det-soft);border-color:var(--det-edge)}
+.c-block{color:var(--stop);background:var(--stop-soft);border-color:var(--stop-edge)}
+.c-plain{color:var(--muted);background:var(--surface-2);border-color:var(--line)}
+
+/* ---------- figures ---------- */
+figure{margin:30px 0;background:var(--surface);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+figure .figbody{padding:20px 18px 6px;overflow-x:auto}
+figure svg{display:block;width:100%;height:auto;min-width:520px}
+figcaption{
+  font-size:12.5px;line-height:1.5;color:var(--muted);padding:12px 18px 14px;
+  border-top:1px solid var(--line-soft);background:var(--sunk)
+}
+figcaption b{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-2);display:block;margin-bottom:3px}
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 4px;padding:0 18px}
+
+/* svg tokens */
+.s-box{fill:var(--surface);stroke:var(--line)}
+.s-det{fill:var(--det-soft);stroke:var(--det-edge)}
+.s-judge{fill:var(--judge-soft);stroke:var(--judge-edge)}
+.s-human{fill:var(--human-soft);stroke:var(--human-edge)}
+.s-stop{fill:var(--stop-soft);stroke:var(--stop-edge)}
+.s-sunk{fill:var(--sunk);stroke:var(--line)}
+.t{fill:var(--ink);font-family:"IBM Plex Sans",sans-serif;font-size:11.5px}
+.t-s{fill:var(--muted);font-family:"IBM Plex Sans",sans-serif;font-size:9.5px}
+.t-m{fill:var(--ink-2);font-family:"IBM Plex Mono",monospace;font-size:10px}
+.t-h{fill:var(--muted);font-family:"IBM Plex Sans Condensed",sans-serif;font-size:9.5px;
+  letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.t-det{fill:var(--det)} .t-judge{fill:var(--judge)} .t-human{fill:var(--human)} .t-stop{fill:var(--stop)}
+.ln{stroke:var(--muted);stroke-width:1.1;fill:none}
+.ln-d{stroke:var(--judge);stroke-width:1.3;fill:none;stroke-dasharray:5 3}
+.ln-x{stroke:var(--stop);stroke-width:1.2;fill:none;stroke-dasharray:4 3}
+.bound{fill:none;stroke:var(--judge);stroke-width:1.4;stroke-dasharray:6 4}
+
+/* ---------- step list ---------- */
+.steps{list-style:none;margin:22px 0;padding:0;border:1px solid var(--line);border-radius:3px;background:var(--surface);overflow:hidden}
+.steps li{display:grid;grid-template-columns:34px 1fr;gap:0;border-bottom:1px solid var(--line-soft)}
+.steps li:last-child{border-bottom:0}
+.steps .sn{
+  font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);
+  padding:13px 0 0;text-align:center;background:var(--sunk);border-right:1px solid var(--line-soft)
+}
+.steps .sb{padding:12px 15px 13px}
+.steps .sh{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-bottom:3px}
+.steps .sh h4{margin:0;font-size:14.5px}
+.steps p{margin:0;font-size:13.5px;line-height:1.5;font-family:"IBM Plex Sans",sans-serif;color:var(--ink-2)}
+.steps li.skip .sb{opacity:.62}
+
+/* ---------- code / tree ---------- */
+pre{
+  margin:20px 0;padding:16px 18px;background:var(--sunk);border:1px solid var(--line);
+  border-radius:3px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;
+  font-size:12.5px;line-height:1.62;color:var(--ink-2)
+}
+pre b{color:var(--ink);font-weight:600}
+pre i{color:var(--muted);font-style:normal}
+pre u{text-decoration:none;color:var(--ok)}
+pre s{text-decoration:none;color:var(--stop)}
+
+.note{
+  font-size:13px;line-height:1.55;color:var(--muted);
+  border-top:1px solid var(--line);padding-top:11px;margin:24px 0
+}
+hr{border:0;border-top:1px solid var(--line);margin:56px 0 0}
+footer{padding:26px 0 0;font-family:"IBM Plex Sans",sans-serif;font-size:11.5px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+
+<header class="mast">
+  <div class="eyebrow">
+    <span>Opportunity Tracking Agent</span><span class="sep">/</span>
+    <span>Complete architecture</span><span class="sep">/</span>
+    <span>Source: TrackF&nbsp;(1).xlsx, 6 tabs, as of 2025-03-10</span>
+  </div>
+  <h1>Read everything.<br>Compute from four.<br><em>Write to one.</em></h1>
+  <p class="standfirst">
+    A design-win pipeline agent for a semiconductor sales organisation. Every currency figure a
+    reviewer sees is produced by plain Python two planes away from any inference call. The model
+    is allowed to move exactly one field &mdash; Confidence Level &mdash; and only by proposing a
+    capped, cited, percentage-point adjustment that a person can reject.
+  </p>
+  <div class="facts">
+    <div class="fact"><b>1</b><span>writable field</span></div>
+    <div class="fact"><b>4</b><span>params touch money</span></div>
+    <div class="fact"><b>13</b><span>rubric factors</span></div>
+    <div class="fact"><b>7</b><span>code layers</span></div>
+    <div class="fact"><b>10</b><span>run steps</span></div>
+    <div class="fact"><b>6</b><span>memory tiers</span></div>
+    <div class="fact"><b>1</b><span>model call per run</span></div>
+  </div>
+</header>
+
+<div class="cols">
+<nav class="rail" aria-label="Contents">
+  <ol>
+    <li><a href="#s1"><i>01</i>The one decision</a></li>
+    <li><a href="#s2"><i>02</i>Parameter model</a></li>
+    <li><a href="#s3"><i>03</i>The LLM boundary</a></li>
+    <li><a href="#s4"><i>04</i>Calculation layer</a></li>
+    <li><a href="#s5"><i>05</i>Matrix A &middot; baselines</a></li>
+    <li><a href="#s6"><i>06</i>Matrix B &middot; the rubric</a></li>
+    <li><a href="#s7"><i>07</i>The one model call</a></li>
+    <li><a href="#s8"><i>08</i>Guards on the reply</a></li>
+    <li><a href="#s9"><i>09</i>One run, ten steps</a></li>
+    <li><a href="#s10"><i>10</i>Seven layers</a></li>
+    <li><a href="#s11"><i>11</i>Six planes &middot; stack</a></li>
+    <li><a href="#s12"><i>12</i>Data model</a></li>
+    <li><a href="#s13"><i>13</i>Memory</a></li>
+    <li><a href="#s14"><i>14</i>Retrieval</a></li>
+    <li><a href="#s15"><i>15</i>Identity &amp; access</a></li>
+    <li><a href="#s16"><i>16</i>Jobs &amp; cadence</a></li>
+    <li><a href="#s17"><i>17</i>What exists today</a></li>
+    <li><a href="#s18"><i>18</i>Build order</a></li>
+    <li><a href="#s19"><i>19</i>Blocked, and on what</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="s1">
+  <h2><span class="num">01</span> The premise</h2>
+  <h3>One writable field is the whole architecture</h3>
+  <p>
+    The workbook keeps a pipeline of design-win opportunities across six parallel tabs. Twenty-eight
+    parameters are collected per row. Exactly four of them reach a currency figure:
+    <span class="pid">V1</span> EAU, <span class="pid">V3</span> Distributor ASP,
+    <span class="pid">J1</span> Confidence Level and <span class="pid">T1</span> quarterly units.
+    Of those four, three are observations of the world. One &mdash; <span class="pid">J1</span> &mdash;
+    is a hand-entered opinion that multiplies every revenue number downstream of it.
+  </p>
+  <p>
+    So the agent's job is not to forecast revenue. It is to <strong>justify a deviation from a known
+    baseline confidence</strong>, in percentage points, with a quote. Revenue is then recomputed by the
+    same deterministic function that produced the base case, which is what makes the before and after
+    comparable at all.
+  </p>
+  <div class="pull">
+    <p>Sales Revenue and Adjusted Revenue are computed in code the model cannot reach. The judgment
+    engine returns percentage points and quotations &mdash; never a figure.</p>
+    <p>That separation is what makes a number defensible when someone in a board review asks where it
+    came from.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="num">02</span> Parameter model</h2>
+  <h3>Twenty-eight live parameters, four of them load-bearing</h3>
+  <p>
+    Every parameter is registered by ID, never by spreadsheet column name. Validators, analyses and
+    judge rules all declare which IDs they require; a module whose requirements are unmet stays dark
+    rather than guessing. Adding a parameter activates the modules that declared a dependency on it.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>ID</th><th>Parameter</th><th>Role</th><th>Reaches money?</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pid">V1</span></td><td><b>EAU</b> (Kpcs)</td><td>Annual usage, already in chip units</td><td><span class="chip c-det">Input</span></td></tr>
+      <tr><td><span class="pid">V3</span></td><td><b>Distributor ASP</b></td><td>Price per unit into the channel</td><td><span class="chip c-det">Input</span></td></tr>
+      <tr><td><span class="pid">J1</span></td><td><b>Confidence Level</b></td><td>The one hand-entered opinion</td><td><span class="chip c-judge">Agent writes</span></td></tr>
+      <tr><td><span class="pid">T1</span></td><td><b>Quarterly units</b></td><td>FCST_Revenue phasing</td><td><span class="chip c-det">Input</span></td></tr>
+      <tr><td><span class="pid">V4</span></td><td>Resale ASP</td><td>Channel margin only</td><td><span class="chip c-plain">Dead end</span></td></tr>
+      <tr><td><span class="pid">U1</span></td><td>Unit / Set</td><td>Attach rate, not a multiplier</td><td><span class="chip c-plain">Dead end</span></td></tr>
+      <tr><td><span class="pid">L1&ndash;L4</span></td><td>Design Status, Stage, dates, tab</td><td>Lifecycle and validation axes</td><td><span class="chip c-plain">Dimension</span></td></tr>
+      <tr><td><span class="pid">D1&ndash;D7</span></td><td>Region, customer, end customer, part&#35;</td><td>Two roll-up trees over the same row</td><td><span class="chip c-plain">Dimension</span></td></tr>
+      <tr><td><span class="pid">R1</span></td><td>Competitor Part&#35;</td><td>Present on the wrong tab today</td><td><span class="chip c-block">Severed</span></td></tr>
+      <tr><td><span class="pid">N1&ndash;N3</span></td><td>Comments, next action, notes</td><td>Free text; the only embedded content</td><td><span class="chip c-plain">Evidence</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    <span class="pid">U1</span> is correctly excluded from the revenue formula &mdash; EAU is already
+    stated in chip units, so Unit/Set is an attach rate, not a missing multiplier. What remains is a
+    <em>validation</em> problem rather than a schema one: the Funnel tab carries rows that do not
+    reconcile with that definition (IP901 at 130,790&nbsp;Kpcs over 4 per set implies 32.7M vehicle-sets a
+    year, roughly a third of global light-vehicle production). That check lives in the rule engine at
+    Layer&nbsp;2, not in the calculation.
+  </p>
+  <div class="pull warn">
+    <p>Five cross-tab joins do not exist. No two tabs share a key, so every relation between them is
+    eyeballed rather than computed.</p>
+    <p>All five close with one field: a stable <span class="pid">P0-1</span> Opportunity ID written on
+    every row of every tab. It is first in the fix order because nothing else can be automated until
+    it lands.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="num">03</span> The boundary</h2>
+  <h3>Where the model is allowed, and what it may hand back</h3>
+  <p>
+    Requests only travel one way. Nothing in the data plane calls back up into a service, and no
+    service calls a model except the judgment engine. Everything a reviewer reads as a currency figure
+    was produced on the top lane below, two planes from any inference call.
+  </p>
+
+  <figure>
+    <div class="legend">
+      <span class="chip c-det">Deterministic</span>
+      <span class="chip c-judge">Model</span>
+      <span class="chip c-block">Deliberately not connected</span>
+    </div>
+    <div class="figbody">
+    <svg viewBox="0 0 900 400" role="img" aria-label="Diagram: intake feeds a deterministic calculation lane and a judgment lane; only a capped confidence adjustment crosses from the judgment lane into the revenue calculation, and computed revenue figures are never sent to the model.">
+      <defs>
+        <marker id="ar" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--muted)"/>
+        </marker>
+        <marker id="aj" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--judge)"/>
+        </marker>
+      </defs>
+
+      <text class="t-h t-det" x="180" y="44">Deterministic &middot; no model</text>
+      <text class="t-h t-judge" x="182" y="222">Judgment &middot; the one model call</text>
+
+      <rect class="s-sunk" x="16" y="60" width="132" height="316" rx="3"/>
+      <text class="t-h" x="32" y="86">Intake</text>
+      <text class="t" x="32" y="112">TrackF (1).xlsx</text>
+      <text class="t-s" x="32" y="130">6 tabs, 28 live parameters</text>
+      <text class="t-s" x="32" y="146">read, coerce, canonicalise</text>
+      <text class="t-s" x="32" y="162">no interpretation</text>
+      <text class="t-m" x="32" y="196">snapshot_id</text>
+      <text class="t-s" x="32" y="212">write-once, immutable</text>
+      <text class="t-s" x="32" y="236">A run is a pure</text>
+      <text class="t-s" x="32" y="250">function of one</text>
+      <text class="t-s" x="32" y="264">snapshot. The same</text>
+      <text class="t-s" x="32" y="278">input reproduces the</text>
+      <text class="t-s" x="32" y="292">same numbers and the</text>
+      <text class="t-s" x="32" y="306">same proposals.</text>
+
+      <rect class="s-det" x="180" y="60" width="98" height="56" rx="3"/>
+      <text class="t t-det" x="196" y="84">V1 &middot; V3</text>
+      <text class="t-s" x="196" y="100">EAU, Disty ASP</text>
+
+      <rect class="s-det" x="306" y="60" width="150" height="56" rx="3"/>
+      <text class="t t-det" x="320" y="84">calc_engine.py</text>
+      <text class="t-s" x="320" y="100">plain Python, unit-tested</text>
+
+      <rect class="s-det" x="484" y="60" width="126" height="56" rx="3"/>
+      <text class="t t-det" x="498" y="84">C1</text>
+      <text class="t-s" x="498" y="100">Sales revenue</text>
+
+      <rect class="s-det" x="638" y="60" width="126" height="56" rx="3"/>
+      <text class="t t-det" x="652" y="84">C2 = C1 &times; J1</text>
+      <text class="t-s" x="652" y="100">Adjusted revenue</text>
+
+      <rect class="s-box" x="792" y="60" width="92" height="56" rx="3"/>
+      <text class="t" x="804" y="84">Roll-ups</text>
+      <text class="t-s" x="804" y="100">C8 C9 C12</text>
+
+      <path class="ln" marker-end="url(#ar)" d="M148,88 H176"/>
+      <path class="ln" marker-end="url(#ar)" d="M278,88 H302"/>
+      <path class="ln" marker-end="url(#ar)" d="M456,88 H480"/>
+      <path class="ln" marker-end="url(#ar)" d="M610,88 H634"/>
+      <path class="ln" marker-end="url(#ar)" d="M764,88 H788"/>
+
+      <rect class="bound" x="168" y="206" width="560" height="170" rx="4"/>
+      <text class="t-s t-judge" x="182" y="366">Nothing inside this boundary produces a number a reviewer reads.</text>
+
+      <rect class="s-box" x="182" y="236" width="124" height="64" rx="3"/>
+      <text class="t" x="194" y="260">Evidence bundle</text>
+      <text class="t-s" x="194" y="276">L1 L2 N1&ndash;N3 R1</text>
+      <text class="t-s" x="194" y="290">portfolio share %</text>
+
+      <rect class="s-judge" x="330" y="236" width="150" height="64" rx="3"/>
+      <text class="t t-judge" x="342" y="260">Judgment engine</text>
+      <text class="t-s" x="342" y="276">Matrix A + 13 factors</text>
+      <text class="t-s" x="342" y="290">one call, whole pipeline</text>
+
+      <rect class="s-judge" x="504" y="236" width="132" height="64" rx="3"/>
+      <text class="t t-judge" x="516" y="260">Proposal</text>
+      <text class="t-s" x="516" y="276">adjustment_pp</text>
+      <text class="t-s" x="516" y="290">+ verbatim quote</text>
+
+      <rect class="s-det" x="760" y="236" width="110" height="64" rx="3"/>
+      <text class="t t-det" x="772" y="260">Guards</text>
+      <text class="t-s" x="772" y="276">caps &middot; clamp</text>
+      <text class="t-s" x="772" y="290">bands &middot; citations</text>
+
+      <path class="ln" marker-end="url(#ar)" d="M148,268 H178"/>
+      <path class="ln-d" marker-end="url(#aj)" d="M306,268 H326"/>
+      <path class="ln-d" marker-end="url(#aj)" d="M480,268 H500"/>
+      <path class="ln-d" marker-end="url(#aj)" d="M636,268 H756"/>
+
+      <path class="ln" marker-end="url(#ar)" d="M815,236 V150 H705 V120"/>
+      <text class="t-m t-det" x="712" y="142">J1 approved</text>
+
+      <path class="ln-x" d="M547,116 V232"/>
+      <text class="t-stop" x="536" y="180" font-family="IBM Plex Sans, sans-serif" font-size="15" font-weight="600">&#10005;</text>
+      <text class="t-s t-stop" x="558" y="164">C1 and C2 are never</text>
+      <text class="t-s t-stop" x="558" y="178">sent to the model</text>
+    </svg>
+    </div>
+    <figcaption>
+      <b>Fig. A &middot; Agent I/O contract</b>
+      The judgment engine is the only box that talks to a model, and the only line crossing back into
+      the money lane carries a confidence level. Guards sit outside the boundary because they are
+      deterministic code checking a model reply, not part of the reply.
+    </figcaption>
+  </figure>
+
+  <p>
+    What the model receives is the qualitative record for every row &mdash; status, stage, comments,
+    competitor field, the raw <span class="pid">V1</span>/<span class="pid">V3</span>/<span class="pid">V4</span>
+    inputs &mdash; plus three computed <em>share</em> percentages per row that the concentration factor
+    needs. It does not receive C1, C2, or any portfolio total. It cannot return one: the response
+    schema has no field for it.
+  </p>
+</section>
+
+<section id="s4">
+  <h2><span class="num">04</span> Calculation layer</h2>
+  <h3>Two lines of arithmetic, pinned to the workbook by test</h3>
+  <p>
+    <code>calc_engine.py</code> reimplements the ProjectTrack columns as plain Python with zero LLM
+    involvement. <code>test_calc_engine.py</code> asserts it reproduces the sheet's own numbers exactly
+    for all nine sample projects; if that test fails, the financial maths has changed, which should
+    never happen silently.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>ID</th><th>Figure</th><th>Formula</th><th>Workbook origin</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pid">C1</span></td><td><b>Sales revenue</b></td><td class="mono">V1 &times; V3</td><td class="mono">ProjectTrack&nbsp;O = K &times; M</td></tr>
+      <tr><td><span class="pid">C2</span></td><td><b>Adjusted revenue</b></td><td class="mono">C1 &times; J1</td><td class="mono">ProjectTrack&nbsp;R = O &times; Q</td></tr>
+      <tr><td><span class="pid">C5</span></td><td>Channel margin</td><td class="mono">V4 &minus; V3</td><td>per unit</td></tr>
+      <tr><td><span class="pid">C8</span></td><td>Regional roll-up</td><td class="mono">&Sigma; C1, &Sigma; C2 by D1</td><td>canonical regions</td></tr>
+      <tr><td><span class="pid">C9</span></td><td>Stage roll-up</td><td class="mono">&Sigma; C1, &Sigma; C2, count by L2</td><td>funnel health</td></tr>
+      <tr><td><span class="pid">C12</span></td><td>Concentration</td><td class="mono">row C2 &divide; &Sigma; C2</td><td>by region, customer, OEM, SKU</td></tr>
+      <tr><td><span class="pid">T2</span></td><td>Quarterly revenue</td><td class="mono">T1 &times; V3</td><td class="mono">FCST_Revenue&nbsp;S:V = L &times; N:Q</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    The invariant that matters: <strong>step 7 of a run re-executes this exact function</strong> against
+    approved confidence values. The base case and the calibrated case are not two implementations that
+    happen to agree &mdash; they are one function called twice, which is the only reason the delta
+    between them means anything.
+  </p>
+  <div class="pull">
+    <p>Effective portfolio confidence is <span class="mono">&Sigma;C2 &divide; &Sigma;C1</span>, and it is the
+    number to watch across runs.</p>
+    <p>On the nine-row sample it starts at 0.375 &mdash; $82,350K unweighted, $30,915K weighted.</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="num">05</span> Matrix A</h2>
+  <h3>Baseline confidence is a table, not an inference</h3>
+  <p>
+    Design Status drives confidence; Stage independently checks it. A pairing marked
+    <span class="chip c-block">forbidden</span> is one the company's rules do not allow, and a row
+    sitting on one is an internal contradiction the validator catches before any model runs. Baselines
+    were inferred from the data and are <em>the</em> item awaiting ratification &mdash; ratifying this
+    table is what turns the agent's job from inventing a confidence number into justifying a deviation
+    from a known one.
+  </p>
+  <div class="tw">
+  <table class="matrix">
+    <thead><tr><th>Design Status</th><th>Concept</th><th>EVT</th><th>DVT</th><th>PVT</th><th>MP</th></tr></thead>
+    <tbody>
+      <tr><td>Promotion</td><td class="cell-ok">0.10</td><td class="cell-ok">0.15</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td></tr>
+      <tr><td>Sample</td><td class="cell-ok">0.20</td><td class="cell-ok">0.30</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td></tr>
+      <tr><td>Evaluation</td><td class="cell-ok">0.20</td><td class="cell-ok">0.35</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td></tr>
+      <tr><td>Design In</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-ok">0.65</td><td class="cell-ok">0.80</td><td class="cell-no">&mdash;</td></tr>
+      <tr><td>Design Win</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-ok">0.90</td><td class="cell-ok">0.95</td></tr>
+      <tr><td>Mass Production</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-no">&mdash;</td><td class="cell-ok">0.95</td></tr>
+      <tr><td>Lost</td><td class="cell-lost">0.00</td><td class="cell-lost">0.00</td><td class="cell-lost">0.00</td><td class="cell-lost">0.00</td><td class="cell-lost">0.00</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h4>Lifecycle bands</h4>
+  <p>
+    A confidence value falls in one of four bands. A proposal that would move a row <em>across</em> a
+    band boundary does not auto-apply &mdash; it routes to a person. Everything inside a band applies
+    on its own, which is the difference between a review queue and a rubber stamp.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Band</th><th class="n">Range</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><b>terminal</b></td><td class="n">0.00 &ndash; 0.05</td><td>Effectively lost</td></tr>
+      <tr><td><b>early</b></td><td class="n">0.05 &ndash; 0.45</td><td>Promotion, Sample, Evaluation territory</td></tr>
+      <tr><td><b>designing</b></td><td class="n">0.45 &ndash; 0.85</td><td>Design In, committed but not locked</td></tr>
+      <tr><td><b>locked</b></td><td class="n">0.85 &ndash; 1.00</td><td>Design Win and Mass Production</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    Stage order is <span class="mono">Concept &rarr; EVT &rarr; DVT &rarr; PVT &rarr; MP</span>. Only
+    Concept and EVT count as early. This is stated as config the model reads, not as prose it might
+    interpret, because reading DVT as "early" was one of two misfires that accounted for 44% of the
+    entire calibration effect on the first live run.
+  </p>
+</section>
+
+<section id="s6">
+  <h2><span class="num">06</span> Matrix B</h2>
+  <h3>Thirteen factors, each with a cap and a direction</h3>
+  <p>
+    A factor may only fire when the row's own data supports it, and it must carry a verbatim quote
+    from the bundle. Only <span class="pid">J-03</span> and <span class="pid">J-06</span> may return a
+    positive adjustment; every other factor is a reduction or nothing. Factors whose input does not
+    exist on this data return <em>not assessable</em>, which is the correct answer for them, not a
+    failure.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>ID</th><th>Factor</th><th>Dir</th><th class="n">Cap</th><th>Fires when</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pid">J-01</span></td><td><b>Status / stage mismatch</b></td><td>&minus;</td><td class="n">25</td><td>the pairing is forbidden in Matrix A</td><td><span class="chip c-live">Live</span></td></tr>
+      <tr><td><span class="pid">J-02</span></td><td><b>Named competitor</b></td><td>&minus;</td><td class="n">12</td><td>competitor_part is populated and not TBD</td><td><span class="chip c-block">Severed</span></td></tr>
+      <tr><td><span class="pid">J-03</span></td><td><b>Design win lock-in</b></td><td>+</td><td class="n">8</td><td>Design Win at PVT or MP, no open risk</td><td><span class="chip c-live">Live</span></td></tr>
+      <tr><td><span class="pid">J-04</span></td><td><b>Early-stage optimism</b></td><td>&minus;</td><td class="n">15</td><td>Concept or EVT and J1 exceeds baseline by &gt;&nbsp;0.15</td><td><span class="chip c-live">Live</span></td></tr>
+      <tr><td><span class="pid">J-05</span></td><td><b>Customer concentration</b></td><td>&minus;</td><td class="n">10</td><td>&gt;25% of its region, or one OEM &gt;40% of portfolio</td><td><span class="chip c-live">Live</span></td></tr>
+      <tr><td><span class="pid">J-06</span></td><td><b>Submitter calibration</b></td><td>+/&minus;</td><td class="n">10</td><td>owner's historic bias exceeds one SD</td><td><span class="chip c-block">No owner field</span></td></tr>
+      <tr><td><span class="pid">J-07</span></td><td><b>Dual sourcing</b></td><td>&minus;</td><td class="n">10</td><td>a second source is named or required by policy</td><td><span class="chip c-block">Blocked</span></td></tr>
+      <tr><td><span class="pid">J-08</span></td><td><b>Cancellation risk</b></td><td>&minus;</td><td class="n">15</td><td>programme cancellation, or SoP slipping across runs</td><td><span class="chip c-block">Needs 2 snapshots</span></td></tr>
+      <tr><td><span class="pid">J-09</span></td><td><b>Stage stall</b></td><td>&minus;</td><td class="n">10</td><td>days in stage exceed 1.5&times; the stage median</td><td><span class="chip c-block">Needs history</span></td></tr>
+      <tr><td><span class="pid">J-10</span></td><td><b>Milestone slip</b></td><td>&minus;</td><td class="n">12</td><td>a parsed ES, PPAP, design-review or SoP date is past due</td><td><span class="chip c-live">Partial</span></td></tr>
+      <tr><td><span class="pid">J-11</span></td><td><b>EAU plausibility</b></td><td>&minus;</td><td class="n">20</td><td>EAU &divide; units-per-set implausible vs build volume</td><td><span class="chip c-block">Needs unit/set</span></td></tr>
+      <tr><td><span class="pid">J-12</span></td><td><b>Data completeness</b></td><td>&minus;</td><td class="n">15</td><td>a required field is null or TBD on the row</td><td><span class="chip c-live">Live</span></td></tr>
+      <tr><td><span class="pid">J-13</span></td><td><b>Price anomaly</b></td><td>&minus;</td><td class="n">8</td><td>resale ASP below distributor ASP, or margin off-band</td><td><span class="chip c-live">Live</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    Six of thirteen can fire on today's data. That is not a modelling shortfall &mdash; it is a data
+    one. <span class="pid">J-02</span> restores the moment Competitor Part&#35; is copied onto
+    ProjectTrack; <span class="pid">J-06</span> and <span class="pid">J-09</span> need an owner field
+    and one quarter of retained history before they mean anything.
+  </p>
+</section>
+
+<section id="s7">
+  <h2><span class="num">07</span> The call</h2>
+  <h3>One request, the whole pipeline, a schema on the wire</h3>
+  <p>
+    The judgment engine makes a single streaming call per run carrying every row at once &mdash;
+    which is what lets <span class="pid">J-05</span> concentration be computed at all, since it needs
+    the portfolio to compare against. The reply shape is constrained server-side by a JSON schema on
+    the request, not by an instruction in the prompt.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Model</td><td class="mono">claude-opus-5</td><td>Hosted frontier API is primary; local vLLM is the residency fallback</td></tr>
+      <tr><td>Transport</td><td class="mono">messages.stream()</td><td>9 rows &times; 13 factors is a large structured reply; a non-streaming request at this max_tokens is refused</td></tr>
+      <tr><td>Output</td><td class="mono">json_schema</td><td>Enum-constrained rule IDs, all seven fields required, additionalProperties false</td></tr>
+      <tr><td>Thinking</td><td class="mono">adaptive</td><td>Rubric application over a whole portfolio</td></tr>
+      <tr><td>max_tokens</td><td class="mono">32000</td><td>Truncation is detected, never parsed around</td></tr>
+      <tr><td>Versioning</td><td class="mono">rubric_version<br>prompt_version</td><td>Stored per event, so two runs can be compared rather than argued about</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h4>Degradation ladder</h4>
+  <p>
+    Four request shapes are tried in order, and the shape actually used is recorded in provenance.
+    Auth, permission, connection and not-found errors break out immediately rather than walking the
+    ladder pointlessly.
+  </p>
+<pre><b>1</b> schema + thinking + server-side fallbacks   <i>&larr; preferred</i>
+<b>2</b> schema + thinking
+<b>3</b> schema only
+<b>4</b> plain                                      <i>&larr; last rung; json_salvaged may be set</i>
+
+<s>&#10005;</s> <b>every rung failed</b> &rarr; raise JudgmentError. <u>Never a silent mock.</u></pre>
+  <div class="pull judge">
+    <p>A failed call raises. It never substitutes hard-coded numbers behind a successful-looking run.</p>
+    <p>The earlier prototype fell back to a rule-based MOCK scorer on any exception &mdash; and did,
+    silently, when a markdown fence took out all nine projects on the first live run. Mode is now
+    recorded per run and a failure is loud.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="num">08</span> Guards</h2>
+  <h3>Eight ways a reply gets rejected, clipped or queued</h3>
+  <p>
+    <code>validate_row()</code> runs over every factor the model returned, in code, before anything
+    reaches the recompute. Each rejection is recorded as a violation with a kind and a detail, so the
+    audit record shows not only what applied but what was thrown away and why.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Violation</th><th>Trigger</th><th>Effect</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pid">unknown_rule</span></td><td>rule ID is not in the current rubric version</td><td>Factor discarded</td></tr>
+      <tr><td><span class="pid">not_assessable</span></td><td>model set <span class="mono">valid: false</span></td><td>Factor discarded, rationale kept</td></tr>
+      <tr><td><span class="pid">no_citation</span></td><td>a factor applies with an empty evidence string</td><td>Factor discarded &mdash; no unexplained change</td></tr>
+      <tr><td><span class="pid">wrong_direction</span></td><td>positive adjustment from anything but J-03 or J-06</td><td>Factor discarded</td></tr>
+      <tr><td><span class="pid">over_factor_cap</span></td><td>|adjustment| exceeds that factor's cap</td><td>Clipped to the cap, flagged</td></tr>
+      <tr><td><span class="pid">over_run_cap</span></td><td>row total exceeds &plusmn;20pp in one run</td><td>All factors scaled proportionally</td></tr>
+      <tr><td><span class="pid">clamped</span></td><td>result falls outside [0.05, 0.95]</td><td>Clamped, flagged</td></tr>
+      <tr><td><span class="pid">band_crossing</span></td><td>entered and proposed sit in different bands</td><td>Routed to a human, does not auto-apply</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    The <strong>0.95 ceiling matters more than it looks</strong>. The first implementation clamped to
+    [0, 1], and both design wins in the sample already sat at 1.00 &mdash; so any positive support was
+    discarded arithmetically and the layer could only ever move the portfolio down. A one-way haircut
+    is not calibration. The band gives <span class="pid">J-03</span> somewhere to put its points.
+  </p>
+  <div class="pull warn">
+    <p>Structural, not policed: the service returns confidence only. There is no code path by which a
+    model output becomes a revenue figure, so "no revenue writes" is impossible rather than forbidden.</p>
+  </div>
+</section>
+
+<section id="s9">
+  <h2><span class="num">09</span> One run</h2>
+  <h3>Ten steps, and the last two are not optional</h3>
+  <p>
+    A run never mutates its source, never writes confidence directly, and always terminates in a queue
+    and a log. Steps 4 and 8 are architecturally present and deliberately not yet running &mdash; they
+    depend on state history that does not exist, and the bench reports them as skipped rather than
+    faking them.
+  </p>
+  <ol class="steps">
+    <li><div class="sn">01</div><div class="sb">
+      <div class="sh"><h4>Intake</h4><span class="chip c-det">Deterministic</span></div>
+      <p>Read the snapshot. Record who owns each field. No interpretation.</p></div></li>
+    <li><div class="sn">02</div><div class="sb">
+      <div class="sh"><h4>Validate</h4><span class="chip c-det">Deterministic</span></div>
+      <p>Gates V-a to V-i, including the Matrix A pairing check. Findings carry rule, severity and message.</p></div></li>
+    <li><div class="sn">03</div><div class="sb">
+      <div class="sh"><h4>Compute the base case</h4><span class="chip c-det">Deterministic</span></div>
+      <p>C1 and C2 per row plus the roll-ups. These exist before any model call and are never replaced.</p></div></li>
+    <li class="skip"><div class="sn">04</div><div class="sb">
+      <div class="sh"><h4>Retrieve precedent</h4><span class="chip c-judge">Judgment</span><span class="chip c-block">Phase 2</span></div>
+      <p>pgvector over resolved opportunities. Nothing to retrieve until won/lost outcomes exist.</p></div></li>
+    <li><div class="sn">05</div><div class="sb">
+      <div class="sh"><h4>Score the factors</h4><span class="chip c-judge">Judgment</span></div>
+      <p>The one live model call. Whole pipeline, one request. Returns percentage points and quotes.</p></div></li>
+    <li><div class="sn">06</div><div class="sb">
+      <div class="sh"><h4>Check the reply</h4><span class="chip c-det">Deterministic</span></div>
+      <p>Caps, citations, direction, per-run cap, clamp, band crossing. Violations are recorded, not swallowed.</p></div></li>
+    <li><div class="sn">07</div><div class="sb">
+      <div class="sh"><h4>Recompute</h4><span class="chip c-det">Deterministic</span></div>
+      <p>The same arithmetic as step 3, on approved confidence. Same function, called twice.</p></div></li>
+    <li class="skip"><div class="sn">08</div><div class="sb">
+      <div class="sh"><h4>Lifecycle moves</h4><span class="chip c-det">Deterministic</span><span class="chip c-block">Phase 2</span></div>
+      <p>Promote to Mass Production, move to Design Lost, C14 time in stage. Needs state_history and a human gate.</p></div></li>
+    <li><div class="sn">09</div><div class="sb">
+      <div class="sh"><h4>Human decision</h4><span class="chip c-human">Person</span></div>
+      <p>Only band-crossing rows queue. A reviewer clears them; nobody approves their own proposal.</p></div></li>
+    <li><div class="sn">10</div><div class="sb">
+      <div class="sh"><h4>Log</h4><span class="chip c-det">Deterministic</span></div>
+      <p>Model ID, stop reason, token counts, rubric and prompt versions, rows moved, rows queued, decisions. Append-only.</p></div></li>
+  </ol>
+  <div class="pull">
+    <p>The queue is the safety property.</p>
+    <p>Because the judge writes to a pending queue rather than to the record, a bad model run degrades
+    to noise a reviewer dismisses &mdash; never to a wrong number in a board pack.</p>
+  </div>
+</section>
+
+<section id="s10">
+  <h2><span class="num">10</span> Code structure</h2>
+  <h3>Seven layers, one registry running through all of them</h3>
+  <p>
+    The structural decision everything else falls out of: a <strong>parameter registry is the single
+    source of truth</strong>, and every layer <em>declares</em> which parameter IDs it needs rather
+    than assuming they exist. Add a parameter and the modules that declared a dependency on it
+    activate on their own &mdash; no hunting through code for what to switch on.
+  </p>
+
+  <figure>
+    <div class="figbody">
+    <svg viewBox="0 0 900 330" role="img" aria-label="Diagram: a parameter registry spine spanning six layers — intake and validation, calculation, analyses, judgment, review and audit, and delivery. Only judgment and review are non-deterministic.">
+      <rect class="s-sunk" x="16" y="20" width="116" height="282" rx="3"/>
+      <text class="t-m" x="30" y="44">01</text>
+      <text class="t" x="30" y="66">Registry</text>
+      <text class="t-s" x="30" y="88">parameters.py</text>
+      <text class="t-s" x="30" y="103">enums.py</text>
+      <text class="t-s" x="30" y="118">rubric.py</text>
+      <text class="t-s" x="30" y="148">Every layer to</text>
+      <text class="t-s" x="30" y="163">the right declares</text>
+      <text class="t-s" x="30" y="178">REQUIRES against</text>
+      <text class="t-s" x="30" y="193">these IDs. Unmet</text>
+      <text class="t-s" x="30" y="208">means the module</text>
+      <text class="t-s" x="30" y="223">stays dark rather</text>
+      <text class="t-s" x="30" y="238">than guessing.</text>
+
+      <rect class="s-det" x="150" y="20" width="600" height="42" rx="3"/>
+      <text class="t-m t-det" x="164" y="46">02</text>
+      <text class="t" x="196" y="39">Intake, normalise, validate</text>
+      <text class="t-s" x="196" y="54">xlsx_reader &middot; snapshot &middot; connectors &middot; coerce &middot; canon &middot; rules V-a&ndash;V-i</text>
+
+      <rect class="s-det" x="150" y="68" width="600" height="42" rx="3"/>
+      <text class="t-m t-det" x="164" y="94">03</text>
+      <text class="t" x="196" y="87">Calculation</text>
+      <text class="t-s" x="196" y="102">engine.py &middot; rollup.py &middot; test_engine.py &mdash; every currency figure originates here</text>
+
+      <rect class="s-det" x="150" y="116" width="600" height="42" rx="3"/>
+      <text class="t-m t-det" x="164" y="142">04</text>
+      <text class="t" x="196" y="135">Analyses</text>
+      <text class="t-s" x="196" y="150">stage_mix &middot; concentration &middot; data_quality &middot; milestones &middot; competitive &middot; margin &middot; demand</text>
+
+      <rect class="s-judge" x="150" y="164" width="600" height="42" rx="3"/>
+      <text class="t-m t-judge" x="164" y="190">05</text>
+      <text class="t t-judge" x="196" y="183">Judgment</text>
+      <text class="t-s" x="196" y="198">evidence.py &middot; client.py &middot; contract.py &middot; rubric_rules.py &mdash; proposes, cannot write</text>
+
+      <rect class="s-human" x="150" y="212" width="600" height="42" rx="3"/>
+      <text class="t-m t-human" x="164" y="238">06</text>
+      <text class="t t-human" x="196" y="231">Review and audit</text>
+      <text class="t-s" x="196" y="246">queue.py &middot; audit.py &mdash; a person decides; the log is append-only</text>
+
+      <rect class="s-det" x="150" y="260" width="600" height="42" rx="3"/>
+      <text class="t-m t-det" x="164" y="286">07</text>
+      <text class="t" x="196" y="279">Delivery</text>
+      <text class="t-s" x="196" y="294">api/ FastAPI &middot; db/ SQLAlchemy &middot; dashboard, stage board, roll-up views</text>
+
+      <text class="t-h" x="766" y="45">Det</text>
+      <text class="t-h" x="766" y="93">Det</text>
+      <text class="t-h" x="766" y="141">Det</text>
+      <text class="t-h t-judge" x="766" y="189">Model</text>
+      <text class="t-h t-human" x="766" y="237">Human</text>
+      <text class="t-h" x="766" y="285">Det</text>
+    </svg>
+    </div>
+    <figcaption>
+      <b>Fig. B &middot; Layer structure</b>
+      Only two layers are non-deterministic, and neither can write a number. Layer 5 proposes;
+      Layer 6 is a person deciding. Everything a reviewer sees as a figure was produced by Layers 3
+      and 4, which have no model in them at all.
+    </figcaption>
+  </figure>
+
+  <h4>Three contracts worth pinning before features</h4>
+  <p>Everything else can be refactored freely. These shapes are what keep the layers honest.</p>
+<pre>@dataclass(frozen=True)
+class <b>ParamSpec</b>:                <i># the registry entry</i>
+    id: str                    <i># "V1", "J1", "L2" — never a column name</i>
+    name: str                  <i># "EAU"</i>
+    dtype: type
+    unit: str | None           <i># "Kpcs", "USD", None</i>
+    enum: tuple | None         <i># canonical values, if any</i>
+    required: bool
+
+<b>FieldValue</b>(param, value, source, at, trust)   <i># connector provenance</i>
+<b>ConfidenceProposal</b>(rule_id, applies, adjustment_pp,
+                   evidence, rationale, confidence, valid)</pre>
+</section>
+
+<section id="s11">
+  <h2><span class="num">11</span> Deployment</h2>
+  <h3>Six planes, one direction of travel</h3>
+  <p>
+    Requests only ever move down. Nothing in the data plane calls back up into a service. The local
+    inference box is sized for the same NVIDIA RTX PRO 6000 Blackwell workstation card (96GB VRAM)
+    used by the sibling ROI Agent, since one card serves both.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Plane</th><th>Components</th><th>Technology</th></tr></thead>
+    <tbody>
+      <tr><td><b>UI</b></td><td>Pipeline entry, stage board (kanban by stage), confidence override, regional roll-up, conversational panel</td><td>React + Next.js</td></tr>
+      <tr><td><b>Gateway</b></td><td>REST/GraphQL gateway, AuthN/AuthZ, immutable audit writer</td><td>FastAPI &middot; Okta or Azure AD &middot; RBAC</td></tr>
+      <tr><td><b>Orchestration</b></td><td>Existing Workflow Manager routes "update pipeline" and "get weighted forecast"; mediates sibling-agent calls</td><td>Platform router &middot; MCP tool schema</td></tr>
+      <tr><td><b>Services</b></td><td>Calc engine (stateless) &middot; judgment engine &middot; stage tracker &middot; alerting</td><td>Containerised Python &middot; cron or Temporal</td></tr>
+      <tr><td><b>Inference</b></td><td>Hosted frontier API primary; local fallback for data residency; embeddings on the same card</td><td>Claude &middot; vLLM, Llama 3.3 70B 4-bit on 1&times; RTX PRO 6000 (96GB)</td></tr>
+      <tr><td><b>Data</b></td><td>Pipeline records, stage history, submitter reliability, audit log &middot; precedent vectors &middot; source workbooks &middot; queue backing</td><td>PostgreSQL &middot; pgvector or Qdrant &middot; S3 or MinIO &middot; Redis</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    Model constraint applied throughout: non-Chinese models only. Local inference uses Llama&nbsp;3.x,
+    Mistral, Gemma or Command&nbsp;R+ &mdash; never Qwen or DeepSeek.
+  </p>
+  <h4>Sibling agents</h4>
+  <p>
+    The <b>ROI Agent</b> consumes this agent's Adjusted Revenue as its own revenue-forecast input, over
+    MCP. The <b>Semiconductor Design Agent</b> sits on the same bus. Both share the inference card.
+  </p>
+</section>
+
+<section id="s12">
+  <h2><span class="num">12</span> Data model</h2>
+  <h3>Ten tables, all hanging off one ID</h3>
+  <p>
+    The workbook keeps a pipeline in six parallel tabs with no shared key. Everything below hangs off a
+    single <span class="pid">opportunity</span> row, which is what turns five eyeballed relations into
+    real foreign keys.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Table</th><th>Holds</th><th>Note</th></tr></thead>
+    <tbody>
+      <tr><td><b>opportunity</b></td><td>The row identity, owner, region scope</td><td>Every other table's foreign key</td></tr>
+      <tr><td><b>state_history</b></td><td>Every Design Status and Stage transition, with actor and timestamp</td><td>The table that earns its keep first</td></tr>
+      <tr><td><b>snapshot</b></td><td>Write-once record of one run's input</td><td>Immutable, seven-year retention</td></tr>
+      <tr><td><b>field_value</b></td><td>Provenanced values from CRM, ERP, POS</td><td>Never overwrites a human edit silently</td></tr>
+      <tr><td><b>forecast</b></td><td>Quarterly units and revenue phasing</td><td>Feeds T1 and T2</td></tr>
+      <tr><td><b>proposal</b></td><td>Pending confidence proposals with factors and quotes</td><td>The review queue</td></tr>
+      <tr><td><b>confidence_event</b></td><td>Append-only log of every proposal and override</td><td>Model ID, prompt and rubric version per row</td></tr>
+      <tr><td><b>finding</b></td><td>Validation results: rule, severity, message</td><td>Phase 0 output</td></tr>
+      <tr><td><b>rubric_version</b></td><td>Published rubric and Matrix A at a point in time</td><td>L4 memory, admin-published</td></tr>
+      <tr><td><b>calibration</b></td><td>Owner and region bias from resolved outcomes</td><td>Quarterly batch, L5 memory</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull">
+    <p><span class="pid">state_history</span> converts Design Status from a cell that gets overwritten
+    into an event stream.</p>
+    <p>Which is simultaneously stall detection, time in stage, velocity, win rate, and the outcome
+    labels the calibration model needs later. None of those require new data collection &mdash; only a
+    decision to stop overwriting.</p>
+  </div>
+</section>
+
+<section id="s13">
+  <h2><span class="num">13</span> Memory</h2>
+  <h3>Six tiers, and only one of them is a vector store</h3>
+  <p>
+    Agent memory usually gets collapsed into embeddings. Most of what this agent needs to remember is
+    relational and exact: what state a project was in last month, who entered a number, what the rubric
+    said at the time. Embeddings serve one tier out of six.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Tier</th><th>Written by</th><th>Read by</th><th>Authoritative for</th></tr></thead>
+    <tbody>
+      <tr><td><b>L0</b> working</td><td>Judgment engine, in memory</td><td>Nothing else</td><td>Nothing. Never a source of truth</td></tr>
+      <tr><td><b>L1</b> episodic</td><td>Intake, once per run</td><td>Audit, reproduction, forecast vintage</td><td>What the input actually was</td></tr>
+      <tr><td><b>L2</b> entity</td><td>Stage tracker, review console</td><td>Judgment, analyses, dashboard</td><td>Current state and how it got there</td></tr>
+      <tr><td><b>L3</b> semantic</td><td>Embedding job, after each ingest</td><td>Evidence assembler only</td><td>Nothing. Supporting quotes only</td></tr>
+      <tr><td><b>L4</b> procedural</td><td>Admin, through a published version</td><td>Judgment, validation, baseline lookup</td><td>The rules in force at a point in time</td></tr>
+      <tr><td><b>L5</b> calibration</td><td>Quarterly batch job</td><td>Judgment, as a prior</td><td>Historic bias, never a current number</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    <strong>L2 is the tier that makes this an agent rather than a calculator.</strong> A model with no
+    memory re-derives the same opinion about the same project every month. With the dossier in front of
+    it, it can observe that a project has sat at EVT for three quarters while its confidence stayed at
+    0.5 &mdash; a different and more useful statement.
+  </p>
+  <p class="note">
+    Retention is a hard rule. L1 is immutable for seven years because it is the audit trail behind
+    revenue figures shown to leadership. L3 rolls off after eight quarters, because stale precedent is
+    worse than none. Deleting a person's account never deletes their decisions &mdash; it anonymises the
+    display name, since removing the actor would break the audit chain.
+  </p>
+</section>
+
+<section id="s14">
+  <h2><span class="num">14</span> Retrieval</h2>
+  <h3>Filter first, then search, and never embed a number</h3>
+  <p>
+    The evidence assembler pulls a fixed set of things for one opportunity, filtered before any
+    similarity search runs, and hands over a bundle with a token budget. <strong>The model never
+    queries the database itself.</strong> Region, product line and recency are applied as SQL
+    predicates first, so the vector search only ranks candidates that were already relevant &mdash;
+    similarity alone will happily return a Korean lighting socket as precedent for a European ADAS
+    opportunity.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Content</th><th>Chunking</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td><b>Comments field</b></td><td>One chunk per row, per run vintage</td><td>Short and self-contained; a note from 2024 should not read as current</td></tr>
+      <tr><td><b>Next action, status notes</b></td><td>One chunk, dates extracted separately</td><td>Milestone dates are parsed into fields; only the prose is embedded</td></tr>
+      <tr><td><b>Loss write-ups</b></td><td>One chunk per closed opportunity</td><td>The highest-value precedent in the system once reason codes exist</td></tr>
+      <tr><td><b>Competitor notes</b></td><td>One chunk per part, per socket</td><td>Lets J-02 cite a specific prior encounter</td></tr>
+      <tr><td><b>Numbers of any kind</b></td><td><span class="chip c-block">Never embedded</span></td><td>A number recovered from a vector search is a number nobody can audit</td></tr>
+      <tr><td><b>Customer pricing</b></td><td><span class="chip c-block">Never embedded</span></td><td>Retrieval crosses region boundaries by design. Pricing must not</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s15">
+  <h2><span class="num">15</span> Identity</h2>
+  <h3>There is no public sign-up</h3>
+  <p>
+    This is an internal sales tool holding unreleased design wins and customer pricing. Accounts are
+    provisioned by an administrator against a corporate directory, never self-registered, never shared
+    between regional owners. <strong>Region scope is enforced in the query, not in the interface</strong>
+    &mdash; hiding a region from a dropdown while the API still returns it is the failure mode worth
+    designing out on day one.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Role</th><th>Sees</th><th>May do</th><th>May not</th></tr></thead>
+    <tbody>
+      <tr><td><b>Regional sales owner</b></td><td>Own region only</td><td>Create and update opportunities, supply evidence, request a review</td><td>Approve a confidence change; close another region's record</td></tr>
+      <tr><td><b>Sales manager</b></td><td>Own region, all owners</td><td>Approve, reject or override a proposal; sign off on a close</td><td>Edit the rubric or the baseline table</td></tr>
+      <tr><td><b>Regional director</b></td><td>All regions</td><td>Everything a manager can, plus cross-region roll-ups</td><td>Edit an audit entry</td></tr>
+      <tr><td><b>Finance</b></td><td>All regions, read only</td><td>Pull the forecast feed, run the ROI cross-check</td><td>Change confidence or move a record</td></tr>
+      <tr><td><b>Admin</b></td><td>Configuration, no pipeline data by default</td><td>Provision users, set scopes, publish rubric versions</td><td>Approve a proposal</td></tr>
+      <tr><td><b>Service account</b></td><td>Scoped to one connector</td><td>Write provenanced field values from CRM, ERP or POS</td><td>Write confidence, move a record, or act as a person</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull">
+    <p>Nobody approves their own proposal.</p>
+    <p>The agent proposes, an owner supplies evidence, a manager decides. Admin sits outside that loop
+    entirely, so the person who can edit the rubric cannot also ratify the numbers it produces.</p>
+  </div>
+</section>
+
+<section id="s16">
+  <h2><span class="num">16</span> Cadence</h2>
+  <h3>What runs, and when</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Job</th><th>Trigger</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td><b>Monthly run</b></td><td>Cron, start of month</td><td>Full pipeline over a fresh snapshot, the requested cadence</td></tr>
+      <tr><td><b>Event run</b></td><td>Stage or status change</td><td>Re-scores that opportunity only, plus its concentration context</td></tr>
+      <tr><td><b>Stall sweep</b></td><td>Nightly</td><td>Flags anything sitting in one stage beyond its historic median</td></tr>
+      <tr><td><b>Milestone check</b></td><td>Nightly</td><td>Compares extracted PPAP, ES and SoP dates against today</td></tr>
+      <tr><td><b>Embedding refresh</b></td><td>After each ingest</td><td>Chunks and embeds new notes, expires anything past eight quarters</td></tr>
+      <tr><td><b>Calibration rebuild</b></td><td>Quarterly</td><td>Recomputes owner and region bias from resolved outcomes</td></tr>
+      <tr><td><b>Connector sync</b></td><td>Per connector schedule</td><td>Writes provenanced field values, never overwrites a human edit silently</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="s17">
+  <h2><span class="num">17</span> Current state</h2>
+  <h3>What is code today, and what is still a document</h3>
+  <p>
+    The POC directory holds a working vertical slice: the calculation layer, the judgment layer, the
+    guards, and two browser benches that show every step's working. Everything else in this document
+    exists as specification.
+  </p>
+<pre>opptrack_poc/
+  <b>calc_engine.py</b>        <u>built</u>   C1, C2, roll-ups, quarterly revenue
+  <b>test_calc_engine.py</b>   <u>built</u>   9 projects asserted against TrackF_1.xlsx
+  <b>judgment.py</b>           <i>v1</i>      6 factors, MOCK fallback, clamp [0,1]
+  <b>judgment_bench.py</b>     <u>v2</u>      Matrix A + 13 factors, schema, guards, no mock
+  <b>opptrack_bench.py</b>     <u>built</u>   all 10 steps, browser bench on :8776
+  <b>run_poc.py</b>            <u>built</u>   end-to-end before/after roll-up
+  data/sample_pipeline.json  9 ProjectTrack rows, 2 Funnel rows
+
+<i>not yet code:</i>
+  <s>registry/  connectors/  normalise/  validate/  analyses/  review/  api/  db/</s></pre>
+  <p>
+    <code>judgment_bench.py</code> is the rewrite that supersedes <code>judgment.py</code>. Six changes
+    separate them, and each one traces to a specific failure on the first live run: Matrix A as config
+    rather than prose, the 0.95 ceiling, whole-portfolio context so concentration can fire at all, a
+    schema on the request, no silent mock, and caps enforced in code.
+  </p>
+  <h4>Running the benches</h4>
+<pre>cd opptrack_poc
+python run_poc.py            <i># end to end, before/after roll-up</i>
+python test_calc_engine.py   <i># regression against the workbook</i>
+python judgment_bench.py --serve   <i># judgment only, :8775</i>
+python opptrack_bench.py     <i># all ten steps, :8776</i></pre>
+<p class="note">
+  A judgement call scores nine rows across thirteen factors and takes a few minutes, so the bench
+  server is threaded. <code>ANTHROPIC_API_KEY</code> is read from the environment, then from
+  <code>.env</code>, then from a local key file; the page will also accept one pasted in.
+</p>
+</section>
+
+<section id="s18">
+  <h2><span class="num">18</span> Build order</h2>
+  <h3>What each phase switches on</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Phase</th><th>Architecture switched on</th><th>Needs</th></tr></thead>
+    <tbody>
+      <tr><td><b>0</b> &middot; Read only</td><td>Intake, normalise, validate, findings. No database, no auth, no model</td><td><span class="chip c-live">Nothing</span> Runs on today's workbook</td></tr>
+      <tr><td><b>1</b> &middot; Numbers</td><td>Calc engine, roll-ups, the live analyses</td><td>The ratified stage-to-confidence table</td></tr>
+      <tr><td><b>2</b> &middot; Identity</td><td>Postgres, opportunity ID, state_history, SSO, roles, region scope</td><td>Owner and ID at intake, one backfill</td></tr>
+      <tr><td><b>3</b> &middot; Judgment</td><td>L3 and L4 memory, evidence assembler, judgment engine, review queue, audit</td><td>Reviewer role assigned, loss reason codes live</td></tr>
+      <tr><td><b>4</b> &middot; Learning</td><td>L5 calibration, POS and ERP connectors, forecast accuracy</td><td>Distributor report scheduled, two quarters of history</td></tr>
+      <tr><td><b>5</b> &middot; Outside in</td><td>Market data, EAU cross-check, white-space detection</td><td>A vehicle programme data licence</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull">
+    <p>Phase 0 needs none of this architecture.</p>
+    <p>It reads the workbook as it stands and reports what does not add up &mdash; which on the current
+    file is already a company total that will not compute, seven TBD values in numeric fields, five
+    skeleton rows carrying design wins worth zero, and a Funnel row implying a third of global
+    light-vehicle production. That is a demo built entirely from the first three boxes of the services
+    plane.</p>
+  </div>
+</section>
+
+<section id="s19">
+  <h2><span class="num">19</span> Blocked</h2>
+  <h3>What is waiting, and on what</h3>
+  <p>
+    None of these are modelling problems. Each is a field that does not exist, a key that was never
+    written, or a decision nobody has ratified yet.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Blocked</th><th>Waiting on</th><th>Unblocks</th></tr></thead>
+    <tbody>
+      <tr><td><b>Every cross-tab join</b></td><td><span class="pid">P0-1</span> Opportunity ID on every row of every tab</td><td>All automation. First in the fix order</td></tr>
+      <tr><td><b>Baseline confidence</b></td><td>Ratification of Matrix A</td><td>Turns the agent from inventing a number into justifying a deviation</td></tr>
+      <tr><td><b>J-02 competitor</b></td><td>Copying Competitor Part&#35; onto ProjectTrack</td><td>One rubric factor, immediately</td></tr>
+      <tr><td><b>J-06 calibration</b></td><td>An owner field, plus one quarter of retained history</td><td>L5 memory, submitter reliability</td></tr>
+      <tr><td><b>J-08 / J-09 slip and stall</b></td><td><span class="pid">state_history</span>: stop overwriting Design Status</td><td>Two of thirteen factors, and time-in-stage</td></tr>
+      <tr><td><b>J-11 EAU plausibility</b></td><td>Unit/Set carried onto the tracked row</td><td>The Funnel reconciliation check</td></tr>
+      <tr><td><b>Lifecycle moves</b></td><td>A human gate, plus a reason code on the way out</td><td>Step 8 of a run</td></tr>
+      <tr><td><b>Precedent retrieval</b></td><td>Resolved won/lost outcomes to retrieve from</td><td>Step 4 of a run, L3 memory</td></tr>
+      <tr><td><b>Forecast accuracy</b></td><td>Actuals</td><td>The analysis that tells you whether any of this worked</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull warn">
+    <p>Six of thirteen rubric factors can fire on today's data, and the agent says so rather than
+    guessing.</p>
+    <p>A factor that returns <em>not assessable</em> because its input does not exist is the correct
+    answer, not a failure &mdash; and it is a far better signal to a reviewer than a confident number
+    derived from nothing.</p>
+  </div>
+</section>
+
+<hr>
+<footer>
+  Opportunity Tracking Agent &middot; complete architecture &middot; rubric opptrack-matrix/2026-08-19
+  &middot; prompt opptrack-judgment/2026-08-19
+</footer>
+
+</main>
+</div>
+</div>
+</body>
+</html>

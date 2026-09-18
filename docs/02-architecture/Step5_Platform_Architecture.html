@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Opportunity Tracking Agent — Platform Architecture</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; }
+
+  :root {
+    --ground:      #EDF0EE;
+    --surface:     #F9FBFA;
+    --surface-2:   #E2E7E4;
+    --ink:         #171C1A;
+    --ink-2:       #4C5854;
+    --ink-3:       #78847F;
+    --rule:        #C7D0CC;
+    --accent:      #0E6E5B;
+    --accent-soft: #D8E9E3;
+    --warn:        #A65418;
+    --warn-soft:   #F0E1D4;
+    --crit:        #9C2A26;
+    --crit-soft:   #F1DCDA;
+
+    --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0F1412; --surface: #171D1B; --surface-2: #202826;
+      --ink: #E3E9E6; --ink-2: #9CA9A4; --ink-3: #74817C; --rule: #2B3634;
+      --accent: #45BFA1; --accent-soft: #14332B;
+      --warn: #D9904F; --warn-soft: #33230F;
+      --crit: #DE6A63; --crit-soft: #351A19;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0F1412; --surface: #171D1B; --surface-2: #202826;
+    --ink: #E3E9E6; --ink-2: #9CA9A4; --ink-3: #74817C; --rule: #2B3634;
+    --accent: #45BFA1; --accent-soft: #14332B;
+    --warn: #D9904F; --warn-soft: #33230F;
+    --crit: #DE6A63; --crit-soft: #351A19;
+  }
+
+  body {
+    background: var(--ground); color: var(--ink);
+    font-family: var(--font-sans); font-size: 16px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-direction: column; gap: 56px; }
+
+  .masthead { display: flex; flex-direction: column; gap: 20px; }
+  .stamp { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; color: var(--accent); display: flex; gap: 10px; align-items: center; }
+  .stamp::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  h1 { font-family: var(--font-mono); font-size: clamp(28px, 4.6vw, 44px); line-height: 1.1; font-weight: 600; letter-spacing: -0.02em; text-wrap: balance; margin: 0; }
+  .deck { max-width: var(--measure); font-size: 17px; color: var(--ink-2); margin: 0; }
+
+  .meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 8px; }
+  .meta div { background: var(--surface); padding: 12px 14px; }
+  .meta dt { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-3); margin: 0 0 4px; }
+  .meta dd { font-family: var(--font-mono); font-size: 13.5px; font-variant-numeric: tabular-nums; margin: 0; color: var(--ink); }
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+
+  .eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em; color: var(--ink-3); display: flex; align-items: center; gap: 12px; }
+  .eyebrow span { color: var(--accent); }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  h2.head { font-family: var(--font-mono); font-size: clamp(19px, 2.6vw, 24px); font-weight: 600; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+  h3.sub { font-family: var(--font-mono); font-size: 15px; font-weight: 600; margin: 12px 0 0; color: var(--ink); }
+
+  .lede { max-width: var(--measure); margin: 0; color: var(--ink-2); }
+  p { max-width: var(--measure); color: var(--ink-2); margin: 0; }
+  code { font-family: var(--font-mono); font-size: .88em; background: var(--surface-2); padding: 1px 5px; color: var(--ink); }
+
+  figure { margin: 6px 0 0; border: 1px solid var(--rule); background: var(--surface); }
+  .canvas { overflow-x: auto; padding: 20px 20px 8px; }
+  .canvas svg { display: block; width: 100%; min-width: 660px; height: auto; }
+  figcaption { border-top: 1px solid var(--rule); padding: 12px 20px 14px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); background: var(--surface-2); }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  pre { margin: 0; overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); padding: 18px 20px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65; color: var(--ink-2); }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  pre .c { color: var(--ink-3); }
+  pre .k { color: var(--accent); }
+  pre .d { color: var(--crit); }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; }
+  caption { text-align: left; font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-3); padding: 14px 16px 10px; }
+  th { text-align: left; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; font-weight: 600; color: var(--ink-3); padding: 8px 16px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--ink-3); white-space: nowrap; }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--rule); font-size: 13.5px; vertical-align: top; color: var(--ink-2); }
+  td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.params { font-family: var(--font-mono); font-size: 11.5px; white-space: normal; }
+
+  .dg-box  { fill: var(--surface);     stroke: var(--rule);   stroke-width: 1.5; }
+  .dg-fill { fill: var(--surface-2);   stroke: var(--rule);   stroke-width: 1.5; }
+  .dg-acc  { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.75; }
+  .dg-warn { fill: var(--warn-soft);   stroke: var(--warn);   stroke-width: 1.5; }
+  .dg-crit { fill: var(--crit-soft);   stroke: var(--crit);   stroke-width: 1.5; stroke-dasharray: 5 4; }
+
+  .dg-t  { fill: var(--ink);    font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-ts { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10.5px; }
+  .dg-tm { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10px; }
+  .dg-tc { fill: var(--crit);   font-family: var(--font-mono); font-size: 10px; }
+  .dg-ta { fill: var(--accent); font-family: var(--font-mono); font-size: 10px; }
+  .dg-tab{ fill: var(--accent); font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-tw { fill: var(--warn);   font-family: var(--font-mono); font-size: 10px; }
+  .dg-hd { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; }
+
+  .dg-e      { stroke: var(--ink-2);  stroke-width: 1.5; fill: none; }
+  .dg-e-thin { stroke: var(--ink-3);  stroke-width: 1;   fill: none; stroke-dasharray: 3 3; }
+  .dg-e-acc  { stroke: var(--accent); stroke-width: 2;   fill: none; }
+  .dg-e-crit { stroke: var(--crit);   stroke-width: 1.5; fill: none; stroke-dasharray: 6 5; }
+
+  .mk  { fill: var(--ink-2); }
+  .mkA { fill: var(--accent); }
+  .mkC { fill: var(--crit); }
+
+  .callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 16px 20px; max-width: var(--measure); }
+  .callout p { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+  .callout b { color: var(--ink); }
+
+  .foot { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); letter-spacing: .06em; border-top: 1px solid var(--rule); padding-top: 16px; }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <div class="stamp">PLATFORM ARCHITECTURE &nbsp;·&nbsp; STEP 5 &nbsp;·&nbsp; REV 01</div>
+  <h1>Opportunity Tracking Agent:<br>platform architecture</h1>
+  <p class="deck">Step 2 fixed the deployment stack and Step 3 proved the deterministic-maths-plus-judgment split. This is everything between a person signing in and a cited confidence proposal landing in an audit log: identity, schema, the five kinds of memory the agent keeps, and how evidence is retrieved without ever letting a model near a revenue figure.</p>
+  <div class="meta">
+    <div><dt>BUILDS ON</dt><dd>Step 2 · Step 3 · TrackF map</dd></div>
+    <div><dt>PLANES</dt><dd>6</dd></div>
+    <div><dt>CORE TABLES</dt><dd>10</dd></div>
+    <div><dt>MEMORY TIERS</dt><dd>6</dd></div>
+    <div><dt>DIAGRAMS</dt><dd>6</dd></div>
+  </div>
+</header>
+
+<section>
+  <div class="eyebrow"><span>01</span> SCOPE</div>
+  <h2 class="head">What this document decides</h2>
+  <p class="lede">Step 2 named the technologies. It did not say how an account gets created, what a row in the database looks like, what the agent remembers between runs, or how evidence reaches the model. Those four gaps are what stop this being buildable, and they are what follows.</p>
+  <p>Two rules run through all of it. First, the agent writes exactly one field, Confidence Level, and every currency figure is computed by plain Python that no model can reach. Second, a run is a pure function of a snapshot: the same input reproduces the same numbers, and anything the model contributed is recorded with the prompt version and model ID that produced it.</p>
+</section>
+
+<section>
+  <div class="eyebrow"><span>02</span> FIG. A &nbsp;·&nbsp; SYSTEM CONTEXT</div>
+  <h2 class="head">Six planes, one direction of travel</h2>
+  <p class="lede">Requests only ever move down. Nothing in the data plane calls back up into a service, and no service calls a model except the judgment engine.</p>
+  <figure>
+    <div class="canvas">
+      <svg viewBox="0 0 980 620" role="img" aria-label="Six-plane system context diagram">
+        <defs><marker id="mA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker></defs>
+
+        <text x="6" y="60" class="dg-hd">CLIENTS</text>
+        <rect x="120" y="30" width="272" height="60" rx="3" class="dg-box"/><text x="136" y="55" class="dg-t">Pipeline dashboard</text><text x="136" y="73" class="dg-ts">Next.js · stage board, entry forms</text>
+        <rect x="404" y="30" width="272" height="60" rx="3" class="dg-box"/><text x="420" y="55" class="dg-t">Review console</text><text x="420" y="73" class="dg-ts">approve / reject / override queue</text>
+        <rect x="688" y="30" width="272" height="60" rx="3" class="dg-box"/><text x="704" y="55" class="dg-t">Reports + exports</text><text x="704" y="73" class="dg-ts">roll-ups, finance feed, ROI compare</text>
+
+        <text x="6" y="148" class="dg-hd">IDENTITY</text>
+        <rect x="120" y="118" width="201" height="60" rx="3" class="dg-fill"/><text x="134" y="143" class="dg-t">TLS + WAF</text><text x="134" y="161" class="dg-ts">edge, rate limit</text>
+        <rect x="333" y="118" width="201" height="60" rx="3" class="dg-fill"/><text x="347" y="143" class="dg-t">SSO provider</text><text x="347" y="161" class="dg-ts">Entra ID / Okta, OIDC</text>
+        <rect x="546" y="118" width="201" height="60" rx="3" class="dg-fill"/><text x="560" y="143" class="dg-t">Session store</text><text x="560" y="161" class="dg-ts">Redis, short-lived tokens</text>
+        <rect x="759" y="118" width="201" height="60" rx="3" class="dg-acc"/><text x="773" y="143" class="dg-tab">Policy engine</text><text x="773" y="161" class="dg-ta">role + region scope</text>
+
+        <text x="6" y="236" class="dg-hd">API</text>
+        <rect x="120" y="206" width="272" height="60" rx="3" class="dg-box"/><text x="136" y="231" class="dg-t">FastAPI gateway</text><text x="136" y="249" class="dg-ts">REST, OpenAPI, request IDs</text>
+        <rect x="404" y="206" width="272" height="60" rx="3" class="dg-box"/><text x="420" y="231" class="dg-t">Workflow Manager</text><text x="420" y="249" class="dg-ts">routes to sibling agents</text>
+        <rect x="688" y="206" width="272" height="60" rx="3" class="dg-box"/><text x="704" y="231" class="dg-t">Scheduler</text><text x="704" y="249" class="dg-ts">monthly run + event triggers</text>
+
+        <text x="6" y="330" class="dg-hd">SERVICES</text>
+        <rect x="120" y="294" width="272" height="52" rx="3" class="dg-box"/><text x="136" y="316" class="dg-t">Intake + normalise</text><text x="136" y="334" class="dg-ts">xlsx / form / CRM → snapshot</text>
+        <rect x="404" y="294" width="272" height="52" rx="3" class="dg-box"/><text x="420" y="316" class="dg-t">Validation rules</text><text x="420" y="334" class="dg-ts">status vs stage, TBD, joins</text>
+        <rect x="688" y="294" width="272" height="52" rx="3" class="dg-acc"/><text x="704" y="316" class="dg-tab">Calc engine</text><text x="704" y="334" class="dg-ta">deterministic, no model</text>
+        <rect x="120" y="356" width="272" height="52" rx="3" class="dg-box"/><text x="136" y="378" class="dg-t">Analyses registry</text><text x="136" y="396" class="dg-ts">10 analyses, declare REQUIRES</text>
+        <rect x="404" y="356" width="272" height="52" rx="3" class="dg-warn"/><text x="420" y="378" class="dg-t">Judgment engine</text><text x="420" y="396" class="dg-tw">the only model caller</text>
+        <rect x="688" y="356" width="272" height="52" rx="3" class="dg-box"/><text x="704" y="378" class="dg-t">Stage tracker</text><text x="704" y="396" class="dg-ts">stalls, auto-move, alerts</text>
+
+        <text x="6" y="466" class="dg-hd">DATA</text>
+        <rect x="120" y="436" width="201" height="60" rx="3" class="dg-fill"/><text x="134" y="461" class="dg-t">PostgreSQL</text><text x="134" y="479" class="dg-ts">records, history, audit</text>
+        <rect x="333" y="436" width="201" height="60" rx="3" class="dg-fill"/><text x="347" y="461" class="dg-t">pgvector</text><text x="347" y="479" class="dg-ts">notes, precedent</text>
+        <rect x="546" y="436" width="201" height="60" rx="3" class="dg-fill"/><text x="560" y="461" class="dg-t">Redis</text><text x="560" y="479" class="dg-ts">queue, sessions, cache</text>
+        <rect x="759" y="436" width="201" height="60" rx="3" class="dg-fill"/><text x="773" y="461" class="dg-t">S3 / MinIO</text><text x="773" y="479" class="dg-ts">source workbooks, exports</text>
+
+        <text x="6" y="554" class="dg-hd">EXTERNAL</text>
+        <rect x="120" y="524" width="201" height="60" rx="3" class="dg-box"/><text x="134" y="549" class="dg-t">Hosted LLM</text><text x="134" y="567" class="dg-ts">primary path</text>
+        <rect x="333" y="524" width="201" height="60" rx="3" class="dg-box"/><text x="347" y="549" class="dg-t">vLLM fallback</text><text x="347" y="567" class="dg-ts">RTX PRO 6000, Western weights</text>
+        <rect x="546" y="524" width="201" height="60" rx="3" class="dg-box"/><text x="560" y="549" class="dg-t">Sibling agents</text><text x="560" y="567" class="dg-ts">ROI, finance forecast</text>
+        <rect x="759" y="524" width="201" height="60" rx="3" class="dg-box"/><text x="773" y="549" class="dg-t">POS / ERP feeds</text><text x="773" y="567" class="dg-ts">actuals, Phase 4</text>
+
+        <path d="M256 90 L256 114" class="dg-e" marker-end="url(#mA)"/>
+        <path d="M256 178 L256 202" class="dg-e" marker-end="url(#mA)"/>
+        <path d="M256 266 L256 290" class="dg-e" marker-end="url(#mA)"/>
+        <path d="M256 408 L256 432" class="dg-e" marker-end="url(#mA)"/>
+        <path d="M540 408 L540 432" class="dg-e" marker-end="url(#mA)"/>
+        <path d="M540 382 L560 382 L560 500 L500 500 L500 520" class="dg-e-thin" marker-end="url(#mA)"/>
+      </svg>
+    </div>
+    <figcaption><b>The judgment engine is the only box that talks to a model.</b> Everything a reviewer sees as a currency figure was produced by the calc engine, two planes away from any inference call. That separation is what makes a number defensible when someone asks where it came from.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="eyebrow"><span>03</span> FIG. B &nbsp;·&nbsp; IDENTITY AND ACCESS</div>
+  <h2 class="head">There is no public sign-up</h2>
+  <p class="lede">This is an internal sales tool holding unreleased design wins and customer pricing. Accounts are provisioned by an administrator against a corporate directory, never self-registered, and never shared between regional owners.</p>
+  <figure>
+    <div class="canvas">
+      <svg viewBox="0 0 980 330" role="img" aria-label="Account provisioning and request authorisation flow">
+        <defs><marker id="mB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+        <marker id="mBa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker></defs>
+
+        <text x="20" y="26" class="dg-hd">PROVISIONING, ONCE PER PERSON</text>
+        <rect x="20" y="38" width="168" height="58" rx="3" class="dg-box"/><text x="34" y="62" class="dg-t">Admin invites</text><text x="34" y="80" class="dg-ts">by corporate email</text>
+        <rect x="212" y="38" width="168" height="58" rx="3" class="dg-box"/><text x="226" y="62" class="dg-t">Role assigned</text><text x="226" y="80" class="dg-ts">+ region scope</text>
+        <rect x="404" y="38" width="168" height="58" rx="3" class="dg-box"/><text x="418" y="62" class="dg-t">SSO login</text><text x="418" y="80" class="dg-ts">OIDC, no local password</text>
+        <rect x="596" y="38" width="150" height="58" rx="3" class="dg-box"/><text x="610" y="62" class="dg-t">MFA</text><text x="610" y="80" class="dg-ts">enforced by IdP</text>
+        <rect x="770" y="38" width="190" height="58" rx="3" class="dg-acc"/><text x="784" y="62" class="dg-tab">Session issued</text><text x="784" y="80" class="dg-ta">short TTL, refresh in Redis</text>
+        <path d="M188 67 L208 67" class="dg-e" marker-end="url(#mB)"/>
+        <path d="M380 67 L400 67" class="dg-e" marker-end="url(#mB)"/>
+        <path d="M572 67 L592 67" class="dg-e" marker-end="url(#mB)"/>
+        <path d="M746 67 L766 67" class="dg-e" marker-end="url(#mB)"/>
+
+        <text x="20" y="146" class="dg-hd">EVERY REQUEST, EVERY TIME</text>
+        <rect x="20" y="158" width="150" height="58" rx="3" class="dg-box"/><text x="34" y="182" class="dg-t">Request</text><text x="34" y="200" class="dg-ts">bearer token</text>
+        <rect x="194" y="158" width="186" height="58" rx="3" class="dg-box"/><text x="208" y="182" class="dg-t">Role check</text><text x="208" y="200" class="dg-ts">deny by default</text>
+        <rect x="404" y="158" width="226" height="58" rx="3" class="dg-acc"/><text x="418" y="182" class="dg-tab">Region scope filter</text><text x="418" y="200" class="dg-ta">injected into every query</text>
+        <rect x="654" y="158" width="140" height="58" rx="3" class="dg-box"/><text x="668" y="182" class="dg-t">Handler</text><text x="668" y="200" class="dg-ts">service call</text>
+        <rect x="818" y="158" width="142" height="58" rx="3" class="dg-acc"/><text x="832" y="182" class="dg-tab">Audit write</text><text x="832" y="200" class="dg-ta">actor + run id</text>
+        <path d="M170 187 L190 187" class="dg-e" marker-end="url(#mB)"/>
+        <path d="M380 187 L400 187" class="dg-e" marker-end="url(#mB)"/>
+        <path d="M630 187 L650 187" class="dg-e" marker-end="url(#mB)"/>
+        <path d="M794 187 L814 187" class="dg-e-acc" marker-end="url(#mBa)"/>
+        <path d="M865 96 L865 126 L95 126 L95 154" class="dg-e-thin" marker-end="url(#mB)"/>
+
+        <rect x="20" y="248" width="300" height="58" rx="3" class="dg-fill"/><text x="34" y="272" class="dg-t">No shared logins</text><text x="34" y="290" class="dg-ts">owner calibration needs a real person per row</text>
+        <rect x="340" y="248" width="300" height="58" rx="3" class="dg-fill"/><text x="354" y="272" class="dg-t">Scope is data, not UI</text><text x="354" y="290" class="dg-ts">enforced in SQL, not by hiding buttons</text>
+        <rect x="660" y="248" width="300" height="58" rx="3" class="dg-fill"/><text x="674" y="272" class="dg-t">Service accounts separated</text><text x="674" y="290" class="dg-ts">connectors never use a human identity</text>
+      </svg>
+    </div>
+    <figcaption><b>Region scope is enforced in the query, not in the interface.</b> Hiding a region from a dropdown while the API still returns it is the failure mode worth designing out on day one, because the pipeline contains unannounced design wins.</figcaption>
+  </figure>
+
+  <div class="tablewrap">
+    <table>
+      <caption>ROLES AND WHAT EACH ONE MAY DO</caption>
+      <thead><tr><th>Role</th><th>Sees</th><th>May do</th><th>May not</th></tr></thead>
+      <tbody>
+        <tr><td>Regional sales owner</td><td>Own region only</td><td>Create and update opportunities, supply evidence, request a review</td><td>Approve a confidence change, close another region's record</td></tr>
+        <tr><td>Sales manager</td><td>Own region, all owners</td><td>Approve, reject or override a proposal, sign off on a close</td><td>Edit the rubric or the baseline table</td></tr>
+        <tr><td>Regional director</td><td>All regions</td><td>Everything a manager can, plus cross-region roll-ups</td><td>Edit an audit entry</td></tr>
+        <tr><td>Finance</td><td>All regions, read only</td><td>Pull the forecast feed, run the ROI cross-check</td><td>Change confidence or move a record</td></tr>
+        <tr><td>Admin</td><td>Configuration, no pipeline data by default</td><td>Provision users, set scopes, publish rubric versions</td><td>Approve a proposal, so no one grants themselves sign-off</td></tr>
+        <tr><td>Service account</td><td>Scoped to one connector</td><td>Write provenanced field values from CRM, ERP or POS</td><td>Write confidence, move a record, or act as a person</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout"><p><b>Nobody approves their own proposal.</b> The agent proposes, an owner supplies evidence, a manager decides. Admin sits outside that loop entirely, so the person who can edit the rubric cannot also ratify the numbers it produces.</p></div>
+</section>
+
+<section>
+  <div class="eyebrow"><span>04</span> FIG. C &nbsp;·&nbsp; DATA MODEL</div>
+  <h2 class="head">Ten tables, all hanging off one ID</h2>
+  <p class="lede">The workbook keeps a pipeline in six parallel tabs with no shared key. Everything below hangs off a single <code>opportunity</code> row, which is what turns five eyeballed relations into real foreign keys.</p>
+  <figure>
+    <div class="canvas">
+      <svg viewBox="0 0 980 620" role="img" aria-label="Entity relationship diagram of the ten core tables">
+        <defs><marker id="mC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+        <marker id="mCa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker></defs>
+
+        <rect x="20" y="26" width="210" height="96" rx="3" class="dg-box"/>
+        <text x="34" y="48" class="dg-t">snapshot</text>
+        <text x="34" y="68" class="dg-ts">id · taken_at</text><text x="34" y="84" class="dg-ts">source_uri · sha256</text><text x="34" y="100" class="dg-ts">row_count · tab</text><text x="34" y="116" class="dg-ts">write once, never edited</text>
+
+        <rect x="300" y="26" width="290" height="96" rx="3" class="dg-box"/>
+        <text x="314" y="48" class="dg-t">run</text>
+        <text x="314" y="68" class="dg-ts">id · snapshot_id · started_at</text><text x="314" y="84" class="dg-ts">mode (live | mock) · model_id</text><text x="314" y="100" class="dg-ts">prompt_version · rubric_version</text><text x="314" y="116" class="dg-ts">reproducibility key for every output</text>
+
+        <rect x="690" y="26" width="270" height="96" rx="3" class="dg-box"/>
+        <text x="704" y="48" class="dg-t">app_user</text>
+        <text x="704" y="68" class="dg-ts">id · email · display_name</text><text x="704" y="84" class="dg-ts">role · region_scope[]</text><text x="704" y="100" class="dg-ts">idp_subject · active</text><text x="704" y="116" class="dg-ts">the owner every row is attributed to</text>
+
+        <rect x="20" y="180" width="210" height="118" rx="3" class="dg-box"/>
+        <text x="34" y="202" class="dg-t">field_value</text>
+        <text x="34" y="222" class="dg-ts">opportunity_id · param_id</text><text x="34" y="238" class="dg-ts">value · unit</text><text x="34" y="254" class="dg-ts">source · trust · observed_at</text><text x="34" y="270" class="dg-ts">provenance, so a nightly</text><text x="34" y="286" class="dg-ts">sync cannot silently overwrite</text>
+
+        <rect x="300" y="180" width="290" height="200" rx="3" class="dg-acc"/>
+        <text x="314" y="202" class="dg-tab">opportunity</text>
+        <text x="314" y="222" class="dg-ta">id (P0-1) · external_ref</text><text x="314" y="238" class="dg-ta">region · customer_id · end_customer</text><text x="314" y="254" class="dg-ta">part_id · application · product_line</text><text x="314" y="270" class="dg-ta">design_status · stage · mp_date</text><text x="314" y="286" class="dg-ta">eau_kpcs · unit_per_set</text><text x="314" y="302" class="dg-ta">disty_asp · resale_asp</text><text x="314" y="318" class="dg-ta">confidence · competitor_parts[]</text><text x="314" y="334" class="dg-ta">owner_id · revenue_type</text><text x="314" y="358" class="dg-tm">current state only. history lives right.</text>
+
+        <rect x="690" y="180" width="270" height="118" rx="3" class="dg-acc"/>
+        <text x="704" y="202" class="dg-tab">state_history</text>
+        <text x="704" y="222" class="dg-ta">opportunity_id · run_id</text><text x="704" y="238" class="dg-ta">from_state → to_state</text><text x="704" y="254" class="dg-ta">from_stage → to_stage</text><text x="704" y="270" class="dg-ta">at · actor_id · loss_reason</text><text x="704" y="286" class="dg-tm">append only. stalls, velocity, outcomes.</text>
+
+        <rect x="690" y="330" width="270" height="132" rx="3" class="dg-acc"/>
+        <text x="704" y="352" class="dg-tab">confidence_event</text>
+        <text x="704" y="372" class="dg-ta">opportunity_id · run_id</text><text x="704" y="388" class="dg-ta">prior · proposed · applied</text><text x="704" y="404" class="dg-ta">factors[] (rule, delta, quote)</text><text x="704" y="420" class="dg-ta">rationale · decided_by</text><text x="704" y="436" class="dg-ta">decision (auto | approved | override)</text><text x="704" y="452" class="dg-tm">the audit log, append only</text>
+
+        <rect x="20" y="350" width="210" height="104" rx="3" class="dg-box"/>
+        <text x="34" y="372" class="dg-t">finding</text>
+        <text x="34" y="392" class="dg-ts">run_id · rule_id</text><text x="34" y="408" class="dg-ts">opportunity_id · severity</text><text x="34" y="424" class="dg-ts">message · field</text><text x="34" y="440" class="dg-ts">the Phase 0 deliverable</text>
+
+        <rect x="300" y="430" width="290" height="92" rx="3" class="dg-box"/>
+        <text x="314" y="452" class="dg-t">analysis_result</text>
+        <text x="314" y="472" class="dg-ts">run_id · analysis_id · payload</text><text x="314" y="488" class="dg-ts">status (live | partial | blocked)</text><text x="314" y="504" class="dg-ts">one row per analysis per run</text>
+
+        <rect x="690" y="500" width="270" height="92" rx="3" class="dg-box"/>
+        <text x="704" y="522" class="dg-t">review_item</text>
+        <text x="704" y="542" class="dg-ts">confidence_event_id · status</text><text x="704" y="558" class="dg-ts">assigned_to · decided_at · note</text><text x="704" y="574" class="dg-ts">the human gate</text>
+
+        <rect x="20" y="500" width="240" height="92" rx="3" class="dg-fill"/>
+        <text x="34" y="522" class="dg-t">reference tables</text>
+        <text x="34" y="542" class="dg-ts">customer · part · region</text><text x="34" y="558" class="dg-ts">loss_reason · rubric_version</text><text x="34" y="574" class="dg-ts">canonical enums live here</text>
+
+        <path d="M230 74 L296 74" class="dg-e" marker-end="url(#mC)"/>
+        <path d="M445 122 L445 176" class="dg-e" marker-end="url(#mC)"/>
+        <path d="M230 240 L296 240" class="dg-e" marker-end="url(#mC)"/><text x="240" y="232" class="dg-tm">1..N</text>
+        <path d="M590 240 L686 240" class="dg-e-acc" marker-end="url(#mCa)"/><text x="606" y="232" class="dg-ta">1..N</text>
+        <path d="M590 330 L640 330 L640 390 L686 390" class="dg-e-acc" marker-end="url(#mCa)"/><text x="606" y="322" class="dg-ta">1..N</text>
+        <path d="M300 330 L260 330 L260 386 L234 386" class="dg-e" marker-end="url(#mC)"/>
+        <path d="M445 380 L445 426" class="dg-e" marker-end="url(#mC)"/>
+        <path d="M825 122 L825 176" class="dg-e" marker-end="url(#mC)"/>
+        <path d="M825 462 L825 496" class="dg-e-acc" marker-end="url(#mCa)"/>
+      </svg>
+    </div>
+    <figcaption><b><code>state_history</code> is the table that earns its keep first.</b> It turns Design Status from a cell that gets overwritten into an event stream, which is simultaneously stall detection, time in stage, win rate, and the outcome labels the calibration model will need later. None of those need new data collection, only a decision to stop overwriting.</figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="eyebrow"><span>05</span> FIG. D &nbsp;·&nbsp; MEMORY</div>
+  <h2 class="head">Six tiers, and only one of them is a vector store</h2>
+  <p class="lede">"Agent memory" usually gets collapsed into embeddings. Most of what this agent needs to remember is relational and exact: what state a project was in last month, who entered a number, what the rubric said at the time. Embeddings serve one tier out of six.</p>
+  <figure>
+    <div class="canvas">
+      <svg viewBox="0 0 980 520" role="img" aria-label="Six memory tiers with store and retention">
+        <text x="20" y="20" class="dg-hd">TIER</text><text x="170" y="20" class="dg-hd">STORE</text><text x="352" y="20" class="dg-hd">LIFETIME</text><text x="520" y="20" class="dg-hd">WHAT IT HOLDS</text>
+
+        <rect x="20" y="30" width="140" height="64" rx="3" class="dg-fill"/><text x="34" y="58" class="dg-t">L0 working</text><text x="34" y="76" class="dg-ts">per request</text>
+        <rect x="170" y="30" width="170" height="64" rx="3" class="dg-box"/><text x="184" y="58" class="dg-ts">process memory</text><text x="184" y="76" class="dg-ts">nothing persisted</text>
+        <rect x="352" y="30" width="150" height="64" rx="3" class="dg-box"/><text x="366" y="66" class="dg-ts">one call</text>
+        <text x="520" y="56" class="dg-ts">The evidence bundle handed to the model, and its reply</text><text x="520" y="76" class="dg-ts">before validation. Discarded once the proposal is stored.</text>
+
+        <rect x="20" y="106" width="140" height="64" rx="3" class="dg-fill"/><text x="34" y="134" class="dg-t">L1 episodic</text><text x="34" y="152" class="dg-ts">per run</text>
+        <rect x="170" y="106" width="170" height="64" rx="3" class="dg-box"/><text x="184" y="134" class="dg-ts">Postgres + S3</text><text x="184" y="152" class="dg-ts">snapshot, run</text>
+        <rect x="352" y="106" width="150" height="64" rx="3" class="dg-box"/><text x="366" y="142" class="dg-ts">7 years, immutable</text>
+        <text x="520" y="132" class="dg-ts">Every ingest, with the file hash, model ID, prompt and</text><text x="520" y="152" class="dg-ts">rubric version. Lets any past number be reproduced.</text>
+
+        <rect x="20" y="182" width="140" height="64" rx="3" class="dg-acc"/><text x="34" y="210" class="dg-tab">L2 entity</text><text x="34" y="228" class="dg-ta">per opportunity</text>
+        <rect x="170" y="182" width="170" height="64" rx="3" class="dg-box"/><text x="184" y="210" class="dg-ts">Postgres</text><text x="184" y="228" class="dg-ts">state_history, events</text>
+        <rect x="352" y="182" width="150" height="64" rx="3" class="dg-box"/><text x="366" y="218" class="dg-ts">life of the socket</text>
+        <text x="520" y="208" class="dg-ts">The dossier: every state change, every confidence decision,</text><text x="520" y="228" class="dg-ts">who made it and why. This is the agent's real memory.</text>
+
+        <rect x="20" y="258" width="140" height="64" rx="3" class="dg-acc"/><text x="34" y="286" class="dg-tab">L3 semantic</text><text x="34" y="304" class="dg-ta">per organisation</text>
+        <rect x="170" y="258" width="170" height="64" rx="3" class="dg-box"/><text x="184" y="286" class="dg-ts">pgvector</text><text x="184" y="304" class="dg-ts">chunk + embedding</text>
+        <rect x="352" y="258" width="150" height="64" rx="3" class="dg-box"/><text x="366" y="294" class="dg-ts">rolling 8 quarters</text>
+        <text x="520" y="284" class="dg-ts">Comments, next actions, loss write-ups, competitor notes.</text><text x="520" y="304" class="dg-ts">Retrieved as precedent, never as fact.</text>
+
+        <rect x="20" y="334" width="140" height="64" rx="3" class="dg-warn"/><text x="34" y="362" class="dg-t">L4 procedural</text><text x="34" y="380" class="dg-tw">per version</text>
+        <rect x="170" y="334" width="170" height="64" rx="3" class="dg-box"/><text x="184" y="362" class="dg-ts">Postgres + git</text><text x="184" y="380" class="dg-ts">rubric_version</text>
+        <rect x="352" y="334" width="150" height="64" rx="3" class="dg-box"/><text x="366" y="370" class="dg-ts">versioned forever</text>
+        <text x="520" y="360" class="dg-ts">The rubric, the canonical enums, and the ratified stage to</text><text x="520" y="380" class="dg-ts">confidence table. Config a person edits, not learned weights.</text>
+
+        <rect x="20" y="410" width="140" height="64" rx="3" class="dg-acc"/><text x="34" y="438" class="dg-tab">L5 calibration</text><text x="34" y="456" class="dg-ta">per owner, region</text>
+        <rect x="170" y="410" width="170" height="64" rx="3" class="dg-box"/><text x="184" y="438" class="dg-ts">Postgres, derived</text><text x="184" y="456" class="dg-ts">rebuilt each quarter</text>
+        <rect x="352" y="410" width="150" height="64" rx="3" class="dg-box"/><text x="366" y="446" class="dg-ts">recomputed, not kept</text>
+        <text x="520" y="436" class="dg-ts">Forecast bias per owner and region, win rate per stage.</text><text x="520" y="456" class="dg-ts">Blocked until outcomes and actuals exist. Phase 4.</text>
+      </svg>
+    </div>
+    <figcaption><b>L2 is the tier that makes this an agent rather than a calculator.</b> A model with no memory re-derives the same opinion about the same project every month. With the dossier in front of it, it can say a project has sat at EVT for three quarters while its confidence stayed at 0.5, which is a different and more useful observation.</figcaption>
+  </figure>
+
+  <div class="tablewrap">
+    <table>
+      <caption>WHO WRITES EACH TIER, AND WHO MAY READ IT</caption>
+      <thead><tr><th>Tier</th><th>Written by</th><th>Read by</th><th>Authoritative for</th></tr></thead>
+      <tbody>
+        <tr><td>L0 working</td><td>Judgment engine, in memory</td><td>Nothing else</td><td>Nothing. Never a source of truth</td></tr>
+        <tr><td>L1 episodic</td><td>Intake, once per run</td><td>Audit, reproduction, forecast vintage</td><td>What the input actually was</td></tr>
+        <tr><td>L2 entity</td><td>Stage tracker, review console</td><td>Judgment, analyses, dashboard</td><td>Current state and how it got there</td></tr>
+        <tr><td>L3 semantic</td><td>Embedding job, after each ingest</td><td>Evidence assembler only</td><td>Nothing. Supporting quotes only</td></tr>
+        <tr><td>L4 procedural</td><td>Admin, through a published version</td><td>Judgment, validation, baseline lookup</td><td>The rules in force at a point in time</td></tr>
+        <tr><td>L5 calibration</td><td>Quarterly batch job</td><td>Judgment, as a prior</td><td>Historic bias, never a current number</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout"><p><b>Retention has a hard rule.</b> L1 is immutable for seven years because it is the audit trail behind revenue figures shown to leadership. L3 rolls off after eight quarters because stale precedent is worse than none. Deleting a person's account never deletes their decisions, it only anonymises the display name, since removing the actor would break the audit chain.</p></div>
+</section>
+
+<section>
+  <div class="eyebrow"><span>06</span> FIG. E &nbsp;·&nbsp; RETRIEVAL</div>
+  <h2 class="head">How evidence reaches the model</h2>
+  <p class="lede">Retrieval here is narrow by design. The assembler pulls a fixed set of things for one opportunity, filtered before any similarity search runs, and hands over a bundle with a token budget. The model never queries the database itself.</p>
+  <figure>
+    <div class="canvas">
+      <svg viewBox="0 0 980 420" role="img" aria-label="Evidence bundle assembly and the judgment boundary">
+        <defs><marker id="mE" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+        <marker id="mEa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker>
+        <marker id="mEc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker></defs>
+
+        <text x="20" y="22" class="dg-hd">SOURCES</text>
+        <rect x="20" y="32" width="230" height="46" rx="3" class="dg-box"/><text x="34" y="52" class="dg-t">Opportunity row</text><text x="34" y="68" class="dg-ts">L2 · exact, SQL</text>
+        <rect x="20" y="88" width="230" height="46" rx="3" class="dg-box"/><text x="34" y="108" class="dg-t">State history</text><text x="34" y="124" class="dg-ts">L2 · time in stage, slips</text>
+        <rect x="20" y="144" width="230" height="46" rx="3" class="dg-box"/><text x="34" y="164" class="dg-t">Prior decisions</text><text x="34" y="180" class="dg-ts">L2 · what was said last time</text>
+        <rect x="20" y="200" width="230" height="46" rx="3" class="dg-acc"/><text x="34" y="220" class="dg-tab">Notes + comments</text><text x="34" y="236" class="dg-ta">L3 · vector, top-k</text>
+        <rect x="20" y="256" width="230" height="46" rx="3" class="dg-acc"/><text x="34" y="276" class="dg-tab">Resolved precedent</text><text x="34" y="292" class="dg-ta">L3 · similar won and lost</text>
+        <rect x="20" y="312" width="230" height="46" rx="3" class="dg-warn"/><text x="34" y="332" class="dg-t">Rubric + baseline</text><text x="34" y="348" class="dg-tw">L4 · version pinned</text>
+
+        <rect x="310" y="110" width="230" height="200" rx="3" class="dg-acc"/>
+        <text x="324" y="134" class="dg-tab">Evidence assembler</text>
+        <text x="324" y="158" class="dg-ta">filter first, search second:</text>
+        <text x="324" y="178" class="dg-ta">· same region and product line</text>
+        <text x="324" y="196" class="dg-ta">· same part or socket where known</text>
+        <text x="324" y="214" class="dg-ta">· resolved within 8 quarters</text>
+        <text x="324" y="232" class="dg-ta">· top-k 6, one chunk per source</text>
+        <text x="324" y="250" class="dg-ta">· hard token budget</text>
+        <text x="324" y="274" class="dg-tm">every chunk keeps its row id so a</text>
+        <text x="324" y="290" class="dg-tm">quote can be traced back to source</text>
+
+        <rect x="600" y="110" width="160" height="90" rx="3" class="dg-warn"/><text x="614" y="140" class="dg-t">Judgment</text><text x="614" y="158" class="dg-tw">JSON schema out</text><text x="614" y="176" class="dg-tw">bounded delta</text>
+
+        <rect x="800" y="110" width="160" height="90" rx="3" class="dg-acc"/><text x="814" y="140" class="dg-tab">Proposal</text><text x="814" y="158" class="dg-ta">prior → proposed</text><text x="814" y="176" class="dg-ta">factors, each cited</text>
+
+        <rect x="600" y="248" width="360" height="86" rx="3" class="dg-crit"/>
+        <text x="614" y="274" class="dg-t">Calc engine output does not pass through here</text>
+        <text x="614" y="294" class="dg-tc">Sales Revenue and Adjusted Revenue are computed from four</text>
+        <text x="614" y="310" class="dg-tc">fields in plain Python and go straight to the roll-up.</text>
+
+        <path d="M250 55 L300 55 L300 150" class="dg-e" marker-end="url(#mE)"/>
+        <path d="M250 111 L290 111 L290 175" class="dg-e" marker-end="url(#mE)"/>
+        <path d="M250 167 L306 167" class="dg-e" marker-end="url(#mE)"/>
+        <path d="M250 223 L290 223 L290 210 L306 210" class="dg-e-acc" marker-end="url(#mEa)"/>
+        <path d="M250 279 L290 279 L290 245 L306 245" class="dg-e-acc" marker-end="url(#mEa)"/>
+        <path d="M250 335 L300 335 L300 275" class="dg-e" marker-end="url(#mE)"/>
+        <path d="M540 155 L596 155" class="dg-e" marker-end="url(#mE)"/>
+        <path d="M760 155 L796 155" class="dg-e-acc" marker-end="url(#mEa)"/>
+        <path d="M700 200 L700 244" class="dg-e-crit" marker-end="url(#mEc)"/>
+      </svg>
+    </div>
+    <figcaption><b>Filter before you search.</b> Similarity alone will happily return a Korean lighting socket as precedent for a European ADAS opportunity. Region, product line and recency are applied as SQL predicates first, so the vector search only ranks candidates that were already relevant.</figcaption>
+  </figure>
+
+  <div class="tablewrap">
+    <table>
+      <caption>WHAT GETS EMBEDDED, AND WHAT DOES NOT</caption>
+      <thead><tr><th>Content</th><th>Chunking</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Comments field</td><td>One chunk per row, per run vintage</td><td>Short and self-contained. Vintage matters, since a note from 2024 should not read as current</td></tr>
+        <tr><td>Next action and status notes</td><td>One chunk, dates extracted separately</td><td>Milestone dates are parsed into fields. Only the prose is embedded</td></tr>
+        <tr><td>Loss write-ups</td><td>One chunk per closed opportunity</td><td>The highest-value precedent in the system once reason codes exist</td></tr>
+        <tr><td>Competitor notes</td><td>One chunk per part, per socket</td><td>Lets the competitor rule cite a specific prior encounter</td></tr>
+        <tr><td class="params">Numbers of any kind</td><td>Never embedded</td><td>EAU, ASP and confidence are read from columns. A number recovered from a vector search is a number nobody can audit</td></tr>
+        <tr><td class="params">Customer pricing</td><td>Never embedded</td><td>Retrieval crosses region boundaries by design. Pricing must not</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow"><span>07</span> FIG. F &nbsp;·&nbsp; ONE RUN</div>
+  <h2 class="head">Ten steps, and the last two are not optional</h2>
+  <figure>
+    <div class="canvas">
+      <svg viewBox="0 0 980 250" role="img" aria-label="Ten-step run pipeline">
+        <defs><marker id="mF" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+        <marker id="mFa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker></defs>
+
+        <rect x="20" y="30" width="176" height="56" rx="3" class="dg-box"/><text x="32" y="54" class="dg-t">1 Snapshot</text><text x="32" y="72" class="dg-ts">hash + store source</text>
+        <rect x="211" y="30" width="176" height="56" rx="3" class="dg-box"/><text x="223" y="54" class="dg-t">2 Normalise</text><text x="223" y="72" class="dg-ts">KR → Korea, dates</text>
+        <rect x="402" y="30" width="176" height="56" rx="3" class="dg-box"/><text x="414" y="54" class="dg-t">3 Validate</text><text x="414" y="72" class="dg-ts">writes findings</text>
+        <rect x="593" y="30" width="176" height="56" rx="3" class="dg-acc"/><text x="605" y="54" class="dg-tab">4 Calculate</text><text x="605" y="72" class="dg-ta">deterministic</text>
+        <rect x="784" y="30" width="176" height="56" rx="3" class="dg-box"/><text x="796" y="54" class="dg-t">5 Analyse</text><text x="796" y="72" class="dg-ts">registry decides</text>
+
+        <rect x="20" y="146" width="176" height="56" rx="3" class="dg-box"/><text x="32" y="170" class="dg-t">6 Assemble</text><text x="32" y="188" class="dg-ts">evidence bundle</text>
+        <rect x="211" y="146" width="176" height="56" rx="3" class="dg-warn"/><text x="223" y="170" class="dg-t">7 Judge</text><text x="223" y="188" class="dg-tw">only model call</text>
+        <rect x="402" y="146" width="176" height="56" rx="3" class="dg-box"/><text x="414" y="170" class="dg-t">8 Validate reply</text><text x="414" y="188" class="dg-ts">schema, bounds, cites</text>
+        <rect x="593" y="146" width="176" height="56" rx="3" class="dg-acc"/><text x="605" y="170" class="dg-tab">9 Queue or apply</text><text x="605" y="188" class="dg-ta">per policy setting</text>
+        <rect x="784" y="146" width="176" height="56" rx="3" class="dg-acc"/><text x="796" y="170" class="dg-tab">10 Audit</text><text x="796" y="188" class="dg-ta">append only</text>
+
+        <path d="M196 58 L207 58" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M387 58 L398 58" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M578 58 L589 58" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M769 58 L780 58" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M872 86 L872 112 L108 112 L108 142" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M196 174 L207 174" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M387 174 L398 174" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M578 174 L589 174" class="dg-e" marker-end="url(#mF)"/>
+        <path d="M769 174 L780 174" class="dg-e-acc" marker-end="url(#mFa)"/>
+      </svg>
+    </div>
+    <figcaption><b>Step 8 is where a bad model run becomes noise instead of a wrong number.</b> A reply that misses its schema, moves confidence further than the cap allows, or cites nothing is rejected and retried, then falls back to no change. The run still completes, with the failure recorded.</figcaption>
+  </figure>
+
+  <h3 class="sub">Guardrails on the one model call</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Guardrail</th><th>Mechanism</th><th>On failure</th></tr></thead>
+      <tbody>
+        <tr><td>Fixed reply shape</td><td>JSON schema on the request, not an instruction in the prompt</td><td>Reject, retry once, then no change</td></tr>
+        <tr><td>Bounded movement</td><td>Delta cap per run, and confidence clamped to 0.05 to 0.95</td><td>Clip and flag for review</td></tr>
+        <tr><td>No unexplained change</td><td>Every factor carries a rule ID and a quote from the bundle</td><td>Reject the whole proposal</td></tr>
+        <tr><td>No revenue writes</td><td>The service returns confidence only. Revenue is computed after</td><td>Structurally impossible, not policed at runtime</td></tr>
+        <tr><td>Truncation and refusal</td><td>Check <code>stop_reason</code> before parsing</td><td>Raise, log loudly, fall back</td></tr>
+        <tr><td>Silent mock fallback</td><td>Mode recorded per run and shown in output</td><td>Run marked mixed, totals labelled</td></tr>
+        <tr><td>Non-determinism</td><td>Model ID, prompt version and rubric version stored per event</td><td>Two runs can be compared rather than argued about</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow"><span>08</span> JOBS AND CADENCE</div>
+  <h2 class="head">What runs, and when</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Job</th><th>Trigger</th><th>Does</th></tr></thead>
+      <tbody>
+        <tr><td>Monthly run</td><td>Cron, start of month</td><td>Full pipeline over a fresh snapshot. The cadence David asked for</td></tr>
+        <tr><td>Event run</td><td>Stage or status change on any opportunity</td><td>Re-scores that opportunity only, plus its concentration context</td></tr>
+        <tr><td>Stall sweep</td><td>Nightly</td><td>Flags anything sitting in one stage beyond its historic median</td></tr>
+        <tr><td>Milestone check</td><td>Nightly</td><td>Compares extracted PPAP, ES and SoP dates against today</td></tr>
+        <tr><td>Embedding refresh</td><td>After each ingest</td><td>Chunks and embeds new notes, expires anything past 8 quarters</td></tr>
+        <tr><td>Calibration rebuild</td><td>Quarterly</td><td>Recomputes owner and region bias from resolved outcomes</td></tr>
+        <tr><td>Connector sync</td><td>Per connector schedule</td><td>Writes provenanced field values, never overwrites a human edit silently</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow"><span>09</span> BUILD ORDER</div>
+  <h2 class="head">What each phase turns on</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Phase</th><th>Architecture switched on</th><th>Needs</th></tr></thead>
+      <tbody>
+        <tr><td>0 · Read only</td><td>Intake, normalise, validate, findings. No database, no auth, no model</td><td>Nothing. Runs on today's workbook</td></tr>
+        <tr><td>1 · Numbers</td><td>Calc engine, roll-ups, seven live analyses</td><td>The ratified stage to confidence table</td></tr>
+        <tr><td>2 · Identity</td><td>Postgres, opportunity ID, state_history, SSO, roles, region scope</td><td>Owner and ID at intake, one backfill</td></tr>
+        <tr><td>3 · Judgment</td><td>L3 and L4 memory, evidence assembler, judgment engine, review queue, audit</td><td>Reviewer role assigned, loss reason codes live</td></tr>
+        <tr><td>4 · Learning</td><td>L5 calibration, POS and ERP connectors, forecast accuracy</td><td>Distributor report scheduled, two quarters of history</td></tr>
+        <tr><td>5 · Outside in</td><td>Market data, EAU cross-check, white-space detection</td><td>A vehicle programme data licence</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout"><p><b>Phase 0 needs none of this architecture.</b> It reads the workbook as it stands and reports what does not add up, which on the current file is already a company total that will not compute, seven TBD values in numeric fields, five skeleton rows carrying design wins worth zero, and a Funnel row implying a third of global light-vehicle production. That is a demo built entirely from the first three boxes of the services plane.</p></div>
+</section>
+
+<div class="foot">AXCELAI · AGENT OS · OPPORTUNITY TRACKING AGENT / EXTENDS STEP 2 BLOCK DIAGRAM AND STEP 3 POC / COMPANION TO THE TAB AND FIELD MAP</div>
+
+</div>
+</body>
+</html>

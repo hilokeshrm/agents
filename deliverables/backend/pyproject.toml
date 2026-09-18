@@ -1,0 +1,36 @@
+[project]
+name = "opptrack-backend"
+version = "0.1.0"
+description = "Opportunity Tracking Agent platform API"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "redis>=5.0",
+    "fakeredis>=2.23",
+    "boto3>=1.34",
+    "anthropic>=0.34",
+]
+
+[project.optional-dependencies]
+# Only needed once DATABASE_URL actually points at Postgres (settings.database_url
+# defaults to SQLite, so a plain venv install works without this).
+postgres = [
+    "psycopg[binary]>=3.1",
+]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "moto[s3]>=5.0",
+    "openpyxl>=3.1",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

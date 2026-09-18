@@ -1,0 +1,13 @@
+# Repo root (this directory). deliverables/.gitignore and opptrack_poc/.gitignore
+# handle their own subtrees on top of this.
+.DS_Store
+Thumbs.db
+*.swp
+.venv/
+__pycache__/
+*.pyc
+
+# See deliverables/deploy/README.md step 7 before pushing this repo anywhere:
+# decide whether data/TrackF (1).xlsx or anything under docs/ is real
+# customer/pricing data you don't want in git history. Uncomment to exclude it:
+# data/TrackF (1).xlsx

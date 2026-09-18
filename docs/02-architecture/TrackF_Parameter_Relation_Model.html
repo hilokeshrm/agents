@@ -1,0 +1,1067 @@
+<title>TrackF Parameter Relation Model</title>
+
+<style>
+  :root {
+    --ground:      #EDF0EE;
+    --surface:     #F9FBFA;
+    --surface-2:   #E2E7E4;
+    --ink:         #171C1A;
+    --ink-2:       #4C5854;
+    --ink-3:       #78847F;
+    --rule:        #C7D0CC;
+    --accent:      #0E6E5B;
+    --accent-soft: #D8E9E3;
+    --warn:        #A65418;
+    --warn-soft:   #F0E1D4;
+    --crit:        #9C2A26;
+    --crit-soft:   #F1DCDA;
+
+    --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0F1412;
+      --surface:     #171D1B;
+      --surface-2:   #202826;
+      --ink:         #E3E9E6;
+      --ink-2:       #9CA9A4;
+      --ink-3:       #74817C;
+      --rule:        #2B3634;
+      --accent:      #45BFA1;
+      --accent-soft: #14332B;
+      --warn:        #D9904F;
+      --warn-soft:   #33230F;
+      --crit:        #DE6A63;
+      --crit-soft:   #351A19;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --ground:      #0F1412;
+    --surface:     #171D1B;
+    --surface-2:   #202826;
+    --ink:         #E3E9E6;
+    --ink-2:       #9CA9A4;
+    --ink-3:       #74817C;
+    --rule:        #2B3634;
+    --accent:      #45BFA1;
+    --accent-soft: #14332B;
+    --warn:        #D9904F;
+    --warn-soft:   #33230F;
+    --crit:        #DE6A63;
+    --crit-soft:   #351A19;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { display: flex; flex-direction: column; gap: 20px; }
+
+  .stamp {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--accent);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .stamp::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  h1 {
+    font-family: var(--font-mono);
+    font-size: clamp(28px, 4.6vw, 44px);
+    line-height: 1.1;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .deck {
+    max-width: var(--measure);
+    font-size: 17px;
+    color: var(--ink-2);
+    margin: 0;
+  }
+
+  .meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    margin-top: 8px;
+  }
+  .meta div { background: var(--surface); padding: 12px 14px; }
+  .meta dt {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--ink-3);
+    margin: 0 0 4px;
+  }
+  .meta dd {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  /* ---------- legend ---------- */
+
+  .legend {
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    padding: 20px 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px 28px;
+  }
+  .legend h2 {
+    grid-column: 1 / -1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--ink-3);
+    margin: 0;
+    font-weight: 600;
+  }
+  .key { display: flex; gap: 12px; align-items: flex-start; }
+  .key svg { flex: none; margin-top: 5px; }
+  .key p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+  .key b {
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    font-weight: 600;
+    display: block;
+  }
+
+  /* ---------- figure sections ---------- */
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .14em;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .eyebrow span { color: var(--accent); }
+  .eyebrow::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  h2.head {
+    font-family: var(--font-mono);
+    font-size: clamp(19px, 2.6vw, 24px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .lede { max-width: var(--measure); margin: 0; color: var(--ink-2); }
+  .lede code, p code, li code {
+    font-family: var(--font-mono);
+    font-size: .88em;
+    background: var(--surface-2);
+    padding: 1px 5px;
+    color: var(--ink);
+  }
+
+  figure {
+    margin: 6px 0 0;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .canvas { overflow-x: auto; padding: 20px 20px 8px; }
+  .canvas svg { display: block; width: 100%; min-width: 660px; height: auto; }
+
+  figcaption {
+    border-top: 1px solid var(--rule);
+    padding: 12px 20px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    background: var(--surface-2);
+  }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- diagram primitives ---------- */
+
+  .dg-box   { fill: var(--surface);     stroke: var(--rule);   stroke-width: 1.5; }
+  .dg-fill  { fill: var(--surface-2);   stroke: var(--rule);   stroke-width: 1.5; }
+  .dg-acc   { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.75; }
+  .dg-warn  { fill: var(--warn-soft);   stroke: var(--warn);   stroke-width: 1.5; }
+  .dg-crit  { fill: var(--crit-soft);   stroke: var(--crit);   stroke-width: 1.5; stroke-dasharray: 5 4; }
+
+  .dg-t  { fill: var(--ink);    font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-ts { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10.5px; }
+  .dg-tm { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10px; }
+  .dg-tc { fill: var(--crit);   font-family: var(--font-mono); font-size: 10px; }
+  .dg-tcb{ fill: var(--crit);   font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; }
+  .dg-ta { fill: var(--accent); font-family: var(--font-mono); font-size: 10px; }
+  .dg-tab{ fill: var(--accent); font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-tw { fill: var(--warn);   font-family: var(--font-mono); font-size: 10px; }
+  .dg-hd { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; }
+  .dg-x  { fill: var(--crit);   font-family: var(--font-mono); font-size: 15px; font-weight: 700; }
+
+  .dg-e      { stroke: var(--ink-2);  stroke-width: 1.5; fill: none; }
+  .dg-e-thin { stroke: var(--ink-3);  stroke-width: 1;   fill: none; stroke-dasharray: 3 3; }
+  .dg-e-crit { stroke: var(--crit);   stroke-width: 1.5; fill: none; stroke-dasharray: 6 5; }
+  .dg-e-acc  { stroke: var(--accent); stroke-width: 2;   fill: none; }
+  .dg-e-warn { stroke: var(--warn);   stroke-width: 1.5; fill: none; }
+  .dg-div    { stroke: var(--rule);   stroke-width: 1;   fill: none; stroke-dasharray: 2 5; }
+
+  .mk  { fill: var(--ink-2); }
+  .mkC { fill: var(--crit); }
+  .mkA { fill: var(--accent); }
+  .mkW { fill: var(--warn); }
+
+  /* ---------- data table ---------- */
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; }
+  caption {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    color: var(--ink-3);
+    padding: 14px 16px 10px;
+  }
+  th {
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: .08em;
+    font-weight: 600;
+    color: var(--ink-3);
+    padding: 8px 16px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--ink-3);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13.5px;
+    vertical-align: top;
+    color: var(--ink-2);
+  }
+  td:first-child { color: var(--ink); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.params { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-2); }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: .06em;
+    padding: 2px 7px;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  .tag-live    { background: var(--accent-soft); color: var(--accent); }
+  .tag-partial { background: var(--warn-soft);   color: var(--warn); }
+  .tag-blocked { background: var(--crit-soft);   color: var(--crit); }
+
+  /* ---------- closing ---------- */
+
+  .close {
+    border-top: 2px solid var(--ink);
+    padding-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .close ol { margin: 0; padding-left: 0; list-style: none; counter-reset: step; display: flex; flex-direction: column; gap: 12px; }
+  .close li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    gap: 14px;
+    max-width: var(--measure);
+    color: var(--ink-2);
+  }
+  .close li::before {
+    content: counter(step, decimal-leading-zero);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    padding-top: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+  .close li b { color: var(--ink); font-family: var(--font-mono); font-size: 14px; }
+
+  .foot {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--ink-3);
+    letter-spacing: .06em;
+    border-top: 1px solid var(--rule);
+    padding-top: 16px;
+  }
+
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="stamp">PARAMETER RELATION MODEL &nbsp;·&nbsp; REV 01</div>
+    <h1>TrackF: how the parameters<br>actually connect</h1>
+    <p class="deck">Seven drawings of the opportunity-tracking data model — what feeds revenue, what rolls up into what, how a design win moves through its states, which parameters the agent reads versus writes, and the five relations that are severed today.</p>
+
+    <dl class="meta">
+      <div><dt>SOURCE</dt><dd>TrackF (1).xlsx</dd></div>
+      <div><dt>TABS</dt><dd>6</dd></div>
+      <div><dt>AS OF</dt><dd>2025-03-10</dd></div>
+      <div><dt>PARAMETERS</dt><dd>28 live · 26 proposed</dd></div>
+    </dl>
+  </header>
+
+  <div class="legend">
+    <h2>ENCODING — CONSISTENT ACROSS ALL SIX FIGURES</h2>
+
+    <div class="key">
+      <svg width="30" height="12" viewBox="0 0 30 12" role="img" aria-label="Solid line"><line x1="0" y1="6" x2="30" y2="6" class="dg-e"/></svg>
+      <p><b>SOLID</b>A relation the workbook computes today.</p>
+    </div>
+
+    <div class="key">
+      <svg width="30" height="12" viewBox="0 0 30 12" role="img" aria-label="Dashed red line"><line x1="0" y1="6" x2="30" y2="6" class="dg-e-crit"/></svg>
+      <p><b>DASHED RED</b>Broken, missing, or unlinked. Nothing flows.</p>
+    </div>
+
+    <div class="key">
+      <svg width="30" height="14" viewBox="0 0 30 14" role="img" aria-label="Teal box"><rect x="1" y="1" width="28" height="12" class="dg-acc"/></svg>
+      <p><b>TEAL</b>The judgment layer, or a proposed fix.</p>
+    </div>
+
+    <div class="key">
+      <svg width="30" height="14" viewBox="0 0 30 14" role="img" aria-label="Crossed line"><line x1="0" y1="7" x2="30" y2="7" class="dg-e-crit"/><text x="15" y="12" text-anchor="middle" class="dg-x">✕</text></svg>
+      <p><b>✕</b>A relation the design intends but the data cannot carry.</p>
+    </div>
+  </div>
+
+  <!-- ============ FIG 01 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 01</span> CALCULATION CHAIN</div>
+    <h2 class="head">Only four parameters touch money</h2>
+    <p class="lede">Everything else in the workbook is a dimension, a validator, or narrative. <code>V1</code>, <code>V3</code>, <code>J1</code> and <code>T1</code> are the sole inputs to every currency figure — which is exactly why the agent may propose changes to <code>J1</code> and nothing else. Two parameters are collected on every row and consumed by nothing.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 920 500" role="img" aria-label="Calculation chain: EAU and Distributor ASP multiply into Sales Revenue, which multiplies by Confidence Level into Adjusted Revenue and then a regional roll-up that is not linked to the Sheet1 targets. A parallel quarterly track multiplies quarterly volume by the same flat ASP and terminates in broken REF aggregates. Unit per Set and Resale ASP feed nothing.">
+          <defs>
+            <marker id="f1a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="f1c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+          </defs>
+
+          <text x="896" y="24" text-anchor="end" class="dg-hd">MONEY SPINE</text>
+
+          <!-- inputs -->
+          <rect x="24" y="44" width="150" height="46" class="dg-box"/>
+          <text x="38" y="66" class="dg-t">V1 · EAU</text>
+          <text x="38" y="80" class="dg-ts">Kpcs — basis undefined</text>
+
+          <rect x="24" y="120" width="150" height="46" class="dg-box"/>
+          <text x="38" y="142" class="dg-t">V3 · Disty ASP</text>
+          <text x="38" y="156" class="dg-ts">$ per unit</text>
+
+          <rect x="254" y="82" width="160" height="46" class="dg-acc" style="fill:var(--surface);stroke:var(--rule);stroke-width:1.5"/>
+          <text x="268" y="104" class="dg-t">C1 · Sales Revenue</text>
+          <text x="268" y="118" class="dg-ts">= V1 × V3</text>
+
+          <rect x="254" y="176" width="160" height="46" class="dg-acc"/>
+          <text x="268" y="198" class="dg-tab">J1 · Confidence</text>
+          <text x="268" y="212" class="dg-ta">the only human judgment</text>
+
+          <rect x="494" y="129" width="170" height="46" class="dg-box"/>
+          <text x="508" y="151" class="dg-t">C2 · Adjusted Rev</text>
+          <text x="508" y="165" class="dg-ts">= C1 × J1</text>
+
+          <rect x="724" y="129" width="172" height="46" class="dg-box"/>
+          <text x="738" y="151" class="dg-t">Σ by Region</text>
+          <text x="738" y="165" class="dg-ts">D1 roll-up</text>
+
+          <rect x="724" y="205" width="172" height="42" class="dg-crit"/>
+          <text x="738" y="223" class="dg-tcb">G1 / G2 Targets</text>
+          <text x="738" y="237" class="dg-tc">Sheet1 — orphaned</text>
+
+          <!-- band A edges -->
+          <path d="M174,67 H214 V96 H250" class="dg-e" marker-end="url(#f1a)"/>
+          <path d="M174,143 H214 V114 H250" class="dg-e" marker-end="url(#f1a)"/>
+          <text x="180" y="60" class="dg-tm">volume</text>
+          <text x="180" y="136" class="dg-tm">price</text>
+
+          <path d="M414,105 H454 V152 H490" class="dg-e" marker-end="url(#f1a)"/>
+          <path d="M414,199 H454 V152 H490" class="dg-e-acc" marker-end="url(#f1a)"/>
+          <text x="418" y="193" class="dg-ta">0.0 – 1.0</text>
+
+          <path d="M664,152 H720" class="dg-e" marker-end="url(#f1a)"/>
+          <text x="668" y="146" class="dg-tm">Σ</text>
+
+          <path d="M810,175 V201" class="dg-e-crit" marker-end="url(#f1c)"/>
+          <text x="818" y="192" class="dg-tc">no link</text>
+
+          <!-- divider -->
+          <line x1="24" y1="252" x2="896" y2="252" class="dg-div"/>
+          <text x="896" y="274" text-anchor="end" class="dg-hd">QUARTERLY PHASING — FCST_REVENUE</text>
+
+          <!-- band B -->
+          <rect x="24" y="292" width="150" height="46" class="dg-box"/>
+          <text x="38" y="314" class="dg-t">T1 · Qtr Kpcs</text>
+          <text x="38" y="328" class="dg-ts">Q1–Q4, CY25 / CY26</text>
+
+          <rect x="254" y="292" width="160" height="46" class="dg-box"/>
+          <text x="268" y="314" class="dg-t">T2 · Qtr Revenue</text>
+          <text x="268" y="328" class="dg-ts">= T1 × V3</text>
+
+          <rect x="494" y="292" width="170" height="46" class="dg-crit"/>
+          <text x="508" y="314" class="dg-tcb">T3 · Regional Σ</text>
+          <text x="508" y="328" class="dg-tc">#REF!  EU · TW · JP</text>
+
+          <rect x="724" y="292" width="172" height="46" class="dg-crit"/>
+          <text x="738" y="314" class="dg-tcb">Company Total</text>
+          <text x="738" y="328" class="dg-tc">#REF! — does not compute</text>
+
+          <path d="M99,166 V268 H334 V288" class="dg-e" marker-end="url(#f1a)"/>
+          <text x="112" y="262" class="dg-tm">flat ASP applied to all 8 quarters — no price erosion</text>
+
+          <path d="M174,315 H250" class="dg-e" marker-end="url(#f1a)"/>
+          <path d="M414,315 H490" class="dg-e" marker-end="url(#f1a)"/>
+          <text x="452" y="308" text-anchor="middle" class="dg-tm">Σ Q1–Q4</text>
+          <path d="M664,315 H720" class="dg-e" marker-end="url(#f1a)"/>
+          <text x="692" y="308" text-anchor="middle" class="dg-tm">Σ regions</text>
+
+          <!-- divider -->
+          <line x1="24" y1="350" x2="896" y2="350" class="dg-div"/>
+          <text x="896" y="368" text-anchor="end" class="dg-hd">ORPHANED — CAPTURED EVERY ROW, CONSUMED BY NOTHING</text>
+
+          <!-- band C -->
+          <rect x="24" y="382" width="150" height="42" class="dg-box"/>
+          <text x="38" y="400" class="dg-t">V2 · Unit / Set</text>
+          <text x="38" y="414" class="dg-ts">2 … 20 chips per set</text>
+
+          <rect x="24" y="438" width="150" height="42" class="dg-box"/>
+          <text x="38" y="456" class="dg-t">V4 · Resale ASP</text>
+          <text x="38" y="470" class="dg-ts">always ≥ V3</text>
+
+          <rect x="254" y="382" width="420" height="98" class="dg-crit"/>
+          <text x="274" y="406" class="dg-tcb">NO CONSUMER</text>
+          <text x="274" y="428" class="dg-tc">V2 is correctly excluded from C1 (EAU is already chip-level).</text>
+          <text x="274" y="444" class="dg-tc">But set count (V1 ÷ V2) and attach rate are never computed.</text>
+          <text x="274" y="466" class="dg-tc">V4 − V3 is channel margin: on every row, calculated on none.</text>
+
+          <path d="M174,403 H250" class="dg-e-crit" marker-end="url(#f1c)"/>
+          <path d="M174,459 H214 V447 H250" class="dg-e-crit" marker-end="url(#f1c)"/>
+        </svg>
+      </div>
+      <figcaption><b>The agent's boundary is this picture.</b> The teal box is the only node it may write to; every solid arrow downstream is deterministic arithmetic that must stay auditable. Note the two dead ends — <code>Unit/Set</code> and <code>Resale ASP</code> are entered on all 28 rows and reach no formula.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG 02 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 02</span> DIMENSION HIERARCHY</div>
+    <h2 class="head">Two roll-up trees over the same row</h2>
+    <p class="lede">Every opportunity is indexed twice — once commercially (who buys it) and once by product (what it is). <code>Part#</code> is not a child of either: it cuts across the commercial tree as the aggregation key for supply.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 920 230" role="img" aria-label="One opportunity row feeds two chains: a commercial chain of Region to Customer to End Customer to Project Name, and a product chain of Product Line to Application. Part number aggregates many projects into one SKU. The Customer to End Customer link is many-to-many, creating correlated OEM risk.">
+          <defs>
+            <marker id="f2a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="f2w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkW"/></marker>
+          </defs>
+
+          <text x="904" y="22" text-anchor="end" class="dg-hd">TWO TREES, ONE ROW</text>
+
+          <rect x="24" y="132" width="170" height="56" class="dg-fill"/>
+          <text x="38" y="158" class="dg-t">one opportunity</text>
+          <text x="38" y="176" class="dg-ts">the grain of every tab</text>
+
+          <!-- commercial chain -->
+          <rect x="280" y="40" width="136" height="44" class="dg-box"/>
+          <text x="292" y="60" class="dg-t">D1 Region</text>
+          <text x="292" y="75" class="dg-ts">KR EU TW JP NA</text>
+
+          <rect x="442" y="40" width="136" height="44" class="dg-box"/>
+          <text x="454" y="60" class="dg-t">D2 Customer</text>
+          <text x="454" y="75" class="dg-ts">Tier-1</text>
+
+          <rect x="604" y="40" width="136" height="44" class="dg-warn"/>
+          <text x="616" y="60" class="dg-t">D3 End Cust.</text>
+          <text x="616" y="75" class="dg-ts">OEM</text>
+
+          <rect x="766" y="40" width="136" height="44" class="dg-box"/>
+          <text x="778" y="60" class="dg-t">D4 Project</text>
+          <text x="778" y="75" class="dg-ts">the socket</text>
+
+          <path d="M416,62 H438" class="dg-e" marker-end="url(#f2a)"/>
+          <path d="M578,62 H600" class="dg-e-warn" marker-end="url(#f2w)"/>
+          <path d="M740,62 H762" class="dg-e" marker-end="url(#f2a)"/>
+          <text x="427" y="34" text-anchor="middle" class="dg-tm">1:N</text>
+          <text x="589" y="34" text-anchor="middle" class="dg-tw">N:M</text>
+          <text x="751" y="34" text-anchor="middle" class="dg-tm">1:N</text>
+
+          <text x="672" y="104" text-anchor="middle" class="dg-tw">one OEM sits behind several Tier-1s — cancel a program, several rows die together</text>
+
+          <!-- product chain -->
+          <rect x="280" y="140" width="136" height="44" class="dg-box"/>
+          <text x="292" y="160" class="dg-t">D6 Product Line</text>
+          <text x="292" y="175" class="dg-ts">BU / P&amp;L axis</text>
+
+          <rect x="442" y="140" width="136" height="44" class="dg-box"/>
+          <text x="454" y="160" class="dg-t">D5 Application</text>
+          <text x="454" y="175" class="dg-ts">Head Lamp, ADAS…</text>
+
+          <path d="M416,162 H438" class="dg-e" marker-end="url(#f2a)"/>
+          <text x="427" y="134" text-anchor="middle" class="dg-tm">⊃</text>
+
+          <rect x="604" y="140" width="136" height="44" class="dg-acc"/>
+          <text x="616" y="160" class="dg-tab">D7 Part#</text>
+          <text x="616" y="175" class="dg-ta">supply key</text>
+
+          <path d="M834,84 V162 H744" class="dg-e" marker-end="url(#f2a)"/>
+          <text x="828" y="122" text-anchor="end" class="dg-tm">N : 1 — many sockets share one SKU (ID801 → TK1 + NX5)</text>
+
+          <!-- row to chains -->
+          <path d="M194,148 H240 V62 H276" class="dg-e" marker-end="url(#f2a)"/>
+          <path d="M194,172 H240 V162 H276" class="dg-e" marker-end="url(#f2a)"/>
+        </svg>
+      </div>
+      <figcaption><b>The copper link is the one to watch.</b> Hyundai/Kia sits behind six MOBIS rows; the model treats them as six independent bets. <code>Part#</code> in teal is the axis your capacity planning needs and no current report uses.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG 03 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 03</span> LIFECYCLE STATE MODEL</div>
+    <h2 class="head">Design Status drives confidence — Stage checks it</h2>
+    <p class="lede">The funnel runs left to right with a baseline <code>J1</code> at each state. <code>Stage</code> is a second, independent axis: it should sit directly beneath its status. Anything off the vertical is an internal contradiction, and that is precisely the signal the agent's <code>stage_status_mismatch</code> rule exists to catch.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 940 420" role="img" aria-label="Design Status progresses from Promotion through Evaluation, Sample, Design In and Design Win, with baseline confidence rising from 0.1 to 1.0, terminating in Mass Production at 1.0 or Design Lost at 0.0. A loss can occur at any stage and no reason is recorded. Below, the Stage axis of Concept, EVT, DVT and PVT aligns vertically with its expected status.">
+          <defs>
+            <marker id="f3a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="f3c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+          </defs>
+
+          <text x="924" y="22" text-anchor="end" class="dg-hd">L1 · DESIGN STATUS</text>
+
+          <rect x="24"  y="44" width="128" height="54" class="dg-box"/>
+          <text x="36" y="66" class="dg-t">Promotion</text>
+          <text x="36" y="86" class="dg-ta">J1 baseline 0.1</text>
+
+          <rect x="168" y="44" width="128" height="54" class="dg-box"/>
+          <text x="180" y="66" class="dg-t">Evaluation</text>
+          <text x="180" y="86" class="dg-ta">J1 baseline 0.3</text>
+
+          <rect x="312" y="44" width="128" height="54" class="dg-box"/>
+          <text x="324" y="66" class="dg-t">Sample</text>
+          <text x="324" y="86" class="dg-ta">J1 baseline 0.3</text>
+
+          <rect x="456" y="44" width="128" height="54" class="dg-box"/>
+          <text x="468" y="66" class="dg-t">Design In</text>
+          <text x="468" y="86" class="dg-ta">J1 baseline 0.8</text>
+
+          <rect x="600" y="44" width="128" height="54" class="dg-box"/>
+          <text x="612" y="66" class="dg-t">Design Win</text>
+          <text x="612" y="86" class="dg-ta">J1 baseline 1.0</text>
+
+          <path d="M152,71 H164" class="dg-e" marker-end="url(#f3a)"/>
+          <path d="M296,71 H308" class="dg-e" marker-end="url(#f3a)"/>
+          <path d="M440,71 H452" class="dg-e" marker-end="url(#f3a)"/>
+          <path d="M584,71 H596" class="dg-e" marker-end="url(#f3a)"/>
+
+          <rect x="796" y="16" width="132" height="54" class="dg-box"/>
+          <text x="808" y="38" class="dg-t">Mass Prod.</text>
+          <text x="808" y="58" class="dg-ta">J1 = 1.0</text>
+
+          <rect x="796" y="104" width="132" height="54" class="dg-crit"/>
+          <text x="808" y="126" class="dg-tcb">Design Lost</text>
+          <text x="808" y="146" class="dg-tc">J1 = 0.0</text>
+
+          <path d="M728,71 H760 V43 H792" class="dg-e" marker-end="url(#f3a)"/>
+          <text x="776" y="36" text-anchor="middle" class="dg-tm">won</text>
+
+          <!-- lost at any stage: bracket beneath the status row -->
+          <path d="M88,98 V112"  class="dg-e-crit"/>
+          <path d="M232,98 V112" class="dg-e-crit"/>
+          <path d="M376,98 V112" class="dg-e-crit"/>
+          <path d="M520,98 V112" class="dg-e-crit"/>
+          <path d="M664,98 V112" class="dg-e-crit"/>
+          <path d="M88,112 H744 V131 H792" class="dg-e-crit" marker-end="url(#f3c)"/>
+
+          <rect x="24" y="272" width="704" height="46" class="dg-crit"/>
+          <text x="38" y="291" class="dg-tc">A loss exits from any state — see the red bracket above the status row.</text>
+          <text x="38" y="307" class="dg-tc">No reason code is ever recorded (P1-1), so Design Lost teaches the model nothing.</text>
+
+          <text x="924" y="200" text-anchor="end" class="dg-hd">L2 · STAGE AXIS</text>
+
+          <!-- alignment ticks -->
+          <path d="M88,98 V214"  class="dg-e-thin"/>
+          <path d="M376,98 V214" class="dg-e-thin"/>
+          <path d="M520,98 V214" class="dg-e-thin"/>
+          <path d="M664,98 V214" class="dg-e-thin"/>
+          <path d="M232,98 L104,214" class="dg-e-thin"/>
+          <path d="M232,98 L360,214" class="dg-e-thin"/>
+
+          <rect x="24"  y="216" width="128" height="40" class="dg-fill"/>
+          <text x="36" y="241" class="dg-t">Concept</text>
+
+          <rect x="312" y="216" width="128" height="40" class="dg-fill"/>
+          <text x="324" y="241" class="dg-t">EVT</text>
+
+          <rect x="456" y="216" width="128" height="40" class="dg-fill"/>
+          <text x="468" y="241" class="dg-t">DVT</text>
+
+          <rect x="600" y="216" width="128" height="40" class="dg-fill"/>
+          <text x="612" y="241" class="dg-t">PVT</text>
+
+          <text x="756" y="228" class="dg-tm">dotted = the expected</text>
+          <text x="756" y="242" class="dg-tm">L1 / L2 pairing — an</text>
+          <text x="756" y="256" class="dg-tm">independent check on L1</text>
+
+          <rect x="24" y="326" width="704" height="34" class="dg-fill"/>
+          <text x="376" y="348" text-anchor="middle" class="dg-t">L4 tab: ProjectTrack — the only tab carrying both L2 and J1</text>
+
+          <rect x="796" y="326" width="132" height="34" class="dg-fill"/>
+          <text x="862" y="348" text-anchor="middle" class="dg-t">MP / Lost tabs</text>
+
+          <text x="24" y="392" class="dg-tc">The Funnel tab carries L1 but has neither L2 nor J1 — so on 8 of the workbook's live rows, this entire validation axis is unavailable.</text>
+        </svg>
+      </div>
+      <figcaption><b>Baselines shown here are inferred from the data, not stated anywhere in the workbook.</b> Ratifying this table is what turns the agent's job from inventing a confidence number into justifying a deviation from a known one.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG 04 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 04</span> CROSS-SHEET JOINS</div>
+    <h2 class="head">Nothing joins to anything</h2>
+    <p class="lede">The six tabs are meant to describe one pipeline at different resolutions. In practice no two tabs share a key, so every relation below is eyeballed rather than computed. This is the structural blocker — until it's closed, none of the other figures can be automated.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 900 350" role="img" aria-label="Five severed relations between workbook tabs: Funnel to FCST Revenue has no key, Funnel and ProjectTrack are disjoint datasets, ProjectTrack to Mass Production and to Design Lost are manual row moves with no trace, and the sum of ProjectTrack is unlinked to the Sheet1 targets.">
+          <defs>
+            <marker id="f4c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+          </defs>
+
+          <text x="884" y="22" text-anchor="end" class="dg-hd">ALL FIVE RELATIONS SEVERED</text>
+
+          <rect x="40"  y="40"  width="160" height="48" class="dg-box"/>
+          <text x="52" y="62" class="dg-t">Funnel</text>
+          <text x="52" y="78" class="dg-ts">8 rows · socket grain</text>
+
+          <rect x="370" y="40"  width="160" height="48" class="dg-box"/>
+          <text x="382" y="62" class="dg-t">FCST_Revenue</text>
+          <text x="382" y="78" class="dg-ts">10 rows · program grain</text>
+
+          <rect x="700" y="40"  width="160" height="48" class="dg-box"/>
+          <text x="712" y="62" class="dg-t">Sheet1 Targets</text>
+          <text x="712" y="78" class="dg-ts">G1 · G2 · G3</text>
+
+          <rect x="370" y="150" width="160" height="48" class="dg-box"/>
+          <text x="382" y="172" class="dg-t">ProjectTrack</text>
+          <text x="382" y="188" class="dg-ts">9 rows · carries J1</text>
+
+          <rect x="190" y="262" width="160" height="48" class="dg-box"/>
+          <text x="202" y="284" class="dg-t">Mass Production</text>
+          <text x="202" y="300" class="dg-ts">1 row</text>
+
+          <rect x="560" y="262" width="160" height="48" class="dg-box"/>
+          <text x="572" y="284" class="dg-t">Design Lost</text>
+          <text x="572" y="300" class="dg-ts">1 row</text>
+
+          <path d="M200,64 H366" class="dg-e-crit" marker-end="url(#f4c)"/>
+          <text x="283" y="44" text-anchor="middle" class="dg-tc">1 : N — no key</text>
+          <text x="283" y="70" text-anchor="middle" class="dg-x">✕</text>
+
+          <path d="M120,88 V174 H366" class="dg-e-crit" marker-end="url(#f4c)"/>
+          <text x="140" y="168" class="dg-tc">disjoint — zero row overlap</text>
+          <text x="250" y="180" text-anchor="middle" class="dg-x">✕</text>
+
+          <path d="M430,198 L360,258" class="dg-e-crit" marker-end="url(#f4c)"/>
+          <text x="370" y="240" text-anchor="end" class="dg-tc">won: manual move, no trace</text>
+          <text x="388" y="238" text-anchor="middle" class="dg-x">✕</text>
+
+          <path d="M470,198 L550,258" class="dg-e-crit" marker-end="url(#f4c)"/>
+          <text x="540" y="240" class="dg-tc">lost: no reason code</text>
+          <text x="518" y="238" text-anchor="middle" class="dg-x">✕</text>
+
+          <path d="M530,166 H780 V92" class="dg-e-crit" marker-end="url(#f4c)"/>
+          <text x="560" y="158" class="dg-tc">Σ C2 vs target — unlinked</text>
+          <text x="700" y="172" text-anchor="middle" class="dg-x">✕</text>
+        </svg>
+      </div>
+      <figcaption><b>All five close with one field.</b> A stable <code>Opportunity ID</code> (P0-1) written on every row of every tab turns each red edge into a real join — which is why it sits first in the fix order.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG 05 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 05</span> JUDGMENT LAYER WIRING</div>
+    <h2 class="head">Three of six rubric rules cannot fire</h2>
+    <p class="lede">Your <code>judgment.py</code> defines six rules. Four have the parameters they need. <code>named_competitor_threat</code> reads a field that exists only on the tab where confidence doesn't, and <code>submitter_calibration</code> reads two fields that don't exist at all.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 900 470" role="img" aria-label="Parameter to rubric rule wiring. Design Status, Stage, Confidence, Region, Customer and Adjusted Revenue feed four working rules. Competitor Part number cannot reach the named competitor threat rule because it lives on a different tab. Sales Owner and Actuals do not exist, so submitter calibration cannot fire. All six rules output only a proposed change to Confidence.">
+          <defs>
+            <marker id="f5a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="f5c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+          </defs>
+
+          <text x="30" y="22" class="dg-hd">PARAMETERS</text>
+          <text x="884" y="22" text-anchor="end" class="dg-hd">RUBRIC RULES</text>
+
+          <rect x="30" y="40"  width="190" height="34" class="dg-box"/><text x="42" y="62" class="dg-t">L1 Design Status</text>
+          <rect x="30" y="84"  width="190" height="34" class="dg-box"/><text x="42" y="106" class="dg-t">L2 Stage</text>
+          <rect x="30" y="128" width="190" height="34" class="dg-acc"/><text x="42" y="150" class="dg-tab">J1 Confidence</text>
+          <rect x="30" y="172" width="190" height="34" class="dg-box"/><text x="42" y="194" class="dg-t">D1 / D2 Region · Cust</text>
+          <rect x="30" y="216" width="190" height="34" class="dg-box"/><text x="42" y="238" class="dg-t">C2 Adjusted Revenue</text>
+
+          <rect x="30" y="270" width="190" height="34" class="dg-crit"/><text x="42" y="292" class="dg-tcb">R1 Competitor Part#</text>
+          <rect x="30" y="318" width="190" height="34" class="dg-crit"/><text x="42" y="340" class="dg-tcb">Sales Owner — ABSENT</text>
+          <rect x="30" y="362" width="190" height="34" class="dg-crit"/><text x="42" y="384" class="dg-tcb">Actuals — ABSENT</text>
+
+          <rect x="516" y="30"  width="344" height="34" class="dg-box"/><text x="530" y="52" class="dg-t">stage_status_mismatch</text>
+          <rect x="516" y="80"  width="344" height="34" class="dg-box"/><text x="530" y="102" class="dg-t">design_win_lock_in</text>
+          <rect x="516" y="130" width="344" height="34" class="dg-box"/><text x="530" y="152" class="dg-t">early_stage_optimism</text>
+          <rect x="516" y="180" width="344" height="34" class="dg-box"/><text x="530" y="202" class="dg-t">customer_concentration</text>
+          <rect x="516" y="270" width="344" height="34" class="dg-crit"/><text x="530" y="292" class="dg-tcb">named_competitor_threat</text>
+          <rect x="516" y="344" width="344" height="34" class="dg-crit"/><text x="530" y="366" class="dg-tcb">submitter_calibration</text>
+
+          <path d="M220,57 H336 V47 H512"  class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,101 H352 V47 H512" class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,57 H368 V97 H512"  class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,101 H384 V97 H512" class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,101 H400 V147 H512" class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,145 H416 V147 H512" class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,189 H432 V197 H512" class="dg-e" marker-end="url(#f5a)"/>
+          <path d="M220,233 H448 V197 H512" class="dg-e" marker-end="url(#f5a)"/>
+
+          <path d="M220,287 H512" class="dg-e-crit" marker-end="url(#f5c)"/>
+          <text x="366" y="292" text-anchor="middle" class="dg-x">✕</text>
+          <text x="240" y="262" class="dg-tc">R1 sits on Funnel; J1 sits on ProjectTrack</text>
+
+          <path d="M220,335 H420 V361 H512" class="dg-e-crit" marker-end="url(#f5c)"/>
+          <path d="M220,379 H440 V361 H512" class="dg-e-crit" marker-end="url(#f5c)"/>
+          <text x="420" y="352" text-anchor="middle" class="dg-x">✕</text>
+          <text x="230" y="328" class="dg-tc">no owner field · no forecast history · no shipped actuals</text>
+
+          <rect x="30" y="414" width="830" height="36" class="dg-acc"/>
+          <text x="445" y="437" text-anchor="middle" class="dg-tab">every rule outputs one thing — a proposed Δ to J1, with citation. C1 and C2 are never touched.</text>
+        </svg>
+      </div>
+      <figcaption><b>Two of the three breaks are cheap to fix.</b> Copying <code>Competitor Part#</code> onto ProjectTrack restores one rule immediately; the calibration rule needs an owner field plus one quarter of retained forecast history before it means anything.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG 06 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 06</span> AGENT I/O CONTRACT &amp; LLM BOUNDARY</div>
+    <h2 class="head">What goes in, where the LLM is allowed, what comes out</h2>
+    <p class="lede">Every parameter is read. Only four reach the arithmetic, which is plain Python with no model involvement. Everything the LLM does happens inside the dashed teal boundary — it reasons over evidence and proposes a single number. It cannot alter a computed figure.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 940 440" role="img" aria-label="Agent input output contract in four stages, with an explicit LLM boundary. All parameter groups are ingested read only. Four of them reach a deterministic Python calculation engine with no LLM involvement. Narrative, lifecycle and target parameters bypass the engine straight to the analysis layer. Eight analyses run inside the LLM boundary, of which forecast accuracy and owner calibration are blocked by absent parameters. The only writable output is a proposed change to the confidence level with rationale and citation.">
+          <defs>
+            <marker id="f6ia" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="f6ic" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+            <marker id="f6iA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker>
+          </defs>
+
+          <rect x="506" y="32" width="420" height="352" class="dg-acc" style="fill:none;stroke-dasharray:7 5"/>
+          <text x="506" y="400" class="dg-ta">LLM BOUNDARY — inside is model reasoning.</text>
+          <text x="506" y="414" class="dg-ta">Everything to the left of it is plain Python.</text>
+
+          <text x="20"  y="24" class="dg-hd">1 · INGEST — READ ONLY</text>
+          <text x="280" y="24" class="dg-hd">2 · COMPUTE — DETERMINISTIC</text>
+          <text x="520" y="24" class="dg-hd">3 · ANALYSE — LLM</text>
+          <text x="920" y="24" text-anchor="end" class="dg-hd">4 · WRITE — LLM PROPOSES</text>
+
+          <!-- ingest chips -->
+          <rect x="20" y="44"  width="190" height="30" class="dg-box"/><text x="32" y="64"  class="dg-t">D1–D7 · dimensions</text>
+          <rect x="20" y="82"  width="190" height="30" class="dg-box"/><text x="32" y="102" class="dg-t">L1–L4 · lifecycle</text>
+          <rect x="20" y="120" width="190" height="30" class="dg-box"/><text x="32" y="140" class="dg-t">V1–V4 · volume · price</text>
+          <rect x="20" y="158" width="190" height="30" class="dg-acc"/><text x="32" y="178" class="dg-tab">J1 · confidence</text>
+          <rect x="20" y="196" width="190" height="30" class="dg-box"/><text x="32" y="216" class="dg-t">R1 · competitor</text>
+          <rect x="20" y="234" width="190" height="30" class="dg-box"/><text x="32" y="254" class="dg-t">T1–T4 · quarterly</text>
+          <rect x="20" y="272" width="190" height="30" class="dg-box"/><text x="32" y="292" class="dg-t">N1–N3 · narrative</text>
+          <rect x="20" y="310" width="190" height="30" class="dg-box"/><text x="32" y="330" class="dg-t">G1–G3 · targets</text>
+
+          <!-- bus A -->
+          <path d="M210,59 H234"  class="dg-e"/>
+          <path d="M210,97 H234"  class="dg-e"/>
+          <path d="M210,135 H234" class="dg-e"/>
+          <path d="M210,173 H234" class="dg-e"/>
+          <path d="M210,211 H234" class="dg-e"/>
+          <path d="M210,249 H234" class="dg-e"/>
+          <path d="M210,287 H234" class="dg-e"/>
+          <path d="M210,325 H234" class="dg-e"/>
+          <path d="M234,59 V325" class="dg-e"/>
+
+          <!-- engine -->
+          <path d="M234,155 H276" class="dg-e" marker-end="url(#f6ia)"/>
+          <text x="238" y="149" class="dg-tm">V1 V3 J1 T1</text>
+
+          <rect x="280" y="100" width="180" height="110" class="dg-box"/>
+          <text x="294" y="124" class="dg-t">calc_engine.py</text>
+          <text x="294" y="144" class="dg-ts">C1 = V1 × V3</text>
+          <text x="294" y="160" class="dg-ts">C2 = C1 × J1</text>
+          <text x="294" y="176" class="dg-ts">T2 = T1 × V3</text>
+          <text x="294" y="198" class="dg-ta">zero LLM involvement</text>
+
+          <path d="M460,155 H488" class="dg-e" marker-end="url(#f6ia)"/>
+
+          <!-- bypass -->
+          <path d="M234,325 V400 H490 V359" class="dg-e" marker-end="url(#f6ia)"/>
+          <text x="248" y="418" class="dg-tm">dimensions, lifecycle, narrative and targets bypass the engine — they are evidence, not arithmetic</text>
+
+          <!-- bus B -->
+          <path d="M490,61 V355" class="dg-e"/>
+
+          <!-- analysis chips -->
+          <rect x="520" y="44"  width="250" height="34" class="dg-box"/><text x="532" y="66"  class="dg-t">stage mix &amp; pipeline health</text>
+          <rect x="520" y="86"  width="250" height="34" class="dg-box"/><text x="532" y="108" class="dg-t">concentration risk</text>
+          <rect x="520" y="128" width="250" height="34" class="dg-box"/><text x="532" y="150" class="dg-t">contradiction / data quality</text>
+          <rect x="520" y="170" width="250" height="34" class="dg-box"/><text x="532" y="192" class="dg-t">milestone &amp; stall detection</text>
+          <rect x="520" y="212" width="250" height="34" class="dg-box"/><text x="532" y="234" class="dg-t">competitive exposure</text>
+          <rect x="520" y="254" width="250" height="34" class="dg-box"/><text x="532" y="276" class="dg-t">coverage vs target</text>
+          <rect x="520" y="296" width="250" height="34" class="dg-crit"/><text x="532" y="318" class="dg-tcb">forecast accuracy</text>
+          <rect x="520" y="338" width="250" height="34" class="dg-crit"/><text x="532" y="360" class="dg-tcb">owner calibration</text>
+
+          <path d="M490,61 H516"  class="dg-e" marker-end="url(#f6ia)"/>
+          <path d="M490,103 H516" class="dg-e" marker-end="url(#f6ia)"/>
+          <path d="M490,145 H516" class="dg-e" marker-end="url(#f6ia)"/>
+          <path d="M490,187 H516" class="dg-e" marker-end="url(#f6ia)"/>
+          <path d="M490,229 H516" class="dg-e" marker-end="url(#f6ia)"/>
+          <path d="M490,271 H516" class="dg-e" marker-end="url(#f6ia)"/>
+          <path d="M490,313 H516" class="dg-e-crit" marker-end="url(#f6ic)"/>
+          <path d="M490,355 H516" class="dg-e-crit" marker-end="url(#f6ic)"/>
+          <text x="503" y="308" text-anchor="middle" class="dg-x">✕</text>
+          <text x="503" y="350" text-anchor="middle" class="dg-x">✕</text>
+
+          <!-- bus C -->
+          <path d="M770,61 H786"  class="dg-e"/>
+          <path d="M770,103 H786" class="dg-e"/>
+          <path d="M770,145 H786" class="dg-e"/>
+          <path d="M770,187 H786" class="dg-e"/>
+          <path d="M770,229 H786" class="dg-e"/>
+          <path d="M770,271 H786" class="dg-e"/>
+          <path d="M786,61 V271" class="dg-e"/>
+          <path d="M786,190 H802" class="dg-e-acc" marker-end="url(#f6iA)"/>
+
+          <rect x="806" y="150" width="114" height="84" class="dg-acc"/>
+          <text x="818" y="176" class="dg-tab">Δ J1</text>
+          <text x="818" y="196" class="dg-ta">+ rationale</text>
+          <text x="818" y="212" class="dg-ta">+ citation</text>
+          <text x="818" y="228" class="dg-ta">+ prior value</text>
+
+          <text x="806" y="262" class="dg-tc">no other field is</text>
+          <text x="806" y="276" class="dg-tc">writable — C1, C2</text>
+          <text x="806" y="290" class="dg-tc">and T2 are sealed</text>
+        </svg>
+      </div>
+      <figcaption><b>Read everything, compute from four, write to one.</b> Six of the eight analyses run on today's data; the two in red are blocked upstream — they need parameters that don't exist yet, not better modelling. Note what the boundary excludes: <code>C1</code>, <code>C2</code> and <code>T2</code> are computed left of the line, so no model output can change a revenue figure a reviewer sees.</figcaption>
+    </figure>
+
+    <div class="tablewrap">
+      <table>
+        <caption>ANALYSIS CATALOGUE — WHAT EACH ANALYSIS CONSUMES</caption>
+        <thead>
+          <tr>
+            <th scope="col">Analysis</th>
+            <th scope="col">Parameters consumed</th>
+            <th scope="col">What it tells you</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Stage mix &amp; pipeline health</td>
+            <td class="params">L1 · L2 · C1 · C2 · D1 · D6</td>
+            <td>How much weighted revenue sits at each funnel stage, and whether the mix is top-heavy with Concept-stage optimism.</td>
+            <td><span class="tag tag-live">LIVE</span></td>
+          </tr>
+          <tr>
+            <td>Concentration risk</td>
+            <td class="params">D1 · D2 · D3 · D7 · C2</td>
+            <td>Single-row, single-customer, single-OEM and single-SKU dependency. Hermes alone is 48% of the Korea pipeline.</td>
+            <td><span class="tag tag-live">LIVE</span></td>
+          </tr>
+          <tr>
+            <td>Contradiction / data quality</td>
+            <td class="params">L1 · L2 · L3 · L4 · V3 · V4 · J1</td>
+            <td>Status-vs-stage mismatches, rows on the wrong tab, SoP dates that disagree across sheets, <code>TBD</code> in numeric fields.</td>
+            <td><span class="tag tag-live">LIVE</span></td>
+          </tr>
+          <tr>
+            <td>Milestone &amp; stall detection</td>
+            <td class="params">N1 · N2 · N3 · L3</td>
+            <td>Extracts PPAP, ES and design-review dates from free text, then flags what is overdue or missing an action.</td>
+            <td><span class="tag tag-live">LIVE</span></td>
+          </tr>
+          <tr>
+            <td>Competitive exposure</td>
+            <td class="params">R1 · D7 · C1 · L1</td>
+            <td>Which sockets have a named rival, and how much revenue is exposed per competitor part.</td>
+            <td><span class="tag tag-partial">PARTIAL</span></td>
+          </tr>
+          <tr>
+            <td>Coverage vs target</td>
+            <td class="params">C2 · G1 · G2 · D1 · L3</td>
+            <td>Whether the bottom-up weighted pipeline actually supports the top-down commitment, by region and quarter.</td>
+            <td><span class="tag tag-partial">PARTIAL</span></td>
+          </tr>
+          <tr>
+            <td>Margin &amp; price analysis</td>
+            <td class="params">V3 · V4 · (+ P1-6 cost)</td>
+            <td>Channel margin per row today; gross margin and profit-ranked pipeline once standard cost is added.</td>
+            <td><span class="tag tag-partial">PARTIAL</span></td>
+          </tr>
+          <tr>
+            <td>Silicon demand aggregation</td>
+            <td class="params">D7 · V1 · V2 · T1</td>
+            <td>Total unit demand per part across all sockets, plus vehicle-set count and attach rate — the input to capacity planning.</td>
+            <td><span class="tag tag-live">LIVE</span></td>
+          </tr>
+          <tr>
+            <td>Forecast accuracy</td>
+            <td class="params">T1 · T2 · (+ P1-2 actuals, P1-3 vintage)</td>
+            <td>Bias and error per region, per owner, per vintage. The single highest-leverage output this agent could produce.</td>
+            <td><span class="tag tag-blocked">BLOCKED</span></td>
+          </tr>
+          <tr>
+            <td>Owner calibration</td>
+            <td class="params">J1 · L4 outcome · (+ P0-2 owner, P0-8 history)</td>
+            <td>Whether a given submitter's confidence numbers historically ran optimistic or conservative, and by how much.</td>
+            <td><span class="tag tag-blocked">BLOCKED</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="lede"><b>PARTIAL</b> means the analysis runs but on incomplete inputs — <code>R1</code> is empty on the tab that carries confidence, <code>G1</code>/<code>G2</code> have no join to the pipeline, and margin is missing its cost side. <b>BLOCKED</b> means a required parameter does not exist at all.</p>
+  </section>
+
+  <!-- ============ FIG 07 ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. 07</span> REMEDIATION ORDER</div>
+    <h2 class="head">Five changes, in dependency order</h2>
+    <p class="lede">These are sequential, not parallel — each one is what makes the next one meaningful. Adding actuals before there's a stable ID gives you numbers you can't attribute to anything.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 920 205" role="img" aria-label="Five sequential fixes: Opportunity ID closes all five broken joins, EAU Basis makes every currency figure decidable, the Status to Confidence rubric gives judgment a baseline, Owner and timestamps revive three dead rules, and Actuals enable accuracy measurement.">
+          <defs>
+            <marker id="f6a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker>
+          </defs>
+
+          <rect x="20"  y="40" width="146" height="72" class="dg-acc"/>
+          <text x="32" y="62" class="dg-ta">01</text>
+          <text x="32" y="82" class="dg-tab">P0-1</text>
+          <text x="32" y="100" class="dg-ta">Opportunity ID</text>
+          <text x="93" y="136" text-anchor="middle" class="dg-tm">closes all five</text>
+          <text x="93" y="150" text-anchor="middle" class="dg-tm">broken joins</text>
+
+          <rect x="196" y="40" width="146" height="72" class="dg-acc"/>
+          <text x="208" y="62" class="dg-ta">02</text>
+          <text x="208" y="82" class="dg-tab">L1 → J1</text>
+          <text x="208" y="100" class="dg-ta">baseline rubric</text>
+          <text x="269" y="136" text-anchor="middle" class="dg-tm">definition only —</text>
+          <text x="269" y="150" text-anchor="middle" class="dg-tm">no new data at all</text>
+
+          <rect x="372" y="40" width="146" height="72" class="dg-acc"/>
+          <text x="384" y="62" class="dg-ta">03</text>
+          <text x="384" y="82" class="dg-tab">P0-2/3/4</text>
+          <text x="384" y="100" class="dg-ta">owner · updated · dates</text>
+          <text x="445" y="136" text-anchor="middle" class="dg-tm">revives 3 dead</text>
+          <text x="445" y="150" text-anchor="middle" class="dg-tm">rubric rules</text>
+
+          <rect x="548" y="40" width="146" height="72" class="dg-acc"/>
+          <text x="560" y="62" class="dg-ta">04</text>
+          <text x="560" y="82" class="dg-tab">P1-1 · P0-8</text>
+          <text x="560" y="100" class="dg-ta">loss reason · audit</text>
+          <text x="621" y="136" text-anchor="middle" class="dg-tm">already mandated in</text>
+          <text x="621" y="150" text-anchor="middle" class="dg-tm">your terms doc</text>
+
+          <rect x="724" y="40" width="146" height="72" class="dg-acc"/>
+          <text x="736" y="62" class="dg-ta">05</text>
+          <text x="736" y="82" class="dg-tab">P1-2 · P1-3</text>
+          <text x="736" y="100" class="dg-ta">actuals · snapshots</text>
+          <text x="797" y="136" text-anchor="middle" class="dg-tm">enables accuracy</text>
+          <text x="797" y="150" text-anchor="middle" class="dg-tm">+ calibration</text>
+
+          <path d="M166,76 H192" class="dg-e-acc" marker-end="url(#f6a)"/>
+          <path d="M342,76 H368" class="dg-e-acc" marker-end="url(#f6a)"/>
+          <path d="M518,76 H544" class="dg-e-acc" marker-end="url(#f6a)"/>
+          <path d="M694,76 H720" class="dg-e-acc" marker-end="url(#f6a)"/>
+
+          <text x="20" y="188" class="dg-tm">Steps 01–03 are schema and definition work — no new data collection. Steps 04–05 change what the sales team is asked to enter.</text>
+        </svg>
+      </div>
+      <figcaption><b>Only the last two steps ask anything of the field teams.</b> The first three are decisions about the schema and can be made without touching a single row of existing data.</figcaption>
+    </figure>
+  </section>
+
+  <div class="close">
+    <h2 class="head">Reading the seven together</h2>
+    <ol>
+      <li><b>The arithmetic is small and safe.</b> Fig. 01 shows four inputs and two formulas. That's the entire money model — easy to keep auditable, and the reason the agent's write access can be limited to a single field.</li>
+      <li><b>The judgment surface is a single number.</b> <code>J1</code> multiplies revenue and nothing else. Fig. 05 shows six rules all converging on it, and Fig. 06 shows it is the only thing the agent may write.</li>
+      <li><b>Seven of ten analyses already run.</b> The catalogue under Fig. 06 separates what today's parameters support from what is genuinely blocked — the blocked ones need fields, not smarter models.</li>
+      <li><b>The failures are structural, not analytical.</b> Fig. 04 is the real blocker: no keys, no history, no outcomes. Better modelling on top of unjoined tabs buys nothing.</li>
+      <li><b>Two parameters are collected and discarded.</b> <code>Unit/Set</code> and <code>Resale ASP</code> sit on every row and feed no formula. Both are free analysis — attach rate and channel margin — sitting unused in data you already collect.</li>
+    </ol>
+  </div>
+
+  <p class="foot">DERIVED FROM TrackF (1).xlsx — FUNNEL · FCST_REVENUE · PROJECTTRACK · MASS PRODUCTION · DESIGN LOST · SHEET1 &nbsp;/&nbsp; CROSS-CHECKED AGAINST calc_engine.py AND judgment.py</p>
+
+</div>

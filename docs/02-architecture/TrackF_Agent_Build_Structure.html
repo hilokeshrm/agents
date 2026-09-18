@@ -1,0 +1,837 @@
+<title>Opportunity Tracking Agent — Build Structure</title>
+
+<style>
+  :root {
+    --ground:      #EDF0EE;
+    --surface:     #F9FBFA;
+    --surface-2:   #E2E7E4;
+    --ink:         #171C1A;
+    --ink-2:       #4C5854;
+    --ink-3:       #78847F;
+    --rule:        #C7D0CC;
+    --accent:      #0E6E5B;
+    --accent-soft: #D8E9E3;
+    --warn:        #A65418;
+    --warn-soft:   #F0E1D4;
+    --crit:        #9C2A26;
+    --crit-soft:   #F1DCDA;
+
+    --font-mono: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-sans: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0F1412; --surface: #171D1B; --surface-2: #202826;
+      --ink: #E3E9E6; --ink-2: #9CA9A4; --ink-3: #74817C; --rule: #2B3634;
+      --accent: #45BFA1; --accent-soft: #14332B;
+      --warn: #D9904F; --warn-soft: #33230F;
+      --crit: #DE6A63; --crit-soft: #351A19;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0F1412; --surface: #171D1B; --surface-2: #202826;
+    --ink: #E3E9E6; --ink-2: #9CA9A4; --ink-3: #74817C; --rule: #2B3634;
+    --accent: #45BFA1; --accent-soft: #14332B;
+    --warn: #D9904F; --warn-soft: #33230F;
+    --crit: #DE6A63; --crit-soft: #351A19;
+  }
+
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 56px 24px 96px; display: flex; flex-direction: column; gap: 56px; }
+
+  .masthead { display: flex; flex-direction: column; gap: 20px; }
+  .stamp {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
+    color: var(--accent); display: flex; gap: 10px; align-items: center;
+  }
+  .stamp::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  h1 {
+    font-family: var(--font-mono);
+    font-size: clamp(28px, 4.6vw, 44px);
+    line-height: 1.1; font-weight: 600; letter-spacing: -0.02em;
+    text-wrap: balance; margin: 0;
+  }
+  .deck { max-width: var(--measure); font-size: 17px; color: var(--ink-2); margin: 0; }
+
+  .meta {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 8px;
+  }
+  .meta div { background: var(--surface); padding: 12px 14px; }
+  .meta dt { font-family: var(--font-mono); font-size: 10px; letter-spacing: .12em; color: var(--ink-3); margin: 0 0 4px; }
+  .meta dd { font-family: var(--font-mono); font-size: 13.5px; font-variant-numeric: tabular-nums; margin: 0; color: var(--ink); }
+
+  section { display: flex; flex-direction: column; gap: 16px; }
+
+  .eyebrow {
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .14em;
+    color: var(--ink-3); display: flex; align-items: center; gap: 12px;
+  }
+  .eyebrow span { color: var(--accent); }
+  .eyebrow::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+  h2.head {
+    font-family: var(--font-mono); font-size: clamp(19px, 2.6vw, 24px);
+    font-weight: 600; letter-spacing: -0.01em; margin: 0; text-wrap: balance;
+  }
+  h3.sub {
+    font-family: var(--font-mono); font-size: 15px; font-weight: 600;
+    margin: 12px 0 0; color: var(--ink);
+  }
+
+  .lede { max-width: var(--measure); margin: 0; color: var(--ink-2); }
+  code { font-family: var(--font-mono); font-size: .88em; background: var(--surface-2); padding: 1px 5px; color: var(--ink); }
+
+  figure { margin: 6px 0 0; border: 1px solid var(--rule); background: var(--surface); }
+  .canvas { overflow-x: auto; padding: 20px 20px 8px; }
+  .canvas svg { display: block; width: 100%; min-width: 660px; height: auto; }
+  figcaption {
+    border-top: 1px solid var(--rule); padding: 12px 20px 14px;
+    font-size: 13.5px; line-height: 1.5; color: var(--ink-2); background: var(--surface-2);
+  }
+  figcaption b { color: var(--ink); font-weight: 600; }
+
+  pre {
+    margin: 0; overflow-x: auto; border: 1px solid var(--rule);
+    background: var(--surface); padding: 18px 20px;
+    font-family: var(--font-mono); font-size: 12.5px; line-height: 1.65; color: var(--ink-2);
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+  pre .c { color: var(--ink-3); }
+  pre .k { color: var(--accent); }
+  pre .d { color: var(--crit); }
+
+  .tablewrap { overflow-x: auto; border: 1px solid var(--rule); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; }
+  caption {
+    text-align: left; font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: .12em; color: var(--ink-3); padding: 14px 16px 10px;
+  }
+  th {
+    text-align: left; font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: .08em; font-weight: 600; color: var(--ink-3); padding: 8px 16px;
+    border-top: 1px solid var(--rule); border-bottom: 1px solid var(--ink-3); white-space: nowrap;
+  }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--rule); font-size: 13.5px; vertical-align: top; color: var(--ink-2); }
+  td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.params { font-family: var(--font-mono); font-size: 11.5px; }
+
+  .dg-box  { fill: var(--surface);     stroke: var(--rule);   stroke-width: 1.5; }
+  .dg-fill { fill: var(--surface-2);   stroke: var(--rule);   stroke-width: 1.5; }
+  .dg-acc  { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.75; }
+  .dg-warn { fill: var(--warn-soft);   stroke: var(--warn);   stroke-width: 1.5; }
+  .dg-crit { fill: var(--crit-soft);   stroke: var(--crit);   stroke-width: 1.5; stroke-dasharray: 5 4; }
+
+  .dg-t  { fill: var(--ink);    font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-ts { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10.5px; }
+  .dg-tm { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10px; }
+  .dg-tc { fill: var(--crit);   font-family: var(--font-mono); font-size: 10px; }
+  .dg-ta { fill: var(--accent); font-family: var(--font-mono); font-size: 10px; }
+  .dg-tab{ fill: var(--accent); font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-tw { fill: var(--warn);   font-family: var(--font-mono); font-size: 10px; }
+  .dg-twb{ fill: var(--warn);   font-family: var(--font-mono); font-size: 12.5px; font-weight: 600; }
+  .dg-hd { fill: var(--ink-3);  font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; }
+
+  .dg-e      { stroke: var(--ink-2);  stroke-width: 1.5; fill: none; }
+  .dg-e-thin { stroke: var(--ink-3);  stroke-width: 1;   fill: none; stroke-dasharray: 3 3; }
+  .dg-e-acc  { stroke: var(--accent); stroke-width: 2;   fill: none; }
+  .dg-e-warn { stroke: var(--warn);   stroke-width: 1.75; fill: none; }
+  .dg-e-crit { stroke: var(--crit);   stroke-width: 1.5; fill: none; stroke-dasharray: 6 5; }
+
+  .mk  { fill: var(--ink-2); }
+  .mkA { fill: var(--accent); }
+  .mkW { fill: var(--warn); }
+  .mkC { fill: var(--crit); }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    padding: 16px 20px;
+    max-width: var(--measure);
+  }
+  .callout p { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+  .callout b { color: var(--ink); }
+
+  .foot {
+    font-family: var(--font-mono); font-size: 11px; color: var(--ink-3);
+    letter-spacing: .06em; border-top: 1px solid var(--rule); padding-top: 16px;
+  }
+  a { color: var(--accent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="stamp">BUILD STRUCTURE &nbsp;·&nbsp; COMPANION TO THE PARAMETER RELATION MODEL</div>
+    <h1>Opportunity Tracking Agent:<br>how to build it</h1>
+    <p class="deck">Your Step 2 diagram already fixes the deployment stack and Step 3 proves the deterministic-math-plus-judgment split. This is the layer in between: how the parameter model becomes code, which parameters can be fetched automatically and which cannot, and what order to build it in.</p>
+
+    <dl class="meta">
+      <div><dt>BUILDS ON</dt><dd>Step 2 stack · Step 3 POC</dd></div>
+      <div><dt>LAYERS</dt><dd>7</dd></div>
+      <div><dt>CORE IDEA</dt><dd>parameter registry</dd></div>
+      <div><dt>PHASES</dt><dd>6</dd></div>
+    </dl>
+  </header>
+
+  <div class="callout">
+    <p><b>One correction carried over.</b> Your terms doc defines EAU as annual usage already in chip units, which means <code>Unit/Set</code> is correctly excluded from the revenue formula — it is an attach rate, not a missing multiplier. I had flagged that as an open ambiguity; it isn't one. What remains is a <em>validation</em> problem: the Funnel tab holds rows that don't reconcile with that definition (IP901 at 130,790 Kpcs ÷ 4 per set implies 32.7M vehicle-sets a year). That moves it out of the schema work and into the rule engine at Layer 2.</p>
+  </div>
+
+  <!-- ============ FIG A ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. A</span> LAYER STRUCTURE</div>
+    <h2 class="head">Seven layers, one registry running through all of them</h2>
+    <p class="lede">The structural decision that makes everything else fall out: a <b>parameter registry</b> is the single source of truth, and every layer <em>declares</em> which parameter IDs it needs rather than assuming they exist. Add a parameter and the modules that declared a dependency on it activate on their own — no hunting through code for what to switch on.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 920 470" role="img" aria-label="Seven layers stacked vertically, each fed by a parameter registry spine on the left. Layers zero through four are Python, layer five is the LLM, layer six is a human gate. Intake, normalise, validate, compute, analyse, judge, review and persist.">
+          <defs>
+            <marker id="fAa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker>
+          </defs>
+
+          <rect x="24" y="52" width="150" height="382" class="dg-acc"/>
+          <text x="40" y="80" class="dg-tab">PARAMETER</text>
+          <text x="40" y="98" class="dg-tab">REGISTRY</text>
+          <text x="40" y="126" class="dg-ta">D1–D7 · L1–L4</text>
+          <text x="40" y="142" class="dg-ta">V1–V5 · C1–C2</text>
+          <text x="40" y="158" class="dg-ta">J1 · R1–R2</text>
+          <text x="40" y="174" class="dg-ta">T1–T4 · N1–N3</text>
+          <text x="40" y="190" class="dg-ta">G1–G3</text>
+          <text x="40" y="222" class="dg-ta">each entry:</text>
+          <text x="40" y="238" class="dg-ta">id · type · enum</text>
+          <text x="40" y="254" class="dg-ta">required? · unit</text>
+          <text x="40" y="270" class="dg-ta">source tab</text>
+          <text x="40" y="302" class="dg-ta">every layer</text>
+          <text x="40" y="318" class="dg-ta">declares what</text>
+          <text x="40" y="334" class="dg-ta">it needs — the</text>
+          <text x="40" y="350" class="dg-ta">registry answers</text>
+          <text x="40" y="366" class="dg-ta">whether it can</text>
+          <text x="40" y="382" class="dg-ta">run yet</text>
+
+          <rect x="238" y="52"  width="530" height="48" class="dg-box"/>
+          <text x="254" y="72" class="dg-t">0 · INTAKE</text>
+          <text x="254" y="90" class="dg-ts">xlsx reader → immutable snapshot. Later: dashboard, API.</text>
+
+          <rect x="238" y="108" width="530" height="48" class="dg-box"/>
+          <text x="254" y="128" class="dg-t">1 · NORMALISE</text>
+          <text x="254" y="146" class="dg-ts">enum canon (KR≡Korea, D-IN≡Design In) · Dec'24 → date · TBD → null</text>
+
+          <rect x="238" y="164" width="530" height="48" class="dg-box"/>
+          <text x="254" y="184" class="dg-t">2 · VALIDATE</text>
+          <text x="254" y="202" class="dg-ts">rules V-a … V-i → Findings. Blocking vs advisory.</text>
+
+          <rect x="238" y="220" width="530" height="48" class="dg-box"/>
+          <text x="254" y="240" class="dg-t">3 · COMPUTE</text>
+          <text x="254" y="258" class="dg-ts">calc_engine — C1, C2, T2, roll-ups, margin. Pure functions.</text>
+
+          <rect x="238" y="276" width="530" height="48" class="dg-box"/>
+          <text x="254" y="296" class="dg-t">4 · ANALYSE</text>
+          <text x="254" y="314" class="dg-ts">analysis registry — each declares REQUIRES, skips if unmet</text>
+
+          <rect x="238" y="332" width="530" height="48" class="dg-acc"/>
+          <text x="254" y="352" class="dg-tab">5 · JUDGE</text>
+          <text x="254" y="370" class="dg-ta">evidence bundle → LLM → bounded, cited ΔJ1 proposal</text>
+
+          <rect x="238" y="388" width="530" height="46" class="dg-warn"/>
+          <text x="254" y="408" class="dg-twb">6 · REVIEW + PERSIST</text>
+          <text x="254" y="426" class="dg-tw">human approves or overrides · audit row written · recompute</text>
+
+          <path d="M174,76  H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+          <path d="M174,132 H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+          <path d="M174,188 H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+          <path d="M174,244 H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+          <path d="M174,300 H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+          <path d="M174,356 H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+          <path d="M174,411 H234" class="dg-e-acc" marker-end="url(#fAa)"/>
+
+          <text x="788" y="78"  class="dg-tm">Python</text>
+          <text x="788" y="134" class="dg-tm">Python</text>
+          <text x="788" y="190" class="dg-tm">Python</text>
+          <text x="788" y="246" class="dg-tm">Python</text>
+          <text x="788" y="302" class="dg-tm">Python</text>
+          <text x="788" y="358" class="dg-ta">LLM</text>
+          <text x="788" y="413" class="dg-tw">HUMAN</text>
+
+          <text x="788" y="94"  class="dg-tm">no logic</text>
+          <text x="788" y="150" class="dg-tm">pure</text>
+          <text x="788" y="206" class="dg-tm">pure</text>
+          <text x="788" y="262" class="dg-tm">pure · tested</text>
+          <text x="788" y="318" class="dg-tm">pure</text>
+          <text x="788" y="374" class="dg-ta">bounded</text>
+          <text x="788" y="429" class="dg-tw">gate</text>
+
+          <text x="24" y="456" class="dg-tm">Layers 1–4 are pure functions: same input, same output, no I/O, no network. That is what makes the numbers reproducible in an audit.</text>
+        </svg>
+      </div>
+      <figcaption><b>Only two layers are non-deterministic, and neither can write a number.</b> Layer 5 proposes; Layer 6 is a person deciding. Everything a reviewer sees as a figure was produced by Layers 3 and 4, which have no model in them at all.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG B ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. B</span> RUN PIPELINE</div>
+    <h2 class="head">What happens on one ingest</h2>
+    <p class="lede">A run is a pure function of a snapshot. It never mutates the source, never writes confidence directly, and always terminates in a queue a person has to act on. Re-running the same snapshot reproduces the same numbers and the same proposals.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 940 340" role="img" aria-label="An ingest run flows from source workbook to immutable snapshot, normalise, validate, and compute in the first row. Validation findings branch off to a data quality report and blocking findings stop the row. The second row continues with analyse, judge, a proposal queue, a human review gate, and finally persist and recompute. Only the human gate can write confidence.">
+          <defs>
+            <marker id="fBa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="fBc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+            <marker id="fBw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkW"/></marker>
+          </defs>
+
+          <text x="920" y="22" text-anchor="end" class="dg-hd">ONE RUN = ONE SNAPSHOT</text>
+
+          <rect x="20"  y="40" width="150" height="46" class="dg-fill"/>
+          <text x="32" y="60" class="dg-t">source .xlsx</text>
+          <text x="32" y="76" class="dg-ts">never mutated</text>
+
+          <rect x="204" y="40" width="150" height="46" class="dg-box"/>
+          <text x="216" y="60" class="dg-t">snapshot</text>
+          <text x="216" y="76" class="dg-ts">immutable · P1-3</text>
+
+          <rect x="388" y="40" width="150" height="46" class="dg-box"/>
+          <text x="400" y="60" class="dg-t">normalise</text>
+          <text x="400" y="76" class="dg-ts">enums · dates · nulls</text>
+
+          <rect x="572" y="40" width="150" height="46" class="dg-box"/>
+          <text x="584" y="60" class="dg-t">validate</text>
+          <text x="584" y="76" class="dg-ts">V-a … V-i</text>
+
+          <rect x="756" y="40" width="150" height="46" class="dg-box"/>
+          <text x="768" y="60" class="dg-t">compute</text>
+          <text x="768" y="76" class="dg-ts">C1 · C2 · T2 · Σ</text>
+
+          <path d="M170,63 H200" class="dg-e" marker-end="url(#fBa)"/>
+          <path d="M354,63 H384" class="dg-e" marker-end="url(#fBa)"/>
+          <path d="M538,63 H568" class="dg-e" marker-end="url(#fBa)"/>
+          <path d="M722,63 H752" class="dg-e" marker-end="url(#fBa)"/>
+
+          <rect x="500" y="126" width="222" height="40" class="dg-crit"/>
+          <text x="512" y="151" class="dg-tc">blocking findings → row excluded from Σ</text>
+          <path d="M647,86 V122" class="dg-e-crit" marker-end="url(#fBc)"/>
+
+          <!-- wrap -->
+          <path d="M831,86 V106 H20 V186" class="dg-e" marker-end="url(#fBa)"/>
+          <text x="32" y="102" class="dg-tm">carries: normalised rows + computed figures + findings</text>
+
+          <rect x="20"  y="196" width="150" height="46" class="dg-box"/>
+          <text x="32" y="216" class="dg-t">analyse</text>
+          <text x="32" y="232" class="dg-ts">registry · 10 analyses</text>
+
+          <rect x="204" y="196" width="150" height="46" class="dg-acc"/>
+          <text x="216" y="216" class="dg-tab">judge</text>
+          <text x="216" y="232" class="dg-ta">LLM · bounded ΔJ1</text>
+
+          <rect x="388" y="196" width="150" height="46" class="dg-box"/>
+          <text x="400" y="216" class="dg-t">proposal queue</text>
+          <text x="400" y="232" class="dg-ts">pending — writes nothing</text>
+
+          <rect x="572" y="196" width="150" height="46" class="dg-warn"/>
+          <text x="584" y="216" class="dg-twb">human gate</text>
+          <text x="584" y="232" class="dg-tw">approve · edit · reject</text>
+
+          <rect x="756" y="196" width="150" height="46" class="dg-box"/>
+          <text x="768" y="216" class="dg-t">persist</text>
+          <text x="768" y="232" class="dg-ts">J1 + audit row</text>
+
+          <path d="M170,219 H200" class="dg-e" marker-end="url(#fBa)"/>
+          <path d="M354,219 H384" class="dg-e" marker-end="url(#fBa)"/>
+          <path d="M538,219 H568" class="dg-e" marker-end="url(#fBa)"/>
+          <path d="M722,219 H752" class="dg-e-warn" marker-end="url(#fBw)"/>
+          <text x="572" y="262" class="dg-tw">the human gate is the only path that writes J1</text>
+
+          <path d="M831,242 V286 H86 V246" class="dg-e" marker-end="url(#fBa)"/>
+          <text x="100" y="282" class="dg-tm">recompute C2 from the approved J1 — deterministic, no second model call</text>
+
+          <text x="20" y="316" class="dg-tm">A rejected proposal is still written to the audit log. Rejections are the training signal for submitter calibration later on.</text>
+        </svg>
+      </div>
+      <figcaption><b>The queue is the safety property.</b> Because the judge writes to a pending queue rather than to the record, a bad model run degrades to noise a reviewer dismisses — never to a wrong number in a board pack.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ FIG C ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. C</span> DATA MODEL</div>
+    <h2 class="head">Nine tables, all hanging off one ID</h2>
+    <p class="lede">This is the parameter dictionary rendered as schema. Everything the workbook keeps in parallel tabs becomes rows related to a single <code>opportunity</code> — which is what turns the five severed joins into real foreign keys.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 920 470" role="img" aria-label="Entity relationship diagram centred on the opportunity table, with foreign keys from state history, forecast line, actuals, competitor, outcome, confidence event, and NRE item. The target table joins on region and quarter rather than by foreign key.">
+          <defs>
+            <marker id="fCa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="fCc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+          </defs>
+
+          <rect x="352" y="176" width="216" height="112" class="dg-acc"/>
+          <text x="366" y="200" class="dg-tab">opportunity</text>
+          <text x="366" y="220" class="dg-ta">id  PK          ← P0-1</text>
+          <text x="366" y="236" class="dg-ta">D1–D7 dimensions</text>
+          <text x="366" y="252" class="dg-ta">L1 L2 L3  V1–V4  J1</text>
+          <text x="366" y="268" class="dg-ta">owner · updated_at</text>
+          <text x="366" y="282" class="dg-ta">← P0-2 · P0-3</text>
+
+          <rect x="24" y="44" width="196" height="72" class="dg-box"/>
+          <text x="38" y="66" class="dg-t">state_history</text>
+          <text x="38" y="84" class="dg-ts">opp_id FK · L1 · L2</text>
+          <text x="38" y="100" class="dg-ts">entered_at · actor</text>
+          <text x="38" y="112" class="dg-ta">← P0-4 · stall detection</text>
+
+          <rect x="24" y="176" width="196" height="72" class="dg-box"/>
+          <text x="38" y="198" class="dg-t">forecast_line</text>
+          <text x="38" y="216" class="dg-ts">opp_id FK · snapshot_id</text>
+          <text x="38" y="232" class="dg-ts">cy · quarter · kpcs</text>
+          <text x="38" y="244" class="dg-ta">← T1 · T2</text>
+
+          <rect x="24" y="308" width="196" height="72" class="dg-box"/>
+          <text x="38" y="330" class="dg-t">actuals</text>
+          <text x="38" y="348" class="dg-ts">opp_id FK · cy · quarter</text>
+          <text x="38" y="364" class="dg-ts">shipped_kpcs · rev_k</text>
+          <text x="38" y="376" class="dg-ta">← P1-2 · accuracy</text>
+
+          <rect x="700" y="44" width="196" height="72" class="dg-box"/>
+          <text x="714" y="66" class="dg-t">competitor</text>
+          <text x="714" y="84" class="dg-ts">opp_id FK · part · vendor</text>
+          <text x="714" y="100" class="dg-ts">incumbent · asp · share</text>
+          <text x="714" y="112" class="dg-ta">← R1 · P1-8</text>
+
+          <rect x="700" y="176" width="196" height="72" class="dg-box"/>
+          <text x="714" y="198" class="dg-t">outcome</text>
+          <text x="714" y="216" class="dg-ts">opp_id FK · result</text>
+          <text x="714" y="232" class="dg-ts">reason_code · closed_at</text>
+          <text x="714" y="244" class="dg-ta">← P1-1 · ground truth</text>
+
+          <rect x="700" y="308" width="196" height="72" class="dg-box"/>
+          <text x="714" y="330" class="dg-t">confidence_event</text>
+          <text x="714" y="348" class="dg-ts">opp_id FK · prior · proposed</text>
+          <text x="714" y="364" class="dg-ts">decision · actor · rationale</text>
+          <text x="714" y="376" class="dg-ta">← P0-8 · the audit log</text>
+
+          <rect x="352" y="356" width="216" height="60" class="dg-box"/>
+          <text x="366" y="378" class="dg-t">nre_item</text>
+          <text x="366" y="396" class="dg-ts">opp_id FK · amount · milestone</text>
+          <text x="366" y="410" class="dg-ta">← T4 · out of the fake rows</text>
+
+          <rect x="352" y="40" width="216" height="60" class="dg-crit"/>
+          <text x="366" y="62" class="dg-tcb" style="fill:var(--crit);font-size:12.5px;font-weight:600">target</text>
+          <text x="366" y="80" class="dg-tc">region · cy · quarter</text>
+          <text x="366" y="94" class="dg-tc">projection_k · stretch_k</text>
+
+          <path d="M220,80  H286 V206 H348" class="dg-e" marker-end="url(#fCa)"/>
+          <path d="M220,212 H348" class="dg-e" marker-end="url(#fCa)"/>
+          <path d="M220,344 H286 V258 H348" class="dg-e" marker-end="url(#fCa)"/>
+
+          <path d="M700,80  H634 V206 H572" class="dg-e" marker-end="url(#fCa)"/>
+          <path d="M700,212 H572" class="dg-e" marker-end="url(#fCa)"/>
+          <path d="M700,344 H634 V258 H572" class="dg-e" marker-end="url(#fCa)"/>
+
+          <path d="M460,356 V292" class="dg-e" marker-end="url(#fCa)"/>
+          <path d="M460,172 V104" class="dg-e-crit" marker-end="url(#fCc)"/>
+          <text x="470" y="142" class="dg-tc">no FK — joins on region + quarter only</text>
+
+          <text x="24" y="444" class="dg-tm">state_history is what makes L1 and L2 time-varying rather than a single mutable cell. Every other analysis that needs "since when" reads from it.</text>
+        </svg>
+      </div>
+      <figcaption><b><code>state_history</code> is the table that earns its keep first.</b> It converts Design Status from a cell that gets overwritten into an event stream — which is simultaneously stall detection, velocity, slip tracking, and the outcome labels the calibration model will need.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ REPO ============ -->
+  <section>
+    <div class="eyebrow"><span>MODULES</span> REPOSITORY LAYOUT</div>
+    <h2 class="head">Where each layer lives</h2>
+    <p class="lede">Your POC already has <code>calc_engine.py</code> and <code>judgment.py</code> in the right shape. This grows them into the seven layers without reorganising what works.</p>
+
+<pre><code>opptrack/
+  registry/
+    <span class="k">parameters.py</span>       <span class="c"># the dictionary as code — one ParamSpec per ID</span>
+    <span class="k">enums.py</span>             <span class="c"># canonical L1, L2, D1, reason codes</span>
+    <span class="k">rubric.py</span>            <span class="c"># L1 → baseline J1, ratified table</span>
+
+  intake/
+    xlsx_reader.py       <span class="c"># tab → raw rows, no interpretation</span>
+    snapshot.py          <span class="c"># write-once run record  (P1-3)</span>
+
+  connectors/            <span class="c"># see FIG. D and FIG. E</span>
+    _framework.py        <span class="c"># SUPPLIES / TRUST / CADENCE + conflict detect</span>
+    provenance.py        <span class="c"># FieldValue(param, value, source, at, trust)</span>
+    crm.py  erp.py  disty_pos.py  market_data.py
+
+  normalise/
+    coerce.py            <span class="c"># "Dec'24"→date, "TBD"→None, 1,343→float</span>
+    canon.py             <span class="c"># KR≡Korea, MOBIS≡Mobis, D-IN≡Design In</span>
+
+  validate/
+    rules.py             <span class="c"># V-a … V-i, each declares REQUIRES</span>
+    findings.py          <span class="c"># Finding(rule, severity, opp_id, message)</span>
+
+  calc/
+    <span class="k">engine.py</span>            <span class="c"># EXISTS — extend with T2, margin, set count</span>
+    rollup.py            <span class="c"># by D1, D6, D7, quarter</span>
+    test_engine.py       <span class="c"># EXISTS — regression vs the workbook</span>
+
+  analyses/
+    _registry.py         <span class="c"># discovers modules, checks REQUIRES</span>
+    stage_mix.py  concentration.py  data_quality.py
+    milestones.py  competitive.py   coverage.py
+    margin.py      demand.py
+    accuracy.py          <span class="d"># BLOCKED until actuals exist</span>
+    calibration.py       <span class="d"># BLOCKED until owner + history exist</span>
+
+  judge/
+    <span class="k">rubric_rules.py</span>      <span class="c"># EXISTS as RUBRIC — add REQUIRES per rule</span>
+    evidence.py          <span class="c"># assemble the bundle handed to the model</span>
+    client.py            <span class="c"># Claude call, retry, MOCK fallback</span>
+    contract.py          <span class="c"># ConfidenceProposal schema + validation</span>
+
+  review/
+    queue.py             <span class="c"># pending proposals</span>
+    audit.py             <span class="c"># append-only confidence_event writer</span>
+
+  api/                   <span class="c"># FastAPI — per the Step 2 gateway</span>
+  db/                    <span class="c"># SQLAlchemy models matching FIG. C</span>
+</code></pre>
+  </section>
+
+  <!-- ============ CONTRACTS ============ -->
+  <section>
+    <div class="eyebrow"><span>CONTRACTS</span> THE THREE THAT MATTER</div>
+    <h2 class="head">Interfaces worth fixing before you write features</h2>
+    <p class="lede">Everything else can be refactored freely. These three shapes are what keep the layers honest, so pin them first.</p>
+
+    <h3 class="sub">1 · ParamSpec — the registry entry</h3>
+    <p class="lede">Every parameter from the dictionary becomes one of these. Validators, analyses and judge rules all reference parameters by ID, never by column name.</p>
+<pre><code><span class="k">@dataclass(frozen=True)</span>
+<span class="k">class</span> ParamSpec:
+    id:          str            <span class="c"># "V1", "J1", "L2"</span>
+    name:        str            <span class="c"># "EAU"</span>
+    dtype:       type
+    unit:        str | None     <span class="c"># "Kpcs", "USD", None</span>
+    enum:        tuple | None    <span class="c"># canonical values, if any</span>
+    required:    bool
+    source_tabs: tuple[str, ...]
+    present:     bool           <span class="c"># False for P0/P1 not yet collected</span>
+</code></pre>
+
+    <h3 class="sub">2 · Analysis — declares what it needs</h3>
+    <p class="lede">This is what makes the LIVE / PARTIAL / BLOCKED status in the catalogue <em>computed</em> rather than hand-maintained. Add a parameter to the registry and the blocked analyses light up by themselves.</p>
+<pre><code><span class="k">class</span> Analysis(Protocol):
+    id:       str
+    requires: tuple[str, ...]        <span class="c"># param IDs, e.g. ("T1","T2","P1-2")</span>
+
+    <span class="k">def</span> run(self, ctx: RunContext) -> AnalysisResult: ...
+
+<span class="c"># the registry, not the analysis, decides whether it may run</span>
+<span class="k">def</span> runnable(a: Analysis, reg: Registry) -> bool:
+    <span class="k">return</span> all(reg[p].present <span class="k">for</span> p <span class="k">in</span> a.requires)
+</code></pre>
+
+    <h3 class="sub">3 · ConfidenceProposal — the model's only output</h3>
+    <p class="lede">The single shape the LLM is allowed to return. Anything that doesn't parse into this is rejected and retried, then falls back to no-change. Note the bounds: the model cannot drive confidence to a certainty in either direction — only a human can.</p>
+<pre><code><span class="k">@dataclass(frozen=True)</span>
+<span class="k">class</span> ConfidenceProposal:
+    opportunity_id: str
+    prior_j1:       float
+    proposed_j1:    float
+    factors:        list[Factor]     <span class="c"># rule id + delta_pp + evidence quote</span>
+    rationale:      str
+
+    <span class="k">def</span> __post_init__(self):
+        delta = abs(self.proposed_j1 - self.prior_j1)
+        <span class="k">assert</span> delta &lt;= MAX_DELTA_PP / 100      <span class="c"># bounded movement</span>
+        <span class="k">assert</span> 0.05 &lt;= self.proposed_j1 &lt;= 0.95  <span class="c"># never 0.0 or 1.0</span>
+        <span class="k">assert</span> self.factors                     <span class="c"># no unexplained change</span>
+</code></pre>
+  </section>
+
+  <!-- ============ FIG D ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. D</span> DATA ACQUISITION</div>
+    <h2 class="head">What can be fetched, and what never can</h2>
+    <p class="lede">Roughly two-thirds of the parameter dictionary can be populated without anyone typing. The remaining third is the part that carries the commercial judgment — and automating it would destroy the thing the tracker exists to record. The split is clean enough to design around.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 940 450" role="img" aria-label="Three tiers of data source. Tier one internal systems of record — CRM, ERP and distributor point of sale — fully automate dimensions, owner, timestamps, realised pricing and shipped actuals. Tier two external data such as vehicle programme forecasts, competitor catalogues and announcements automate start-of-production dates, competitor detail and candidate leads with a human confirm. Tier three, sales judgment and customer conversation, fills confidence, design status and loss reason and cannot be automated.">
+          <defs>
+            <marker id="fDa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="fDw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkW"/></marker>
+            <marker id="fDc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkC"/></marker>
+          </defs>
+
+          <text x="20" y="34" class="dg-hd">TIER 1 · SYSTEMS OF RECORD — FULLY AUTOMATABLE</text>
+
+          <rect x="20" y="46"  width="190" height="34" class="dg-box"/><text x="32" y="68"  class="dg-t">CRM</text>
+          <rect x="20" y="88"  width="190" height="34" class="dg-box"/><text x="32" y="110" class="dg-t">ERP / order book</text>
+          <rect x="20" y="130" width="190" height="34" class="dg-box"/><text x="32" y="152" class="dg-t">Distributor POS / POR</text>
+
+          <path d="M210,63 H262"  class="dg-e"/>
+          <path d="M210,105 H262" class="dg-e"/>
+          <path d="M210,147 H262" class="dg-e"/>
+          <path d="M262,63 V147"  class="dg-e"/>
+          <path d="M262,105 H336" class="dg-e" marker-end="url(#fDa)"/>
+
+          <rect x="340" y="46"  width="300" height="34" class="dg-box"/><text x="352" y="68"  class="dg-t">D1–D4 · owner · updated_at · history</text>
+          <rect x="340" y="88"  width="300" height="34" class="dg-box"/><text x="352" y="110" class="dg-t">V3 realised ASP · bookings · backlog</text>
+          <rect x="340" y="130" width="300" height="34" class="dg-acc"/><text x="352" y="152" class="dg-tab">P1-2 ACTUALS</text>
+
+          <text x="660" y="140" class="dg-ta">the highest-value feed you</text>
+          <text x="660" y="154" class="dg-ta">can build — unblocks both</text>
+          <text x="660" y="168" class="dg-ta">dead analyses at once</text>
+
+          <line x1="20" y1="184" x2="920" y2="184" class="dg-e-thin"/>
+          <text x="20" y="206" class="dg-hd">TIER 2 · EXTERNAL DATA — AUTOMATABLE, HUMAN CONFIRMS</text>
+
+          <rect x="20" y="218" width="190" height="34" class="dg-box"/><text x="32" y="240" class="dg-t">Vehicle programme data</text>
+          <rect x="20" y="260" width="190" height="34" class="dg-box"/><text x="32" y="282" class="dg-t">Competitor catalogues</text>
+          <rect x="20" y="302" width="190" height="34" class="dg-box"/><text x="32" y="324" class="dg-t">OEM / Tier-1 notices</text>
+
+          <path d="M210,235 H336" class="dg-e-warn" marker-end="url(#fDw)"/>
+          <path d="M210,277 H336" class="dg-e-warn" marker-end="url(#fDw)"/>
+          <path d="M210,319 H336" class="dg-e-warn" marker-end="url(#fDw)"/>
+
+          <rect x="340" y="218" width="300" height="34" class="dg-warn"/><text x="352" y="240" class="dg-twb">L3 SoP dates · platform build volumes</text>
+          <rect x="340" y="260" width="300" height="34" class="dg-warn"/><text x="352" y="282" class="dg-twb">R1 competitor ASP · incumbency · P1-8</text>
+          <rect x="340" y="302" width="300" height="34" class="dg-warn"/><text x="352" y="324" class="dg-twb">candidate opportunities — white space</text>
+
+          <text x="660" y="234" class="dg-tw">this is what would have</text>
+          <text x="660" y="248" class="dg-tw">caught the IP901 row</text>
+          <text x="660" y="312" class="dg-tw">suggestions only —</text>
+          <text x="660" y="326" class="dg-tw">never a record</text>
+
+          <line x1="20" y1="352" x2="920" y2="352" class="dg-e-thin"/>
+          <text x="20" y="374" class="dg-hd">TIER 3 · HUMAN ONLY — NOT AUTOMATABLE, BY DESIGN</text>
+
+          <rect x="20" y="386" width="190" height="34" class="dg-crit"/><text x="32" y="408" class="dg-tc">Sales judgment</text>
+          <rect x="340" y="386" width="300" height="34" class="dg-crit"/><text x="352" y="408" class="dg-tc">J1 · L1 design status · P1-1 loss reason</text>
+          <path d="M210,403 H336" class="dg-e-crit" marker-end="url(#fDc)"/>
+
+          <text x="660" y="402" class="dg-tc">a design win is a relationship</text>
+          <text x="660" y="416" class="dg-tc">outcome, not a data point</text>
+        </svg>
+      </div>
+      <figcaption><b>Tier 1 is where the return is.</b> A distributor POS/POR feed is a standard, already-formatted report that most distributors will send on a schedule — and it is exactly the <code>P1-2 actuals</code> that both blocked analyses are waiting on. That single connector is worth more than the whole of Tier 2.</figcaption>
+    </figure>
+
+    <div class="tablewrap">
+      <table>
+        <caption>FEASIBILITY BY SOURCE</caption>
+        <thead>
+          <tr><th scope="col">Source</th><th scope="col">Fills</th><th scope="col">Mechanism</th><th scope="col">Effort</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Distributor POS / POR</td>
+            <td class="params">P1-2 actuals · V3 realised</td>
+            <td>Scheduled CSV/EDI drop from Arrow, Avnet, WT and similar. Already a standard report in most distribution agreements.</td>
+            <td>Low — ask, then parse</td>
+          </tr>
+          <tr>
+            <td>ERP / order book</td>
+            <td class="params">bookings · backlog · invoiced ASP</td>
+            <td>Direct DB read or nightly extract. Gives shipped-vs-forecast without waiting on the channel.</td>
+            <td>Low</td>
+          </tr>
+          <tr>
+            <td>CRM</td>
+            <td class="params">D1–D4 · P0-1..P0-4 · L1</td>
+            <td>API sync. If you already run one, most of the P0 identity work is a mapping exercise, not new data collection.</td>
+            <td>Low if a CRM exists</td>
+          </tr>
+          <tr>
+            <td>Sample / PLM system</td>
+            <td class="params">L2 stage evidence · ES dates</td>
+            <td>Sample shipment and qualification records corroborate the stage a salesperson claims.</td>
+            <td>Medium</td>
+          </tr>
+          <tr>
+            <td>Vehicle programme data</td>
+            <td class="params">L3 SoP · build volumes</td>
+            <td>Licensed feed (S&amp;P Global Mobility, MarkLines, LMC class). Cross-checks EAU against the platform's actual forecast build.</td>
+            <td>Medium + licence cost</td>
+          </tr>
+          <tr>
+            <td>Competitor catalogues</td>
+            <td class="params">R1 detail · P1-8</td>
+            <td>Vendor product pages and distributor parametric search, matched on package and specification.</td>
+            <td>Medium, brittle</td>
+          </tr>
+          <tr>
+            <td>Announcements &amp; press</td>
+            <td class="params">candidate opportunities</td>
+            <td>Monitored feeds, LLM-extracted into structured candidates. Low precision — treat as a lead queue.</td>
+            <td>Medium, low yield</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ FIG E ============ -->
+  <section>
+    <div class="eyebrow"><span>FIG. E</span> CONNECTOR LAYER</div>
+    <h2 class="head">Fetched data must never silently overwrite a person</h2>
+    <p class="lede">The moment more than one source can write a field, you need provenance on every value and a rule for who wins. Without it, a nightly CRM sync quietly reverts a correction a regional manager made that morning — and nobody can tell it happened.</p>
+
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 940 420" role="img" aria-label="Connectors for CRM, ERP, distributor POS and market data feed a connector framework where each declares which parameters it supplies, its trust level and cadence. Values become field records carrying source, timestamp and trust. A conflict detector either auto-applies agreeing values or routes disagreements to a reconciliation queue for a human. Below, a precedence ladder ranks human entry above ERP actuals, above distributor POS, above CRM, above external enrichment.">
+          <defs>
+            <marker id="fEa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mk"/></marker>
+            <marker id="fEA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkA"/></marker>
+            <marker id="fEw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" class="mkW"/></marker>
+          </defs>
+
+          <rect x="20" y="46"  width="160" height="34" class="dg-box"/><text x="32" y="68"  class="dg-t">crm_connector</text>
+          <rect x="20" y="88"  width="160" height="34" class="dg-box"/><text x="32" y="110" class="dg-t">erp_connector</text>
+          <rect x="20" y="130" width="160" height="34" class="dg-box"/><text x="32" y="152" class="dg-t">disty_pos</text>
+          <rect x="20" y="172" width="160" height="34" class="dg-box"/><text x="32" y="194" class="dg-t">market_data</text>
+
+          <path d="M180,63 H206 V125 H246"  class="dg-e" marker-end="url(#fEa)"/>
+          <path d="M180,105 H206 V125 H246" class="dg-e" marker-end="url(#fEa)"/>
+          <path d="M180,147 H206 V125 H246" class="dg-e" marker-end="url(#fEa)"/>
+          <path d="M180,189 H206 V125 H246" class="dg-e" marker-end="url(#fEa)"/>
+
+          <rect x="250" y="46" width="190" height="160" class="dg-box"/>
+          <text x="264" y="70" class="dg-t">connector framework</text>
+          <text x="264" y="92"  class="dg-ts">each declares:</text>
+          <text x="264" y="110" class="dg-ts">SUPPLIES = (param ids)</text>
+          <text x="264" y="128" class="dg-ts">TRUST    = 1 … 5</text>
+          <text x="264" y="146" class="dg-ts">CADENCE  = nightly | wk</text>
+          <text x="264" y="176" class="dg-ta">same REQUIRES pattern</text>
+          <text x="264" y="192" class="dg-ta">as the analyses</text>
+
+          <path d="M440,125 H486" class="dg-e" marker-end="url(#fEa)"/>
+
+          <rect x="490" y="46" width="190" height="160" class="dg-box"/>
+          <text x="504" y="70" class="dg-t">FieldValue</text>
+          <text x="504" y="92"  class="dg-ts">param_id</text>
+          <text x="504" y="110" class="dg-ts">value</text>
+          <text x="504" y="128" class="dg-ts">source</text>
+          <text x="504" y="146" class="dg-ts">fetched_at</text>
+          <text x="504" y="164" class="dg-ts">trust</text>
+          <text x="504" y="192" class="dg-ta">provenance per field</text>
+
+          <path d="M680,125 H726" class="dg-e" marker-end="url(#fEa)"/>
+
+          <rect x="730" y="98" width="190" height="54" class="dg-box"/>
+          <text x="744" y="120" class="dg-t">conflict detector</text>
+          <text x="744" y="138" class="dg-ts">new vs held value</text>
+
+          <path d="M825,152 V180" class="dg-e-acc" marker-end="url(#fEA)"/>
+          <rect x="730" y="184" width="190" height="44" class="dg-acc"/>
+          <text x="744" y="204" class="dg-tab">agree → auto-apply</text>
+          <text x="744" y="220" class="dg-ta">no human needed</text>
+
+          <path d="M825,228 V256" class="dg-e-warn" marker-end="url(#fEw)"/>
+          <rect x="730" y="260" width="190" height="44" class="dg-warn"/>
+          <text x="744" y="280" class="dg-twb">disagree → queue</text>
+          <text x="744" y="296" class="dg-tw">same gate as Fig. B</text>
+
+          <text x="20" y="252" class="dg-hd">PRECEDENCE — HIGHER NEVER OVERWRITTEN SILENTLY BY LOWER</text>
+
+          <rect x="20"  y="266" width="126" height="40" class="dg-warn"/><text x="32" y="284" class="dg-twb">1 human</text><text x="32" y="299" class="dg-tw">entry</text>
+          <rect x="162" y="266" width="126" height="40" class="dg-box"/><text x="174" y="284" class="dg-t">2 ERP</text><text x="174" y="299" class="dg-ts">shipped</text>
+          <rect x="304" y="266" width="126" height="40" class="dg-box"/><text x="316" y="284" class="dg-t">3 disty POS</text><text x="316" y="299" class="dg-ts">channel</text>
+          <rect x="446" y="266" width="126" height="40" class="dg-box"/><text x="458" y="284" class="dg-t">4 CRM</text><text x="458" y="299" class="dg-ts">declared</text>
+          <rect x="588" y="266" width="126" height="40" class="dg-box"/><text x="600" y="284" class="dg-t">5 external</text><text x="600" y="299" class="dg-ts">inferred</text>
+
+          <text x="150" y="291" class="dg-tm">&gt;</text>
+          <text x="292" y="291" class="dg-tm">&gt;</text>
+          <text x="434" y="291" class="dg-tm">&gt;</text>
+          <text x="576" y="291" class="dg-tm">&gt;</text>
+
+          <text x="20" y="344" class="dg-tm">A lower-precedence source that disagrees with a higher one does not lose quietly — it raises a reconciliation item. That is how a stale</text>
+          <text x="20" y="360" class="dg-tm">CRM stage or an EAU that contradicts the platform build forecast surfaces as a question rather than as a silent overwrite.</text>
+
+          <text x="20" y="392" class="dg-ta">Connectors reuse the registry pattern exactly: declare what you supply, and the framework decides whether you may write it.</text>
+        </svg>
+      </div>
+      <figcaption><b>Provenance is what makes automation safe to switch on incrementally.</b> Every value knows where it came from and when, so you can add a connector, watch what it would have changed for a fortnight, and only then let it write.</figcaption>
+    </figure>
+
+    <h3 class="sub">On automating lead generation specifically</h3>
+    <p class="lede">The direct version — scraping the world for new design-win opportunities — has poor economics in automotive semi. Sockets are won through RFQs and multi-year relationships, and by the time a programme is public the design-in window has usually closed. The high-yield inversion is <b>white-space detection</b>: licence the vehicle programme database, list every platform with an SoP inside your design-in horizon, match it against your product lines by application, and flag the ones where you have <em>no registered opportunity at all</em>.</p>
+    <p class="lede">That produces a short, specific, checkable list — "Hyundai/Kia has four platforms with 2028–29 SoP in lighting and we are registered on one" — rather than a feed of press releases. It uses the same programme data you would buy for EAU validation, so the marginal cost is near zero once Tier 2 exists.</p>
+  </section>
+
+  <!-- ============ PHASES ============ -->
+  <section>
+    <div class="eyebrow"><span>SEQUENCE</span> BUILD PHASES</div>
+    <h2 class="head">What to build, in what order</h2>
+    <p class="lede">Phases 0 and 1 change nothing about how your sales teams work — they read the workbook as it is today. Only from Phase 2 does the intake change.</p>
+
+    <div class="tablewrap">
+      <table>
+        <caption>SIX PHASES — EACH ONE SHIPPABLE ON ITS OWN</caption>
+        <thead>
+          <tr><th scope="col">Phase</th><th scope="col">Build</th><th scope="col">Delivers</th><th scope="col">Needs from the business</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>0 · Read-only</td>
+            <td class="params">registry · intake · normalise · validate</td>
+            <td>A data-quality report against the existing workbook. Finds the <code>#REF!</code> totals, the <code>TBD</code> numerics, the Funnel/FCST date contradictions.</td>
+            <td>Nothing. Runs on today's file.</td>
+          </tr>
+          <tr>
+            <td>1 · Numbers</td>
+            <td class="params">calc · rollup · 7 live analyses</td>
+            <td>Reproduces every workbook figure, plus attach rate, channel margin, concentration and coverage that the sheet never computed.</td>
+            <td>Ratify the <code>L1 → J1</code> baseline rubric.</td>
+          </tr>
+          <tr>
+            <td>2 · Identity</td>
+            <td class="params">Postgres · opportunity · state_history · crm_connector</td>
+            <td>Stable IDs, real joins across tabs, stage-entry dates, stall detection. If a CRM exists, most of this arrives by sync rather than by typing.</td>
+            <td>Add ID, owner and last-updated to intake. One-time backfill. CRM read access.</td>
+          </tr>
+          <tr>
+            <td>3 · Judgment</td>
+            <td class="params">judge · queue · audit · review UI</td>
+            <td>Cited confidence proposals with a human gate and a permanent audit log — the two things your terms doc already mandates.</td>
+            <td>Reviewer role assigned. Loss reason codes required at close.</td>
+          </tr>
+          <tr>
+            <td>4 · Learning</td>
+            <td class="params">snapshots · disty_pos · erp_connector · accuracy · calibration</td>
+            <td>Forecast bias per region and per owner; confidence calibrated against what actually shipped. The actuals arrive by feed, not by hand.</td>
+            <td>Distributor POS/POR report scheduled. ERP extract. Two quarters before it says anything useful.</td>
+          </tr>
+          <tr>
+            <td>5 · Outside-in</td>
+            <td class="params">market_data · EAU cross-check · white-space</td>
+            <td>Validates EAU against real platform build forecasts, enriches competitor detail, and lists programmes in your horizon with no opportunity registered against them.</td>
+            <td>A vehicle programme data licence. This is the only phase with a recurring external cost.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <p><b>Phase 0 is worth shipping alone.</b> It needs no schema change, no database and no model — and on the current file it already finds a company total that doesn't compute, four <code>TBD</code> values sitting in numeric fields, and an SoP date that disagrees between two tabs. That is a credible first demo built entirely from Layers 0–2.</p>
+    </div>
+  </section>
+
+  <p class="foot">COMPANION TO THE TRACKF PARAMETER RELATION MODEL &nbsp;/&nbsp; ALIGNS WITH STEP 2 ARCHITECTURE (FASTAPI · POSTGRES · PGVECTOR · VLLM) AND STEP 3 POC (calc_engine.py · judgment.py)</p>
+
+</div>

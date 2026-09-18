@@ -1,0 +1,69 @@
+# Deploys the OppTrack SPA to GitHub Pages, built against a backend that runs
+# separately (the RTX Blackwell machine -- see deliverables/deploy/README.md).
+# Pages and the backend are different origins, so this is the CORS-requiring
+# path; if the backend and UI are both served from the RTX box instead, this
+# workflow is unnecessary and deliverables/frontend just ships in the
+# frontend Docker image built by deliverables/docker-compose.yml.
+#
+# One-time setup before this will work:
+#   1. Settings -> Pages -> Source: "GitHub Actions".
+#   2. Settings -> Secrets and variables -> Actions -> Variables -> New
+#      repository variable: VITE_API_BASE = https://<your-host>/api/v1
+#      (the RTX box's public HTTPS URL -- see deploy/README.md for how to
+#      get one without owning a domain, e.g. a nip.io hostname).
+#   3. On the backend: CORS_ORIGINS must include this Pages site's origin,
+#      e.g. https://<github-username>.github.io -- set it in
+#      deliverables/deploy/.env.production and redeploy the backend.
+name: deploy-pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "deliverables/frontend/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: deliverables/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: deliverables/frontend/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit -p tsconfig.json
+      - run: npm run build
+        env:
+          # Absolute URL required here -- Pages and the backend are cross-origin,
+          # unlike the same-origin relative /api/v1 the RTX-hosted build uses.
+          VITE_API_BASE: ${{ vars.VITE_API_BASE }}
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: deliverables/frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

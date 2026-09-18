@@ -1,0 +1,147 @@
+# Opportunity Tracking Agent -- the Step 2 stack as containers (WBS 13.1).
+#   docker compose up --build
+# Postgres with pgvector, Redis, MinIO, the API, the scheduler loop, and the SPA
+# behind nginx. Secrets come from .env (see .env.example); nothing here embeds one.
+#
+# Local development does not need any of this: the backend runs on a plain venv
+# with SQLite, fakeredis and on-disk object storage (deliverables/README.md).
+#
+# To put this on a public IP, layer deploy/docker-compose.prod.yml on top --
+# it adds a TLS-terminating edge proxy and locks auth/CORS/dev-tools down for
+# real exposure. See deploy/README.md for the full runbook.
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: opptrack
+      POSTGRES_USER: opptrack
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-opptrack}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U opptrack"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+
+  minio:
+    image: minio/minio:latest
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - miniodata:/data
+    ports:
+      # Console only, and loopback-only -- reach it with an SSH tunnel, not
+      # directly from the public IP. Nothing needs this published at all for
+      # the app itself; it's here for you to poke at the bucket by hand.
+      - "127.0.0.1:9001:9001"
+
+  backend:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql+psycopg://opptrack:${POSTGRES_PASSWORD:-opptrack}@postgres:5432/opptrack
+      REDIS_BACKEND: real
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_BACKEND: s3
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      S3_BUCKET: opptrack
+      JUDGMENT_MODE: ${JUDGMENT_MODE:-mock}
+      JUDGMENT_BACKEND: ${JUDGMENT_BACKEND:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      VLLM_BASE_URL: ${VLLM_BASE_URL:-http://vllm:8000/v1}
+      VLLM_MODEL: ${VLLM_MODEL:-meta-llama/Llama-3.3-70B-Instruct}
+      AUTH_ISSUER: ${AUTH_ISSUER:-}
+      AUTH_AUDIENCE: ${AUTH_AUDIENCE:-opptrack}
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      NOTIFICATION_CHANNEL: ${NOTIFICATION_CHANNEL:-log}
+      MONTHLY_BUDGET_USD: ${MONTHLY_BUDGET_USD:-0}
+      CONNECTOR_DROP_DIR: /app/data/drops
+      BACKUP_DIR: /app/data/backups
+      WORKBOOK_PATH: /app/data/TrackF.xlsx
+    volumes:
+      - drops:/app/data/drops
+      - backups:/app/data/backups
+      - ../data/TrackF (1).xlsx:/app/data/TrackF.xlsx:ro
+    ports:
+      # Loopback-only: the public entry point is the edge proxy in
+      # deploy/docker-compose.prod.yml, which reaches this over the Docker
+      # network by service name regardless of what's published to the host.
+      # Local dev keeps working unchanged since 127.0.0.1:8000 is still
+      # localhost:8000.
+      - "127.0.0.1:8000:8000"
+
+  scheduler:
+    build: ./backend
+    command: ["python", "-m", "scripts.scheduler"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://opptrack:${POSTGRES_PASSWORD:-opptrack}@postgres:5432/opptrack
+      REDIS_BACKEND: real
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_BACKEND: s3
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      JUDGMENT_MODE: ${JUDGMENT_MODE:-mock}
+      JUDGMENT_BACKEND: ${JUDGMENT_BACKEND:-anthropic}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      NOTIFICATION_CHANNEL: ${NOTIFICATION_CHANNEL:-log}
+      CONNECTOR_DROP_DIR: /app/data/drops
+      BACKUP_DIR: /app/data/backups
+    volumes:
+      - drops:/app/data/drops
+      - backups:/app/data/backups
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend
+    ports:
+      # Loopback-only -- see the backend service's port comment above.
+      - "127.0.0.1:8080:80"
+
+  # Optional local model (WBS 13.3): the vLLM fallback on the shared RTX PRO 6000.
+  # Western open weights only. Enable with: docker compose --profile local-model up
+  vllm:
+    image: vllm/vllm-openai:latest
+    profiles: ["local-model"]
+    command: ["--model", "${VLLM_MODEL:-meta-llama/Llama-3.3-70B-Instruct}", "--max-model-len", "32768"]
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN:-}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - hfcache:/root/.cache/huggingface
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  drops:
+  backups:
+  hfcache:

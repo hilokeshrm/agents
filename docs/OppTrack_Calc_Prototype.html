@@ -1,0 +1,463 @@
+<meta charset="utf-8">
+<title>OppTrack Calc Bench</title>
+
+<style>
+  :root {
+    --paper:#F7F6F3; --surface:#FFFFFF; --surface-2:#F1EFEA;
+    --ink:#1F1B18; --ink-2:#453E37; --muted:#6E665D; --faint:#948B81;
+    --rule:#DCD7CF; --rule-2:#C7C0B6;
+    --accent:#BE5320; --accent-bg:#F6E7DD;
+    --judge:#16706A; --judge-bg:#DDEDEB;
+    --broken:#A22C22; --broken-bg:#F6E2DF;
+    --ok:#4E6A2C; --ok-bg:#E6EDDB;
+    --s1:#BE5320; --s2:#00897B; --grid:#E4E0D9;
+    --shadow:0 1px 2px rgba(31,27,24,.05), 0 8px 24px -16px rgba(31,27,24,.18);
+    --mono: ui-monospace,"Cascadia Mono","Cascadia Code",Consolas,"SF Mono","DejaVu Sans Mono",Menlo,monospace;
+    --sans: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --serif:"Palatino Linotype","Iowan Old Style",Palatino,"Book Antiqua",Georgia,serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#17140F; --surface:#1E1A15; --surface-2:#251F19;
+      --ink:#EDE8E0; --ink-2:#CDC5BA; --muted:#9C938A; --faint:#7A7268;
+      --rule:#332C25; --rule-2:#443B32;
+      --accent:#E8844B; --accent-bg:#3A2317;
+      --judge:#4CB8AC; --judge-bg:#133430;
+      --broken:#E58275; --broken-bg:#3B1E1A;
+      --ok:#A2C46C; --ok-bg:#26301A;
+      --s1:#D9743C; --s2:#2FA79A; --grid:#2C251E;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#17140F; --surface:#1E1A15; --surface-2:#251F19;
+    --ink:#EDE8E0; --ink-2:#CDC5BA; --muted:#9C938A; --faint:#7A7268;
+    --rule:#332C25; --rule-2:#443B32;
+    --accent:#E8844B; --accent-bg:#3A2317;
+    --judge:#4CB8AC; --judge-bg:#133430;
+    --broken:#E58275; --broken-bg:#3B1E1A;
+    --ok:#A2C46C; --ok-bg:#26301A;
+    --s1:#D9743C; --s2:#2FA79A; --grid:#2C251E;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.7);
+  }
+
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:15.5px; line-height:1.55; -webkit-font-smoothing:antialiased; }
+  .shell { max-width:1400px; margin:0 auto; padding:clamp(28px,5vw,60px) clamp(14px,3vw,36px) 100px; display:flex; flex-direction:column; }
+  .shell > * { min-width:0; }
+
+  .eyebrow { font-family:var(--mono); font-size:10.5px; letter-spacing:.19em; text-transform:uppercase; color:var(--accent); margin-bottom:16px; }
+  h1 { font-family:var(--mono); font-weight:700; font-size:clamp(26px,4.4vw,44px); line-height:1.04; letter-spacing:-.03em; margin:0 0 6px; }
+  .sub { font-family:var(--mono); font-size:clamp(13px,1.8vw,18px); color:var(--accent); margin:0 0 18px; }
+  .lede { font-family:var(--serif); font-size:17.5px; line-height:1.5; color:var(--ink-2); max-width:62ch; margin:0 0 26px; }
+
+  h2 { font-family:var(--mono); font-weight:700; font-size:15px; margin:34px 0 12px; padding-top:13px; border-top:2px solid var(--ink); display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  h2 span { font-family:var(--mono); font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); font-weight:400; }
+  h3 { font-family:var(--mono); font-size:11px; letter-spacing:.11em; text-transform:uppercase; color:var(--muted); margin:24px 0 9px; font-weight:600; }
+
+  .tw { overflow-x:auto; border:1px solid var(--rule); background:var(--surface); box-shadow:var(--shadow); }
+  table { border-collapse:collapse; width:100%; font-size:13px; }
+  thead th { background:var(--surface-2); font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-align:left; padding:8px 9px; border-bottom:1px solid var(--rule-2); white-space:nowrap; }
+  thead th.n { text-align:right; }
+  td, tbody th { padding:4px 6px; border-bottom:1px solid var(--rule); vertical-align:middle; text-align:left; font-weight:400; }
+  tbody th { font-family:var(--mono); font-size:12px; font-weight:600; white-space:nowrap; padding-left:9px; }
+  tr:last-child td, tr:last-child th { border-bottom:0; }
+  td.n { font-family:var(--mono); font-size:12.5px; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; padding-right:9px; }
+  td.m { font-family:var(--mono); font-size:12px; white-space:nowrap; }
+  td.res { font-family:var(--mono); font-size:12.5px; font-weight:600; font-variant-numeric:tabular-nums; text-align:right; white-space:nowrap; color:var(--accent); padding-right:9px; }
+  td.sub { font-family:var(--mono); font-size:12px; font-variant-numeric:tabular-nums; color:var(--ink-2); white-space:nowrap; }
+  td.frm { font-family:var(--mono); font-size:12px; color:var(--muted); white-space:nowrap; }
+  tr.tot td, tr.tot th { border-top:1px solid var(--rule-2); background:var(--surface-2); font-weight:600; }
+  input, select { font-family:var(--mono); font-size:12.5px; color:var(--ink); background:transparent; border:1px solid transparent; border-radius:2px; padding:4px 5px; width:100%; font-variant-numeric:tabular-nums; }
+  input[type=number] { text-align:right; min-width:70px; }
+  input:hover, select:hover { border-color:var(--rule-2); }
+  input:focus, select:focus, button:focus-visible { border-color:var(--accent); background:var(--surface); outline:2px solid var(--accent); outline-offset:-1px; }
+  select { background:var(--surface); border-color:var(--rule-2); min-width:104px; }
+
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(158px,1fr)); gap:1px; background:var(--rule); border:1px solid var(--rule); margin-bottom:10px; }
+  .stats div { background:var(--surface); padding:13px 15px; }
+  .stats dt { font-family:var(--mono); font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--faint); margin-bottom:5px; }
+  .stats dd { margin:0; font-family:var(--mono); font-size:20px; font-weight:600; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
+  .stats dd small { display:block; font-weight:400; font-size:11px; color:var(--muted); margin-top:2px; }
+
+  .chip { display:inline-block; font-family:var(--mono); font-size:9.5px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; padding:2px 7px; border-radius:2px; border:1px solid transparent; white-space:nowrap; }
+  .c-ok { background:var(--ok-bg); color:var(--ok); border-color:var(--ok); }
+  .c-no { background:var(--broken-bg); color:var(--broken); border-color:var(--broken); }
+  .c-mut { background:var(--surface-2); color:var(--muted); border-color:var(--rule-2); }
+  .c-a { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); }
+
+  .note { border-left:3px solid var(--accent); background:var(--surface); padding:13px 16px; margin:14px 0; font-size:14px; color:var(--ink-2); }
+  .note.judge { border-left-color:var(--judge); }
+  .note b { color:var(--ink); }
+  .cap { font-family:var(--mono); font-size:11.5px; color:var(--muted); line-height:1.5; margin:8px 0 0; max-width:92ch; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:14px; }
+  button.act { font-family:var(--mono); font-size:11.5px; letter-spacing:.05em; padding:7px 13px; cursor:pointer; background:var(--surface); color:var(--ink); border:1px solid var(--rule-2); border-radius:2px; }
+  button.act:hover { border-color:var(--accent); color:var(--accent); }
+  button.act[aria-pressed="true"] { background:var(--accent-bg); color:var(--accent); border-color:var(--accent); font-weight:600; }
+
+  .legend { display:flex; flex-wrap:wrap; gap:6px 18px; font-family:var(--mono); font-size:10.5px; color:var(--muted); margin:0 0 10px; }
+  .legend i { font-style:normal; display:inline-flex; align-items:center; gap:6px; }
+  .sw { width:11px; height:11px; display:inline-block; border-radius:1px; }
+  .chartwrap { overflow-x:auto; border:1px solid var(--rule); background:var(--surface); padding:16px; box-shadow:var(--shadow); }
+  .chartwrap svg { display:block; width:100%; height:auto; min-width:520px; }
+  .neg { color:var(--broken); } .pos { color:var(--ok); }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; transition:none !important; } }
+</style>
+
+<div class="shell">
+  <header>
+    <div class="eyebrow">AxcelAI &middot; Agent OS &middot; &sect;05 of the build specification</div>
+    <h1>OppTrack Calc Bench</h1>
+    <p class="sub">C1&ndash;C13 across the pipeline, live, with the working shown</p>
+    <p class="lede">
+      Two formulas produce every dollar in the Opportunity Tracking agent. This computes them
+      across the whole pipeline from editable rows, and loads with the nine
+      <code>ProjectTrack</code> rows so the first thing it tells you is whether it reproduces
+      <code>TrackF_1.xlsx</code>.
+    </p>
+  </header>
+
+  <h2>Pipeline <span id="regbadge"></span></h2>
+  <dl class="stats" id="stats"></dl>
+  <p class="cap" id="regnote"></p>
+
+  <div class="tw">
+    <table id="grid">
+      <thead><tr>
+        <th>Project</th><th>Region</th><th>End customer</th><th>Design status</th><th>Stage</th>
+        <th class="n">V1 EAU</th><th class="n">V3 Disty</th><th class="n">V4 Resale</th><th class="n">J1 Conf</th>
+        <th class="n">C1 Sales</th><th class="n">C2 Adjusted</th><th>Matrix A</th>
+      </tr></thead>
+      <tbody id="gbody"></tbody>
+      <tfoot id="gfoot"></tfoot>
+    </table>
+  </div>
+  <p class="cap">
+    Every white cell is editable. <b>Matrix A</b> is the baseline confidence for that
+    (Design Status, Stage) pairing from &sect;06 &mdash; a forbidden pairing shows in red, and
+    is what J-01 should fire on rather than inferring a contradiction from the words.
+  </p>
+
+  <div class="row">
+    <button class="act" id="reset">Reset to TrackF_1.xlsx</button>
+    <button class="act" id="addrow">Add a row</button>
+  </div>
+
+  <h2>Roll-ups <span>C8 &middot; C9</span></h2>
+  <div class="legend">
+    <i><span class="sw" style="background:var(--s1)"></span>Sales revenue &mdash; unweighted</i>
+    <i><span class="sw" style="background:var(--s2)"></span>Adjusted revenue &mdash; confidence-weighted</i>
+  </div>
+  <div class="row" style="margin:0 0 11px">
+    <button class="act" data-group="region" aria-pressed="true">By region</button>
+    <button class="act" data-group="stage" aria-pressed="false">By stage</button>
+    <button class="act" data-group="end_customer" aria-pressed="false">By end customer</button>
+  </div>
+  <div class="chartwrap"><svg id="chart" viewBox="0 0 880 300" role="img" aria-label="Sales revenue and confidence-weighted adjusted revenue per group, both in thousands of dollars on one axis."></svg></div>
+  <div class="tw" style="margin-top:11px"><table id="roll"><thead><tr id="rollhead"></tr></thead><tbody id="rollbody"></tbody></table></div>
+  <p class="cap" id="rollnote"></p>
+
+  <h2>The working <span>one row, substituted</span></h2>
+  <div class="row" id="pick" style="margin:0 0 11px"></div>
+  <div class="tw"><table><thead><tr><th>ID</th><th>What</th><th>Formula</th><th>Substituted</th><th class="n">Result</th></tr></thead><tbody id="workbody"></tbody></table></div>
+  <p class="cap" id="worknote"></p>
+
+  <h2>Whole pipeline <span>C10 &middot; C12 &middot; C13</span></h2>
+  <div class="tw"><table><thead><tr><th>ID</th><th>What</th><th>Formula</th><th>Substituted</th><th class="n">Result</th></tr></thead><tbody id="projbody"></tbody></table></div>
+
+  <div class="note judge" id="confnote"></div>
+
+  <footer style="margin-top:60px;border-top:2px solid var(--ink);padding-top:14px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);display:flex;flex-wrap:wrap;gap:6px 20px">
+    <span>AxcelAI &middot; Agent OS &middot; Opportunity Tracking Agent</span>
+    <span>Calc bench prototype</span>
+    <span>Deterministic &mdash; no model call on this page</span>
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* the nine ProjectTrack rows, exactly as TrackF_1.xlsx has them */
+  var SAMPLE = [
+    {project:"Hercules",   region:"Korea",  customer:"SLM",      end_customer:"GM",    design_status:"Design Win", stage:"PVT",     eau:1100,  disty:3,    resale:3.2,  conf:1.00},
+    {project:"Aphrodite",  region:"Korea",  customer:"SLM",      end_customer:"GM",    design_status:"Design In",  stage:"DVT",     eau:1350,  disty:3,    resale:3.2,  conf:0.80},
+    {project:"Hermes",     region:"Korea",  customer:"Flextron", end_customer:"Ford",  design_status:"Sample",     stage:"EVT",     eau:10000, disty:4,    resale:4.3,  conf:0.30},
+    {project:"Poseidon",   region:"Korea",  customer:"Flextron", end_customer:"Ford",  design_status:"Promotion",  stage:"Concept", eau:8000,  disty:2,    resale:2.1,  conf:0.10},
+    {project:"Apollo",     region:"Korea",  customer:"Flextron", end_customer:"Ford",  design_status:"Evaluation", stage:"EVT",     eau:5000,  disty:2,    resale:2.1,  conf:0.50},
+    {project:"Hugo",       region:"EU",     customer:"ODE",      end_customer:"BMWi",  design_status:"Evaluation", stage:"EVT",     eau:750,   disty:3,    resale:3.2,  conf:0.30},
+    {project:"Dresden",    region:"EU",     customer:"ODE",      end_customer:"BMWi",  design_status:"Evaluation", stage:"EVT",     eau:1000,  disty:3,    resale:3.2,  conf:0.50},
+    {project:"Yellowstone",region:"Taiwan", customer:"Foxc",     end_customer:"Forde", design_status:"Design Win", stage:"PVT",     eau:1000,  disty:3,    resale:3.2,  conf:1.00},
+    {project:"Montana",    region:"Taiwan", customer:"Foxc",     end_customer:"Forde", design_status:"Design In",  stage:"DVT",     eau:250,   disty:3,    resale:3.2,  conf:0.80}
+  ];
+  var WB = { sales: 82350.0, adjusted: 30915.0 };   /* what the workbook itself says */
+
+  var STAGES = ["Concept","EVT","DVT","PVT","MP"];
+  var STATUSES = ["Promotion","Sample","Evaluation","Design In","Design Win","Mass Production","Lost"];
+  /* Matrix A from section 06 — null means a pairing the rules forbid */
+  var MATRIX_A = {
+    "Promotion":      {Concept:0.10, EVT:0.15, DVT:null, PVT:null, MP:null},
+    "Sample":         {Concept:0.20, EVT:0.30, DVT:null, PVT:null, MP:null},
+    "Evaluation":     {Concept:0.20, EVT:0.35, DVT:null, PVT:null, MP:null},
+    "Design In":      {Concept:null, EVT:null, DVT:0.65, PVT:0.80, MP:null},
+    "Design Win":     {Concept:null, EVT:null, DVT:null, PVT:0.90, MP:0.95},
+    "Mass Production":{Concept:null, EVT:null, DVT:null, PVT:null, MP:0.95},
+    "Lost":           {Concept:0.00, EVT:0.00, DVT:0.00, PVT:0.00, MP:0.00}
+  };
+
+  var R = JSON.parse(JSON.stringify(SAMPLE));
+  var GROUP = "region", FOCUS = 2;             /* Hermes — the instructive row */
+  var $ = function (i) { return document.getElementById(i); };
+
+  /* ---------- the calc engine, ported from calc_engine.py ---------- */
+  function sales(r)    { return r.eau * r.disty; }              /* C1 : O = K * M */
+  function adjusted(r) { return sales(r) * r.conf; }            /* C2 : R = O * Q */
+  function baseline(r) { var m = MATRIX_A[r.design_status]; return m ? m[r.stage] : undefined; }
+
+  function rollup(key) {
+    var g = {};
+    R.forEach(function (r) {
+      var k = r[key] || "—";
+      if (!g[k]) g[k] = { sales:0, adjusted:0, count:0 };
+      g[k].sales += sales(r); g[k].adjusted += adjusted(r); g[k].count++;
+    });
+    return g;
+  }
+  var totSales = function () { return R.reduce(function (a,r) { return a + sales(r); }, 0); };
+  var totAdj   = function () { return R.reduce(function (a,r) { return a + adjusted(r); }, 0); };
+
+  /* ---------- formatting ---------- */
+  var money = function (v, d) {
+    if (v === null || !isFinite(v)) return "n/a";
+    d = d === undefined ? 1 : d;
+    return (v < 0 ? "−$" : "$") + Math.abs(v).toLocaleString("en-US",
+      { minimumFractionDigits:d, maximumFractionDigits:d }) + "K";
+  };
+  var pct = function (v, d) { return !isFinite(v) ? "n/a" : v.toFixed(d === undefined ? 1 : d) + "%"; };
+  var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
+
+  /* ---------- the editable grid ---------- */
+  function buildGrid() {
+    $("gbody").innerHTML = R.map(function (r, i) {
+      var b = baseline(r), ok = b !== null && b !== undefined;
+      return "<tr>" +
+        '<th><input data-i="' + i + '" data-k="project" value="' + esc(r.project) + '" aria-label="Project"></th>' +
+        '<td><input data-i="' + i + '" data-k="region" value="' + esc(r.region) + '" aria-label="Region"></td>' +
+        '<td><input data-i="' + i + '" data-k="end_customer" value="' + esc(r.end_customer) + '" aria-label="End customer"></td>' +
+        '<td><select data-i="' + i + '" data-k="design_status" aria-label="Design status">' +
+          STATUSES.map(function (s) { return '<option' + (s === r.design_status ? " selected" : "") + ">" + s + "</option>"; }).join("") +
+        "</select></td>" +
+        '<td><select data-i="' + i + '" data-k="stage" aria-label="Stage">' +
+          STAGES.map(function (s) { return '<option' + (s === r.stage ? " selected" : "") + ">" + s + "</option>"; }).join("") +
+        "</select></td>" +
+        '<td><input type="number" step="10" data-i="' + i + '" data-k="eau" value="' + r.eau + '" aria-label="EAU"></td>' +
+        '<td><input type="number" step="0.01" data-i="' + i + '" data-k="disty" value="' + r.disty + '" aria-label="Distributor ASP"></td>' +
+        '<td><input type="number" step="0.01" data-i="' + i + '" data-k="resale" value="' + r.resale + '" aria-label="Resale ASP"></td>' +
+        '<td><input type="number" step="0.05" min="0" max="1" data-i="' + i + '" data-k="conf" value="' + r.conf + '" aria-label="Confidence"></td>' +
+        '<td class="n">' + money(sales(r)) + "</td>" +
+        '<td class="res">' + money(adjusted(r)) + "</td>" +
+        "<td>" + (ok
+          ? '<span class="chip c-ok">valid ' + b.toFixed(2) + "</span>"
+          : '<span class="chip c-no">forbidden</span>') + "</td>" +
+      "</tr>";
+    }).join("");
+
+    $("gfoot").innerHTML = '<tr class="tot"><th>Total</th><td colspan="4" class="m">' + R.length +
+      ' rows</td><td class="n">' + R.reduce(function (a,r) { return a + r.eau; }, 0).toLocaleString("en-US") +
+      '</td><td class="n">—</td><td class="n">—</td><td class="n">' +
+      (totSales() ? (totAdj() / totSales()).toFixed(3) : "—") + '</td><td class="n">' + money(totSales()) +
+      '</td><td class="res">' + money(totAdj()) + "</td><td></td></tr>";
+
+    $("gbody").querySelectorAll("input,select").forEach(function (el) {
+      el.addEventListener("input", function () {
+        var i = +el.dataset.i, k = el.dataset.k;
+        R[i][k] = el.type === "number" ? (parseFloat(el.value) || 0) : el.value;
+        render();
+      });
+    });
+  }
+
+  /* ---------- chart: sales and adjusted per group, one $K axis ---------- */
+  function chart() {
+    var g = rollup(GROUP), keys = Object.keys(g);
+    var W = 880, H = 300, ML = 78, MR = 18, MT = 16, MB = 44;
+    var iw = W - ML - MR, ih = H - MT - MB;
+    var hi = Math.max.apply(null, keys.map(function (k) { return g[k].sales; }).concat([1]));
+    hi *= 1.08;
+    var y = function (v) { return MT + ih - v / hi * ih; };
+    var band = iw / Math.max(keys.length, 1), bw = Math.min(30, band * 0.3);
+    var s = [];
+    for (var t = 0; t <= 4; t++) {
+      var v = hi * t / 4, yy = y(v);
+      s.push('<line x1="' + ML + '" y1="' + yy.toFixed(1) + '" x2="' + (W - MR) + '" y2="' + yy.toFixed(1) + '" stroke="var(--grid)"/>');
+      s.push('<text x="' + (ML - 9) + '" y="' + (yy + 4).toFixed(1) + '" text-anchor="end" font-family="ui-monospace,monospace" font-size="10.5" fill="var(--faint)">' +
+             Math.round(v).toLocaleString("en-US") + "</text>");
+    }
+    keys.forEach(function (k, i) {
+      var cx = ML + band * (i + 0.5);
+      [["sales", "var(--s1)", -1], ["adjusted", "var(--s2)", 1]].forEach(function (p) {
+        var v = g[k][p[0]], x = cx + (p[2] < 0 ? -bw - 1 : 1), h = Math.max(1, MT + ih - y(v));
+        s.push('<rect x="' + x.toFixed(1) + '" y="' + y(v).toFixed(1) + '" width="' + bw.toFixed(1) +
+               '" height="' + h.toFixed(1) + '" rx="3" fill="' + p[1] + '" stroke="var(--surface)" stroke-width="2"/>');
+      });
+      s.push('<text x="' + cx.toFixed(1) + '" y="' + (H - MB + 18) + '" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10.5" fill="var(--muted)">' + esc(k) + "</text>");
+      var eff = g[k].sales ? g[k].adjusted / g[k].sales : 0;
+      s.push('<text x="' + cx.toFixed(1) + '" y="' + (H - MB + 32) + '" text-anchor="middle" font-family="ui-monospace,monospace" font-size="10" fill="var(--faint)">conf ' + eff.toFixed(2) + "</text>");
+    });
+    s.push('<line x1="' + ML + '" y1="' + (MT + ih) + '" x2="' + (W - MR) + '" y2="' + (MT + ih) + '" stroke="var(--rule-2)" stroke-width="1.5"/>');
+    $("chart").innerHTML = s.join("");
+  }
+
+  /* ---------- render ---------- */
+  function render() {
+    var tS = totSales(), tA = totAdj();
+
+    $("stats").innerHTML =
+      '<div><dt>C1 &middot; Sales revenue</dt><dd>' + money(tS) + "<small>unweighted</small></dd></div>" +
+      '<div><dt>C2 &middot; Adjusted revenue</dt><dd>' + money(tA) + "<small>confidence-weighted</small></dd></div>" +
+      '<div><dt>Effective confidence</dt><dd>' + (tS ? (tA / tS).toFixed(3) : "n/a") + "<small>falls out of the roll-up</small></dd></div>" +
+      '<div><dt>Rows</dt><dd>' + R.length + "<small>" + Object.keys(rollup("region")).length + " regions</small></dd></div>";
+
+    var isSample = JSON.stringify(R) === JSON.stringify(SAMPLE);
+    var okS = Math.abs(tS - WB.sales) <= 0.01, okA = Math.abs(tA - WB.adjusted) <= 0.01;
+    if (isSample && okS && okA) {
+      $("regbadge").innerHTML = '<span class="chip c-ok">Reproduces TrackF_1.xlsx</span>';
+      $("regnote").innerHTML = "Sales " + money(tS) + " and adjusted " + money(tA) +
+        " against the workbook's own $82,350.0K and $30,915.0K — the same assertion <code>test_calc_engine.py</code> makes for all nine rows.";
+    } else if (isSample) {
+      $("regbadge").innerHTML = '<span class="chip c-no">Does not match</span>';
+      $("regnote").textContent = "Expected $82,350.0K / $30,915.0K.";
+    } else {
+      $("regbadge").innerHTML = '<span class="chip c-mut">Edited &mdash; not the sample pipeline</span>';
+      $("regnote").innerHTML = "Rows differ from <code>TrackF_1.xlsx</code>, so there is nothing to regress against. Reset to check the engine again.";
+    }
+
+    buildGrid();
+    chart();
+
+    /* roll-up table */
+    var g = rollup(GROUP), keys = Object.keys(g);
+    var label = { region:"Region", stage:"Stage", end_customer:"End customer" }[GROUP];
+    $("rollhead").innerHTML = "<th>" + label + '</th><th class="n">Rows</th><th class="n">&Sigma; C1</th>' +
+      '<th class="n">&Sigma; C2</th><th>Effective confidence</th><th class="n">Share of weighted</th>';
+    $("rollbody").innerHTML = keys.map(function (k) {
+      var v = g[k], eff = v.sales ? v.adjusted / v.sales : 0;
+      return "<tr><th>" + esc(k) + '</th><td class="n">' + v.count + '</td><td class="n">' + money(v.sales) +
+        '</td><td class="res">' + money(v.adjusted) + '</td><td class="sub">' +
+        Math.round(v.adjusted).toLocaleString("en-US") + " ÷ " + Math.round(v.sales).toLocaleString("en-US") +
+        " = " + eff.toFixed(3) + '</td><td class="n">' + pct(tA ? v.adjusted / tA * 100 : 0) + "</td></tr>";
+    }).join("") +
+      '<tr class="tot"><th>Total</th><td class="n">' + R.length + '</td><td class="n">' + money(tS) +
+      '</td><td class="res">' + money(tA) + '</td><td class="sub">' +
+      Math.round(tA).toLocaleString("en-US") + " ÷ " + Math.round(tS).toLocaleString("en-US") + " = " +
+      (tS ? (tA / tS).toFixed(3) : "—") + '</td><td class="n">100.0%</td></tr>';
+
+    var best = keys.slice().sort(function (a, b) { return g[b].adjusted - g[a].adjusted; })[0];
+    $("rollnote").innerHTML = best
+      ? "Effective confidence is not a parameter — it falls out of the roll-up, and it is the fastest read on pipeline quality. " +
+        esc(best) + " carries " + pct(tA ? g[best].adjusted / tA * 100 : 0) + " of the weighted pipeline."
+      : "";
+
+    /* the working, one row */
+    if (FOCUS >= R.length) FOCUS = R.length - 1;
+    $("pick").innerHTML = R.map(function (r, i) {
+      return '<button class="act" data-focus="' + i + '" aria-pressed="' + (i === FOCUS) + '">' + esc(r.project) + "</button>";
+    }).join("");
+    $("pick").querySelectorAll("[data-focus]").forEach(function (b) {
+      b.addEventListener("click", function () { FOCUS = +b.dataset.focus; render(); });
+    });
+
+    var r = R[FOCUS], b = baseline(r);
+    var reg = rollup("region")[r.region], ends = rollup("end_customer")[r.end_customer];
+    var W2 = function (id, what, f, sub, res, flat) {
+      return "<tr><th>" + id + "</th><td>" + what + '</td><td class="frm">' + f +
+             '</td><td class="sub">' + sub + '</td><td class="res' + (flat ? " flat" : "") + '">' + res + "</td></tr>";
+    };
+    $("workbody").innerHTML =
+      W2("C1", "Sales revenue", "V1 × V3",
+         r.eau.toLocaleString("en-US") + " Kpcs × $" + r.disty.toFixed(2), money(sales(r))) +
+      W2("C2", "Adjusted revenue", "C1 × J1",
+         money(sales(r)) + " × " + r.conf.toFixed(2), money(adjusted(r))) +
+      W2("C5", "Channel margin", "V4 − V3",
+         "$" + r.resale.toFixed(2) + " − $" + r.disty.toFixed(2), "$" + (r.resale - r.disty).toFixed(2) + " / unit") +
+      W2("C6", "Channel margin %", "(V4 − V3) ÷ V4",
+         "$" + (r.resale - r.disty).toFixed(2) + " ÷ $" + r.resale.toFixed(2),
+         r.resale ? pct((r.resale - r.disty) / r.resale * 100, 2) : "n/a") +
+      W2("C5b", "Margin on the row", "(V4 − V3) × V1",
+         "$" + (r.resale - r.disty).toFixed(2) + " × " + r.eau.toLocaleString("en-US"),
+         money((r.resale - r.disty) * r.eau)) +
+      W2("C12", "Share of " + esc(r.region) + "'s weighted pipeline", "row C2 ÷ Σ C2 for the region",
+         money(adjusted(r)) + " ÷ " + money(reg.adjusted), pct(reg.adjusted ? adjusted(r) / reg.adjusted * 100 : 0)) +
+      W2("C12b", "Share of the whole weighted pipeline", "row C2 ÷ Σ C2",
+         money(adjusted(r)) + " ÷ " + money(tA), pct(tA ? adjusted(r) / tA * 100 : 0)) +
+      W2("C12c", "End customer " + esc(r.end_customer) + " share", "Σ C2 for the end customer ÷ Σ C2",
+         money(ends.adjusted) + " ÷ " + money(tA), pct(tA ? ends.adjusted / tA * 100 : 0)) +
+      W2("A", "Matrix A baseline", r.design_status + " @ " + r.stage,
+         (b === null || b === undefined) ? "pairing the rules forbid" : "table lookup",
+         (b === null || b === undefined) ? "forbidden" : b.toFixed(2), b === null || b === undefined) +
+      W2("Δ", "Entered vs baseline", "J1 − baseline",
+         (b === null || b === undefined) ? "no baseline to compare against"
+           : r.conf.toFixed(2) + " − " + b.toFixed(2),
+         (b === null || b === undefined) ? "n/a" : ((r.conf - b) >= 0 ? "+" : "") + (r.conf - b).toFixed(2));
+
+    $("worknote").innerHTML = (b === null || b === undefined)
+      ? "<b>" + esc(r.project) + "</b> sits in a cell Matrix A forbids — that is what J-01 fires on. It reads the table; it does not infer a contradiction from the words."
+      : "<b>" + esc(r.project) + "</b> is a valid pairing, so J-01 must stay silent on it. The deviation from baseline is what J-04 measures, and only when the stage is Concept or EVT.";
+
+    /* whole pipeline */
+    var conc = Object.keys(rollup("end_customer")).map(function (k) {
+      return { k:k, v:rollup("end_customer")[k].adjusted };
+    }).sort(function (a, b2) { return b2.v - a.v; })[0];
+    var forbidden = R.filter(function (x) { var bb = baseline(x); return bb === null || bb === undefined; });
+    var deviants = R.filter(function (x) {
+      var bb = baseline(x); return bb != null && (x.conf - bb) > 0.15 && (x.stage === "Concept" || x.stage === "EVT");
+    });
+    $("projbody").innerHTML =
+      W2("C1", "Total sales revenue", "Σ V1 × V3", R.length + " rows", money(tS)) +
+      W2("C2", "Total adjusted revenue", "Σ C1 × J1", R.length + " rows", money(tA)) +
+      W2("C10", "Effective confidence", "Σ C2 ÷ Σ C1",
+         Math.round(tA).toLocaleString("en-US") + " ÷ " + Math.round(tS).toLocaleString("en-US"),
+         tS ? (tA / tS).toFixed(3) : "n/a") +
+      W2("C13", "Largest end-customer concentration", "max Σ C2 by end customer ÷ Σ C2",
+         conc ? esc(conc.k) + ": " + money(conc.v) + " ÷ " + money(tA) : "—",
+         conc && tA ? pct(conc.v / tA * 100) : "n/a") +
+      W2("J-01", "Rows in a forbidden Matrix A cell", "count where baseline is null",
+         forbidden.length ? forbidden.map(function (x) { return esc(x.project); }).join(", ") : "none — every pairing is valid",
+         String(forbidden.length), !forbidden.length) +
+      W2("J-04", "Rows early AND over baseline by > 0.15", "stage ∈ {Concept, EVT} and J1 − baseline > 0.15",
+         deviants.length ? deviants.map(function (x) { return esc(x.project); }).join(", ") : "none",
+         String(deviants.length), !deviants.length);
+
+    var wins = R.filter(function (x) { return x.design_status === "Design Win"; });
+    var atCeil = wins.filter(function (x) { return x.conf >= 1.0; });
+    $("confnote").innerHTML = atCeil.length
+      ? "<b>" + atCeil.length + " design win" + (atCeil.length > 1 ? "s sit" : " sits") +
+        " at confidence 1.00.</b> <code>apply_confidence_adjustment</code> clamps to [0, 1], so any " +
+        "positive support the agent proposes for " + atCeil.map(function (x) { return esc(x.project); }).join(" and ") +
+        " is discarded and the calibrated total can only ever move down. Ratifying the 0.95 ceiling from §06 " +
+        "gives J-03 somewhere to put its points and makes the layer two-directional."
+      : "<b>No row sits at the 1.00 ceiling</b>, so a positive adjustment has somewhere to go and the " +
+        "judgement layer can move the total in both directions.";
+  }
+
+  /* ---------- wiring ---------- */
+  document.querySelectorAll("[data-group]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      GROUP = b.dataset.group;
+      document.querySelectorAll("[data-group]").forEach(function (x) {
+        x.setAttribute("aria-pressed", String(x.dataset.group === GROUP));
+      });
+      render();
+    });
+  });
+  $("reset").addEventListener("click", function () { R = JSON.parse(JSON.stringify(SAMPLE)); FOCUS = 2; render(); });
+  $("addrow").addEventListener("click", function () {
+    R.push({ project:"New " + (R.length + 1), region:"Korea", customer:"—", end_customer:"—",
+             design_status:"Evaluation", stage:"EVT", eau:1000, disty:3, resale:3.2, conf:0.35 });
+    render();
+  });
+
+  render();
+})();
+</script>

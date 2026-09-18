@@ -1,0 +1,24 @@
+{
+  "as_of": "2025-03-10",
+  "funnel_projects": [
+    {"region": "KR", "customer": "MOBIS", "end_customer": "Hyundai/Kia", "project": "Tail Lamp", "part_number": "ID801", "design_status": "M/P", "mp_date": "Dec'24", "eau_kpcs": 57175, "disty_asp": 0.4615, "resale_asp": 0.4733},
+    {"region": "KR", "customer": "MOBIS", "end_customer": "Hyundai/Kia", "project": "Head Lamp", "part_number": "IP901", "design_status": "D-IN", "mp_date": "Nov'26", "eau_kpcs": 130790, "disty_asp": 0.4778, "resale_asp": 0.49}
+  ],
+  "project_track": [
+    {"region": "Korea", "customer": "SLM", "end_customer": "GM", "project": "Hercules", "part_number": "AX01", "design_status": "Design Win", "stage": "PVT", "eau_kpcs": 1100, "disty_asp": 3, "resale_asp": 3.2, "confidence": 1.0, "competitor_part": null, "comments": "Locked design win, entering production validation"},
+    {"region": "Korea", "customer": "SLM", "end_customer": "GM", "project": "Aphrodite", "part_number": "AX01", "design_status": "Design In", "stage": "DVT", "eau_kpcs": 1350, "disty_asp": 3, "resale_asp": 3.2, "confidence": 0.8, "competitor_part": null, "comments": "Design in, not yet locked"},
+    {"region": "Korea", "customer": "Flextron", "end_customer": "Ford", "project": "Hermes", "part_number": "AX10", "design_status": "Sample", "stage": "EVT", "eau_kpcs": 10000, "disty_asp": 4, "resale_asp": 4.3, "confidence": 0.3, "competitor_part": null, "comments": "Early sample stage, large volume upside"},
+    {"region": "Korea", "customer": "Flextron", "end_customer": "Ford", "project": "Poseidon", "part_number": "AX20", "design_status": "Promotion", "stage": "Concept", "eau_kpcs": 8000, "disty_asp": 2, "resale_asp": 2.1, "confidence": 0.1, "competitor_part": null, "comments": "Concept stage only"},
+    {"region": "Korea", "customer": "Flextron", "end_customer": "Ford", "project": "Apollo", "part_number": "AX20", "design_status": "Evaluation", "stage": "EVT", "eau_kpcs": 5000, "disty_asp": 2, "resale_asp": 2.1, "confidence": 0.5, "competitor_part": null, "comments": "Under evaluation"},
+    {"region": "EU", "customer": "ODE", "end_customer": "BMWi", "project": "Hugo", "part_number": "AX01", "design_status": "Evaluation", "stage": "EVT", "eau_kpcs": 750, "disty_asp": 3, "resale_asp": 3.2, "confidence": 0.3, "competitor_part": null, "comments": "Under evaluation"},
+    {"region": "EU", "customer": "ODE", "end_customer": "BMWi", "project": "Dresden", "part_number": "AX01", "design_status": "Evaluation", "stage": "EVT", "eau_kpcs": 1000, "disty_asp": 3, "resale_asp": 3.2, "confidence": 0.5, "competitor_part": null, "comments": "Under evaluation"},
+    {"region": "Taiwan", "customer": "Foxc", "end_customer": "Forde", "project": "Yellowstone", "part_number": "AX01", "design_status": "Design Win", "stage": "PVT", "eau_kpcs": 1000, "disty_asp": 3, "resale_asp": 3.2, "confidence": 1.0, "competitor_part": null, "comments": "Locked design win"},
+    {"region": "Taiwan", "customer": "Foxc", "end_customer": "Forde", "project": "Montana", "part_number": "AX01", "design_status": "Design In", "stage": "DVT", "eau_kpcs": 250, "disty_asp": 3, "resale_asp": 3.2, "confidence": 0.8, "competitor_part": null, "comments": "Design in"}
+  ],
+  "mass_production": [
+    {"region": "KR", "customer": "SLM", "end_customer": "GM", "project": "Zeus", "part_number": "AX01", "design_status": "Mass Production", "mp_date": "Dec'24", "eau_kpcs": 1400, "disty_asp": 3, "resale_asp": 3.2, "confidence": 1.0}
+  ],
+  "design_lost": [
+    {"region": "Japan", "customer": "Denzo", "end_customer": "Toyoda", "project": "Titan", "part_number": "AX01", "design_status": "Lost", "mp_date": "Oct'26", "eau_kpcs": 1000, "disty_asp": 3, "resale_asp": 3.2, "confidence": 0.0}
+  ]
+}

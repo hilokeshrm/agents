@@ -1,0 +1,1512 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OppTrack Product Surface</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;1,400&display=swap">
+  <style>html,body{margin:0;padding:0}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#F4F6F8; --surface:#FFFFFF; --surface-2:#E9EEF3; --sunk:#EFF3F7;
+  --ink:#111821; --ink-2:#3C4854; --muted:#6A7785;
+  --line:#D2DAE2; --line-soft:#E4E9EF;
+  --det:#1A5787; --det-soft:#E0EBF4; --det-edge:#9CC0DC;
+  --judge:#9E560F; --judge-soft:#F8EADA; --judge-edge:#DDB98C;
+  --human:#57488A; --human-soft:#EBE7F5; --human-edge:#BDB2DD;
+  --stop:#A93129; --stop-soft:#F7E4E2; --stop-edge:#DFA9A3;
+  --ok:#1B6F55; --ok-soft:#DFF0E9; --ok-edge:#9BCBB8;
+  --shadow:0 1px 2px rgba(17,24,33,.05), 0 8px 24px -12px rgba(17,24,33,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+    --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+    --line:#2A3542; --line-soft:#212B36;
+    --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+    --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+    --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+    --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+    --ok:#5FC49E; --ok-soft:#132821; --ok-edge:#2F5F4C;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1218; --surface:#151B23; --surface-2:#1C242E; --sunk:#121820;
+  --ink:#E7EDF3; --ink-2:#B6C2CE; --muted:#8291A1;
+  --line:#2A3542; --line-soft:#212B36;
+  --det:#79B8E4; --det-soft:#152735; --det-edge:#2E5A7A;
+  --judge:#E3A662; --judge-soft:#2C2017; --judge-edge:#6A4A26;
+  --human:#AC9BDE; --human-soft:#211C32; --human-edge:#4A3F70;
+  --stop:#EA8880; --stop-soft:#31191A; --stop-edge:#6B3330;
+  --ok:#5FC49E; --ok-soft:#132821; --ok-edge:#2F5F4C;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 28px -14px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3,.eyebrow,.plate,.tag{font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px 90px}
+header.mast{padding:60px 0 26px;border-bottom:1px solid var(--line)}
+.eyebrow{font-size:11.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);display:flex;flex-wrap:wrap;gap:13px;align-items:center}
+.eyebrow .sep{color:var(--line);font-weight:400}
+h1{font-size:clamp(34px,5.4vw,54px);line-height:1.04;margin:18px 0 0;font-weight:700;
+  letter-spacing:-.02em;text-wrap:balance}
+.stand{font-family:"IBM Plex Serif",Georgia,serif;font-size:18px;line-height:1.55;
+  color:var(--ink-2);margin:18px 0 0;max-width:64ch}
+section{padding:56px 0 0;scroll-margin-top:16px}
+h2{font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--det);
+  margin:0 0 6px;display:flex;align-items:baseline;gap:11px}
+h2 .num{font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--muted);font-weight:400}
+h3{font-size:clamp(23px,3.2vw,30px);line-height:1.16;margin:0 0 14px;font-weight:600;
+  letter-spacing:-.015em;text-wrap:balance}
+h4{font-size:15px;margin:32px 0 10px;font-weight:600}
+p{margin:0 0 15px;max-width:68ch;color:var(--ink-2)}
+p.lead{color:var(--ink)}
+strong{font-weight:600;color:var(--ink)}
+a{color:var(--det)}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:2px;
+  border:1px solid;white-space:nowrap}
+.t-det{color:var(--det);background:var(--det-soft);border-color:var(--det-edge)}
+.t-judge{color:var(--judge);background:var(--judge-soft);border-color:var(--judge-edge)}
+.t-human{color:var(--human);background:var(--human-soft);border-color:var(--human-edge)}
+.t-stop{color:var(--stop);background:var(--stop-soft);border-color:var(--stop-edge)}
+.t-ok{color:var(--ok);background:var(--ok-soft);border-color:var(--ok-edge)}
+.t-mute{color:var(--muted);background:var(--surface-2);border-color:var(--line)}
+
+.tw{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  font-weight:600;padding:10px 13px;background:var(--sunk);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid var(--line-soft);vertical-align:top;color:var(--ink-2)}
+tr:last-child td{border-bottom:0}
+td b{color:var(--ink);font-weight:600}
+td code,td .mono{white-space:nowrap}
+code{font-size:.87em;background:var(--surface-2);border:1px solid var(--line-soft);
+  padding:.06em .34em;border-radius:2px;color:var(--ink-2)}
+pre{margin:18px 0;padding:16px 18px;background:var(--sunk);border:1px solid var(--line);
+  border-radius:3px;overflow-x:auto;font-family:"IBM Plex Mono",monospace;font-size:12.5px;
+  line-height:1.6;color:var(--ink-2)}
+pre b{color:var(--ink);font-weight:600}
+pre i{color:var(--muted);font-style:normal}
+pre u{text-decoration:none;color:var(--ok)}
+pre s{text-decoration:none;color:var(--stop)}
+.pull{border-left:3px solid var(--det);background:var(--sunk);padding:15px 19px;margin:24px 0;
+  border-radius:0 3px 3px 0}
+.pull p{margin:0;color:var(--ink);font-size:16.5px;line-height:1.5;max-width:none}
+.pull p+p{margin-top:8px;font-size:14px;color:var(--ink-2)}
+.pull.warn{border-left-color:var(--stop)}
+.pull.judge{border-left-color:var(--judge)}
+.note{font-size:13px;line-height:1.55;color:var(--muted);border-top:1px solid var(--line);
+  padding-top:11px;margin:22px 0;max-width:76ch}
+
+/* ---------- app mockups ---------- */
+.screen{margin:26px 0 8px;border:1px solid var(--line);border-radius:5px;overflow:hidden;
+  background:var(--surface);box-shadow:var(--shadow)}
+.chrome{display:flex;align-items:center;gap:9px;padding:9px 13px;background:var(--sunk);
+  border-bottom:1px solid var(--line)}
+.dots{display:flex;gap:5px}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.chrome .url{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted);
+  background:var(--surface);border:1px solid var(--line-soft);border-radius:3px;padding:3px 9px}
+.app{display:grid;grid-template-columns:172px minmax(0,1fr);min-height:200px}
+@media(max-width:720px){.app{grid-template-columns:1fr}.nav{display:none}}
+.nav{background:var(--sunk);border-right:1px solid var(--line);padding:14px 0}
+.brand{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:700;font-size:14px;
+  letter-spacing:-.01em;padding:0 14px 12px;color:var(--ink)}
+.brand span{color:var(--det)}
+.nav a{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:6px 14px;font-size:12.5px;color:var(--muted);text-decoration:none;border-left:2px solid transparent}
+.nav a.on{color:var(--ink);background:var(--surface);border-left-color:var(--det);font-weight:500}
+.nav .grp{font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);
+  padding:16px 14px 6px;font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600}
+.nav .cnt{font-family:"IBM Plex Mono",monospace;font-size:10px;background:var(--judge-soft);
+  color:var(--judge);border:1px solid var(--judge-edge);border-radius:8px;padding:0 6px}
+.main{padding:16px 18px 20px;min-width:0}
+.mhead{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;
+  margin-bottom:14px}
+.mhead h5{margin:0;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:17px;font-weight:600}
+.mhead .sub{font-size:11.5px;color:var(--muted)}
+.btn{font-family:"IBM Plex Sans",sans-serif;font-size:11.5px;font-weight:500;padding:5px 11px;
+  border-radius:3px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);white-space:nowrap}
+.btn.pri{background:var(--det);border-color:var(--det);color:var(--paper)}
+.btn.dan{border-color:var(--stop-edge);color:var(--stop);background:var(--stop-soft)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.kpi{background:var(--surface);padding:10px 12px}
+.kpi b{display:block;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:20px;
+  font-weight:700;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kpi span{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);margin-top:2px}
+.kpi em{font-style:normal;font-size:10.5px;font-family:"IBM Plex Mono",monospace}
+.up{color:var(--ok)} .dn{color:var(--stop)}
+.dtab{width:100%;border-collapse:collapse;font-size:12px}
+.dtab th{padding:7px 9px;font-size:9.5px;background:var(--sunk)}
+.dtab td{padding:7px 9px;font-size:12px;border-bottom:1px solid var(--line-soft)}
+.dtab td.n{text-align:right;font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.bar{height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden;min-width:56px}
+.bar i{display:block;height:100%;background:var(--det)}
+.board{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:9px;overflow-x:auto}
+.col{background:var(--sunk);border:1px solid var(--line-soft);border-radius:3px;padding:9px;min-width:150px}
+.col h6{margin:0 0 8px;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:10.5px;
+  letter-spacing:.11em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:3px;padding:8px 9px;margin-bottom:7px}
+.card b{display:block;font-size:12.5px;font-weight:600;color:var(--ink)}
+.card .meta{font-size:10px;color:var(--muted);margin-top:2px}
+.card .row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:6px}
+.conf{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;padding:1px 5px;
+  border-radius:2px;border:1px solid}
+.conf.up{background:var(--ok-soft);border-color:var(--ok-edge)}
+.conf.dn{background:var(--stop-soft);border-color:var(--stop-edge)}
+.conf.flat{background:var(--surface-2);border-color:var(--line);color:var(--muted)}
+.prop{border:1px solid var(--line);border-radius:4px;overflow:hidden;margin-bottom:12px}
+.prop .ph{display:flex;flex-wrap:wrap;gap:9px;align-items:center;justify-content:space-between;
+  padding:10px 12px;background:var(--sunk);border-bottom:1px solid var(--line-soft)}
+.prop .ph b{font-size:13.5px}
+.delta{font-family:"IBM Plex Mono",monospace;font-size:12.5px;font-weight:600}
+.factor{display:grid;grid-template-columns:58px minmax(0,1fr) 62px;gap:10px;padding:9px 12px;
+  border-bottom:1px solid var(--line-soft);font-size:11.5px;align-items:start}
+.factor:last-child{border-bottom:0}
+.factor .rid{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted)}
+.factor q{display:block;color:var(--ink-2);font-style:italic;margin-top:3px;font-size:11px}
+.factor q:before{content:'"'} .factor q:after{content:'"'}
+.factor .pp{text-align:right;font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:11.5px}
+.factor.drop{background:var(--stop-soft)}
+.factor.drop .pp{color:var(--stop);text-decoration:line-through}
+.pfoot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;
+  padding:10px 12px;background:var(--sunk);border-top:1px solid var(--line-soft);font-size:11px;color:var(--muted)}
+.chat{display:flex;flex-direction:column;gap:11px;max-width:660px}
+.msg{display:flex;gap:9px;align-items:flex-start}
+.av{flex:0 0 24px;height:24px;border-radius:3px;display:grid;place-items:center;
+  font-family:"IBM Plex Sans Condensed",sans-serif;font-size:10px;font-weight:700;
+  background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.msg.bot .av{background:var(--det-soft);color:var(--det);border-color:var(--det-edge)}
+.bub{font-size:12.5px;line-height:1.55;color:var(--ink-2);background:var(--sunk);
+  border:1px solid var(--line-soft);border-radius:3px;padding:9px 11px;min-width:0}
+.msg.me .bub{background:var(--surface);color:var(--ink)}
+.bub b{color:var(--ink)}
+.cite{display:inline-flex;gap:4px;align-items:center;font-family:"IBM Plex Mono",monospace;
+  font-size:10px;color:var(--det);background:var(--det-soft);border:1px solid var(--det-edge);
+  border-radius:2px;padding:0 5px;margin:2px 3px 0 0}
+.ask{display:flex;gap:8px;align-items:center;margin-top:13px;border:1px solid var(--line);
+  border-radius:3px;padding:7px 10px;background:var(--surface);max-width:660px}
+.ask span{flex:1;font-size:12px;color:var(--muted)}
+.conn{display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:10px}
+.ccard{border:1px solid var(--line);border-radius:3px;padding:11px 12px;background:var(--surface)}
+.ccard .top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}
+.ccard b{font-size:13px}
+.ccard p{margin:0;font-size:11.5px;color:var(--muted);max-width:none}
+.ccard .fields{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-2);margin-top:7px}
+hr{border:0;border-top:1px solid var(--line);margin:52px 0 0}
+footer{padding:24px 0 0;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="eyebrow"><span>Opportunity Tracking Agent</span><span class="sep">/</span>
+  <span>Product surface</span><span class="sep">/</span><span>UI, chat, integrations, API</span></div>
+  <h1>What people actually touch</h1>
+  <p class="stand">
+    Ten screens built around direct entry rather than a spreadsheet drop, rendered four different ways
+    for the four people who use them; an assistant that is allowed to explain but never to decide; a
+    role model enforced in the query rather than the interface; and the three machine surfaces &mdash;
+    MCP, REST and webhooks &mdash; that let the rest of the platform consume a weighted forecast
+    without anyone re-keying anything.
+  </p>
+</header>
+
+<section id="p1">
+  <h2><span class="num">01</span> Screen</h2>
+  <h3>Pipeline dashboard</h3>
+  <p class="lead">
+    The landing view answers one question before anything else: <strong>what is the weighted pipeline,
+    and what moved it since the last run?</strong> Every figure here is calc-engine output at a named
+    snapshot &mdash; the run banner says which one, because a forecast without a vintage is not a
+    forecast.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / pipeline</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a class="on" href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+      <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Global pipeline</h5>
+            <div class="sub">Snapshot 2025-03-10 &middot; monthly run completed 04:12 &middot; rubric opptrack-matrix/2026-08-19</div></div>
+          <div><span class="tag t-det">Deterministic figures</span></div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><b>$82,350K</b><span>Sales revenue</span><em class="mono">unweighted</em></div>
+          <div class="kpi"><b>$30,915K</b><span>Adjusted revenue</span><em class="mono dn">&minus;$742K vs Feb</em></div>
+          <div class="kpi"><b>0.375</b><span>Effective confidence</span><em class="mono">&Sigma;C2 &divide; &Sigma;C1</em></div>
+          <div class="kpi"><b>9</b><span>Tracked opportunities</span><em class="mono">3 regions</em></div>
+          <div class="kpi"><b>2</b><span>Awaiting approval</span><em class="mono">band crossings</em></div>
+          <div class="kpi"><b>7</b><span>Open findings</span><em class="mono dn">4 blocking</em></div>
+        </div>
+        <table class="dtab">
+          <thead><tr><th>Region</th><th>Sales revenue</th><th>Adjusted</th><th>Share of weighted</th><th>Top concentration</th></tr></thead>
+          <tbody>
+            <tr><td><b>Korea</b></td><td class="n">$73,350K</td><td class="n">$25,140K</td>
+              <td><div class="bar"><i style="width:81%"></i></div></td>
+              <td>Hermes, 47.7% of Korea</td></tr>
+            <tr><td><b>Taiwan</b></td><td class="n">$3,750K</td><td class="n">$3,600K</td>
+              <td><div class="bar"><i style="width:12%"></i></div></td>
+              <td>Yellowstone, 83.3% of Taiwan</td></tr>
+            <tr><td><b>EU</b></td><td class="n">$5,250K</td><td class="n">$2,175K</td>
+              <td><div class="bar"><i style="width:7%"></i></div></td>
+              <td>Dresden, 69.0% of EU</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="note">
+    Concentration is shown next to the money because it is the figure a regional roll-up hides. One
+    project carrying 48% of a region is a different risk from the same total spread across six, and
+    the number is computed, not judged.
+  </p>
+</section>
+
+<section id="pOPPS">
+  <h2><span class="num">02</span> Screen</h2>
+  <h3>Opportunities</h3>
+  <p class="lead">
+    The list view is where field-level provenance becomes visible. Every value carries a badge saying
+    where it came from &mdash; a person, ERP, CRM or a workbook import &mdash; because the question a
+    reviewer asks about a surprising number is always <em>who put that there</em>, and the answer
+    should not require opening an audit log.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / opportunities</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a class="on" href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+        <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Opportunities</h5>
+            <div class="sub">9 of 9 visible in your scope &middot; snapshot 2025-03-10</div></div>
+          <div><span class="btn">Export</span> <span class="btn pri">New opportunity</span></div>
+        </div>
+        <div class="filters">
+          <span class="fchip on">Korea, Taiwan, EU <span class="x">&times;</span></span>
+          <span class="fchip on">Has open finding <span class="x">&times;</span></span>
+          <span class="fchip">Stage</span>
+          <span class="fchip">Design status</span>
+          <span class="fchip">Customer</span>
+          <span class="srch">Search project, part number or end customer&hellip;</span>
+        </div>
+        <table class="dtab">
+          <thead><tr><th>Project</th><th>Customer</th><th>Status @ stage</th><th>EAU</th>
+            <th>Disty ASP</th><th>C1 sales</th><th>Confidence</th><th>C2 adjusted</th><th>Flags</th></tr></thead>
+          <tbody>
+            <tr><td><b>Hercules</b><div style="font-size:10px;color:var(--muted)">AX01</div></td>
+              <td>SLM &rarr; GM<span class="prov crm">crm</span></td>
+              <td>Design Win @ PVT<span class="prov crm">crm</span></td>
+              <td class="n">1,100<span class="prov you">you</span></td>
+              <td class="n">$3.00<span class="prov erp">erp</span></td>
+              <td class="n">$3,300.0K</td>
+              <td class="n">1.00 <span style="color:var(--muted)">/ 0.90</span></td>
+              <td class="n">$3,300.0K</td>
+              <td><span class="tag t-judge">+5pp</span></td></tr>
+            <tr><td><b>Aphrodite</b><div style="font-size:10px;color:var(--muted)">AX01</div></td>
+              <td>SLM &rarr; GM<span class="prov crm">crm</span></td>
+              <td>Design In @ DVT<span class="prov crm">crm</span></td>
+              <td class="n">1,350<span class="prov you">you</span></td>
+              <td class="n">$3.00<span class="prov erp">erp</span></td>
+              <td class="n">$4,050.0K</td>
+              <td class="n">0.80 <span style="color:var(--muted)">/ 0.65</span></td>
+              <td class="n">$3,240.0K</td>
+              <td>&mdash;</td></tr>
+            <tr><td><b>Hermes</b><div style="font-size:10px;color:var(--muted)">AX10</div></td>
+              <td>Flextron &rarr; Ford<span class="prov crm">crm</span></td>
+              <td>Sample @ EVT<span class="prov xls">xls</span></td>
+              <td class="n">10,000<span class="prov xls">xls</span></td>
+              <td class="n">$4.00<span class="prov erp">erp</span></td>
+              <td class="n">$40,000.0K</td>
+              <td class="n">0.30 <span style="color:var(--muted)">/ 0.30</span></td>
+              <td class="n">$12,000.0K</td>
+              <td><span class="tag t-stop">Queued</span></td></tr>
+            <tr><td><b>Poseidon</b><div style="font-size:10px;color:var(--muted)">AX20</div></td>
+              <td>Flextron &rarr; Ford<span class="prov crm">crm</span></td>
+              <td>Promotion @ Concept<span class="prov xls">xls</span></td>
+              <td class="n">8,000<span class="prov xls">xls</span></td>
+              <td class="n">$2.00<span class="prov erp">erp</span></td>
+              <td class="n">$16,000.0K</td>
+              <td class="n">0.10 <span style="color:var(--muted)">/ 0.10</span></td>
+              <td class="n">$1,600.0K</td>
+              <td><span class="tag t-stop">TBD fields</span></td></tr>
+            <tr><td><b>Dresden</b><div style="font-size:10px;color:var(--muted)">AX01</div></td>
+              <td>ODE &rarr; BMWi<span class="prov crm">crm</span></td>
+              <td>Evaluation @ EVT<span class="prov you">you</span></td>
+              <td class="n">1,000<span class="prov you">you</span></td>
+              <td class="n">$3.00<span class="prov erp">erp</span></td>
+              <td class="n">$3,000.0K</td>
+              <td class="n">0.50 <span style="color:var(--muted)">/ 0.35</span></td>
+              <td class="n">$1,500.0K</td>
+              <td><span class="tag t-stop">Queued</span></td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:10.5px;color:var(--muted);margin-top:10px">
+          Confidence shows <b>entered / Matrix A baseline</b>. Provenance:
+          <span class="prov you">you</span> a person,
+          <span class="prov crm">crm</span> Salesforce,
+          <span class="prov erp">erp</span> SAP,
+          <span class="prov xls">xls</span> workbook import, lowest trust.
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">
+    Showing the baseline beside every entered value turns the list into a deviation report. Hermes and
+    Poseidon sit exactly on their baselines and are uninteresting; Hercules at 1.00 against a 0.90
+    baseline is the row worth a conversation, and it reads at a glance without running anything.
+  </p>
+</section>
+
+<section id="p1b">
+  <h2><span class="num">03</span> Screen</h2>
+  <h3>Adding an opportunity</h3>
+  <p class="lead">
+    <strong>The workbook is one intake path, not the intake path.</strong> Direct entry in the UI is
+    the primary route and the only one that captures owner, evidence and a reason for the confidence
+    figure at the moment a person actually knows them. Import exists for migration and for regions not
+    yet on a CRM &mdash; and everything it writes is marked lowest trust.
+  </p>
+  <div class="paths">
+    <div class="path pri"><span class="n">01</span><b>Direct entry</b>
+      <p>A person fills the form below. Owner, region and evidence are captured at source, and Matrix A
+      is shown live so a deviation is a conscious act.</p></div>
+    <div class="path"><span class="n">02</span><b>CRM sync</b>
+      <p>Salesforce creates the row on opportunity creation; the owner completes the commercial fields
+      in-app. No re-keying.</p></div>
+    <div class="path"><span class="n">03</span><b>Bulk import</b>
+      <p>Workbook or CSV, column-mapped with a preview and a dry-run validation pass before anything
+      commits. For migration and backfill.</p></div>
+    <div class="path"><span class="n">04</span><b>API / MCP</b>
+      <p><code>POST /v1/opportunities</code> for another system to create rows under a scoped service
+      account.</p></div>
+  </div>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / opportunities / new</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a class="on" href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+      <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>New opportunity</h5>
+            <div class="sub">Owner and region are set from your account and cannot be changed here</div></div>
+          <div><span class="btn">Import instead</span> <span class="btn pri">Create</span></div>
+        </div>
+        <div class="form">
+          <div class="fsec">Identity</div>
+          <div class="fg"><label>Region</label><div class="inp sel">EU</div>
+            <div class="hint">from your scope</div></div>
+          <div class="fg"><label>Customer</label><div class="inp sel">ODE</div></div>
+          <div class="fg"><label>End customer</label><div class="inp sel">BMWi</div></div>
+          <div class="fg"><label>Project name</label><div class="inp">Karlsruhe</div></div>
+          <div class="fg"><label>Part number</label><div class="inp sel">AX01</div>
+            <div class="hint">from ERP catalogue</div></div>
+          <div class="fg"><label>Opportunity ID</label><div class="inp ph">auto, on create</div>
+            <div class="hint ok">OPP-0052</div></div>
+
+          <div class="fsec">Lifecycle</div>
+          <div class="fg"><label>Design status</label><div class="inp sel">Design In</div></div>
+          <div class="fg"><label>Stage</label><div class="inp sel">DVT</div>
+            <div class="hint ok">valid pairing in Matrix A</div></div>
+          <div class="fg"><label>SoP / MP date</label><div class="inp">Nov 2026</div></div>
+          <div class="fg"><label>Next milestone</label><div class="inp">PPAP, 2025-09-15</div>
+            <div class="hint">parsed to a date field, prose kept</div></div>
+
+          <div class="fsec">Commercial</div>
+          <div class="fg"><label>EAU (Kpcs)</label><div class="inp">1,200</div>
+            <div class="hint">already in chip units</div></div>
+          <div class="fg"><label>Unit / set</label><div class="inp">2</div>
+            <div class="hint warn">attach rate, not a multiplier</div></div>
+          <div class="fg"><label>Distributor ASP</label><div class="inp">$3.00</div></div>
+          <div class="fg"><label>Resale ASP</label><div class="inp">$3.20</div>
+            <div class="hint ok">margin $0.20, inside the observed band</div></div>
+          <div class="fg"><label>Sales revenue (C1)</label><div class="inp ph">$3,600.0K</div>
+            <div class="hint">computed, read only</div></div>
+          <div class="fg"><label>Competitor part&#35;</label><div class="inp ph">none known</div>
+            <div class="hint warn">blank blocks J-02 next run</div></div>
+
+          <div class="fsec">Confidence</div>
+          <div class="fg"><label>Matrix A baseline</label><div class="inp ph">0.65</div>
+            <div class="hint">Design In at DVT</div></div>
+          <div class="fg"><label>Your confidence</label><div class="inp">0.75</div>
+            <div class="hint warn">+0.10 above baseline</div></div>
+          <div class="fg wide"><label>Why this differs from the baseline</label>
+            <div class="inp">Second source was dropped by ODE in June; we are the only part qualified for the DVT build.</div>
+            <div class="hint ok">required when you deviate by more than 0.05, and it becomes evidence in the next run</div></div>
+          <div class="fg wide"><label>Comments</label>
+            <div class="inp ph">Free text. Embedded as prose for precedent retrieval; numbers here are never read as data.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pull">
+    <p>The baseline sits next to the field the whole system turns on, while the person is typing.</p>
+    <p>Asking for a reason only when the entry deviates by more than 0.05 turns the agent's monthly job
+    from arguing with a number into checking a stated rationale &mdash; and it captures the evidence at
+    the one moment someone actually has it.</p>
+  </div>
+  <p class="note">
+    Bulk import runs the same validation gates as a run's step 2, in dry-run, before committing:
+    forbidden Matrix A pairings, TBD in numeric fields, EAU that will not reconcile against units per
+    set, and rows carrying a design win worth zero. The preview shows what would fail, and nothing
+    commits until the mapping is confirmed.
+  </p>
+</section>
+
+<section id="p2">
+  <h2><span class="num">04</span> Screen</h2>
+  <h3>Stage board</h3>
+  <p class="lead">
+    The funnel as a board, columns in stage order. Dragging a card writes a
+    <code>state_history</code> row rather than overwriting a cell &mdash; which is what makes stall
+    detection, time-in-stage and win rate fall out later without a new data-collection programme.
+    A card with a pending proposal carries its delta on the face.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / board</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a class="on" href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+      <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Stage board</h5>
+            <div class="sub">Korea, Taiwan, EU &middot; 9 opportunities &middot; drag to move stage, a reason code is required to leave</div></div>
+          <div><span class="btn">Group by region</span></div>
+        </div>
+        <div class="board">
+          <div class="col">
+            <h6><span>Concept</span><span>1</span></h6>
+            <div class="card"><b>Poseidon</b><div class="meta">Flextron &rarr; Ford &middot; AX20</div>
+              <div class="row"><span class="tag t-mute">Promotion</span><span class="conf flat">0.10</span></div></div>
+          </div>
+          <div class="col">
+            <h6><span>EVT</span><span>4</span></h6>
+            <div class="card"><b>Hermes</b><div class="meta">Flextron &rarr; Ford &middot; 10,000 Kpcs</div>
+              <div class="row"><span class="tag t-judge">Proposal &minus;12pp</span><span class="conf dn">0.30 &rarr; 0.18</span></div></div>
+            <div class="card"><b>Apollo</b><div class="meta">Flextron &rarr; Ford &middot; AX20</div>
+              <div class="row"><span class="tag t-judge">Proposal &minus;8pp</span><span class="conf dn">0.50 &rarr; 0.42</span></div></div>
+            <div class="card"><b>Dresden</b><div class="meta">ODE &rarr; BMWi &middot; AX01</div>
+              <div class="row"><span class="tag t-mute">Evaluation</span><span class="conf flat">0.50</span></div></div>
+            <div class="card"><b>Hugo</b><div class="meta">ODE &rarr; BMWi &middot; AX01</div>
+              <div class="row"><span class="tag t-mute">Evaluation</span><span class="conf flat">0.30</span></div></div>
+          </div>
+          <div class="col">
+            <h6><span>DVT</span><span>2</span></h6>
+            <div class="card"><b>Aphrodite</b><div class="meta">SLM &rarr; GM &middot; AX01</div>
+              <div class="row"><span class="tag t-mute">Design In</span><span class="conf flat">0.80</span></div></div>
+            <div class="card"><b>Montana</b><div class="meta">Foxc &rarr; Forde &middot; AX01</div>
+              <div class="row"><span class="tag t-mute">Design In</span><span class="conf flat">0.80</span></div></div>
+          </div>
+          <div class="col">
+            <h6><span>PVT</span><span>2</span></h6>
+            <div class="card"><b>Hercules</b><div class="meta">SLM &rarr; GM &middot; 1,100 Kpcs</div>
+              <div class="row"><span class="tag t-judge">Proposal +5pp</span><span class="conf up">1.00 &rarr; 0.95</span></div></div>
+            <div class="card"><b>Yellowstone</b><div class="meta">Foxc &rarr; Forde &middot; AX01</div>
+              <div class="row"><span class="tag t-judge">Proposal +5pp</span><span class="conf up">1.00 &rarr; 0.95</span></div></div>
+          </div>
+          <div class="col">
+            <h6><span>Mass Production</span><span>0</span></h6>
+            <div class="card" style="opacity:.6"><b>Nothing promoted</b>
+              <div class="meta">Step 8 lifecycle moves need a human gate and a reason code. Not switched on.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">
+    The two design wins read <code>1.00 &rarr; 0.95</code> because the clamp ceiling is 0.95, not 1.0.
+    A row entered at certainty is the one case where the agent proposes a <em>reduction</em> that is
+    really a correction: nothing in a pipeline is 100%, and leaving them at 1.00 is what made the old
+    layer arithmetically incapable of ever moving a number up.
+  </p>
+</section>
+
+<section id="p3">
+  <h2><span class="num">05</span> Screen</h2>
+  <h3>Review console</h3>
+  <p class="lead">
+    The screen the whole architecture exists to serve. A proposal is never a number on its own: it is a
+    list of factors, each carrying a rule ID and a verbatim quote, plus everything the guards threw
+    away. A reviewer can approve, override with their own value, or reject &mdash; and all three write
+    an audit event.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / review / dresden</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a class="on" href="#p3">Review queue <span class="cnt">2</span></a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+      <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Review queue</h5>
+            <div class="sub">2 rows crossed a lifecycle band this run. Everything else applied automatically.</div></div>
+          <div><span class="tag t-human">Sales manager, EU</span></div>
+        </div>
+        <div class="prop">
+          <div class="ph">
+            <div><b>Dresden</b> &middot; <span class="mono">ODE &rarr; BMWi &middot; AX01</span></div>
+            <div><span class="tag t-stop">Band crossing</span>
+              <span class="delta">0.50 &rarr; 0.35</span></div>
+          </div>
+          <div class="factor">
+            <div class="rid">J-05<br><span class="tag t-judge">fired</span></div>
+            <div><b>Customer concentration</b>
+              <q>Dresden 1,500K adjusted of 2,175K for EU</q>
+              Dresden alone is 69.0% of the EU weighted pipeline, well past the 25% threshold, and the
+              region has only two tracked rows to absorb a loss.</div>
+            <div class="pp">&minus;10.0</div>
+          </div>
+          <div class="factor drop">
+            <div class="rid">J-05<br><span class="tag t-stop">clipped</span></div>
+            <div><b>over_factor_cap</b>
+              Returned &minus;14.0pp against a cap of 10. Clipped to the cap and flagged; the reviewer
+              sees both the ask and the ceiling.</div>
+            <div class="pp">&minus;14.0</div>
+          </div>
+          <div class="factor">
+            <div class="rid">J-12<br><span class="tag t-judge">fired</span></div>
+            <div><b>Data completeness</b>
+              <q>competitor_part: null, unit_per_set: null</q>
+              Two fields required by the rubric are absent on this row, so three other factors could not
+              be assessed at all.</div>
+            <div class="pp">&minus;5.0</div>
+          </div>
+          <div class="factor drop">
+            <div class="rid">J-02<br><span class="tag t-stop">dropped</span></div>
+            <div><b>not_assessable</b>
+              Competitor Part&#35; exists only on the Funnel tab, not on ProjectTrack. The model marked
+              it <code>valid: false</code> rather than inferring rivalry from the comments field.</div>
+            <div class="pp">&mdash;</div>
+          </div>
+          <div class="factor drop">
+            <div class="rid">J-06<br><span class="tag t-stop">dropped</span></div>
+            <div><b>not_assessable</b>
+              No owner field exists anywhere in the workbook and no outcomes have resolved, so there is
+              no bias to apply.</div>
+            <div class="pp">&mdash;</div>
+          </div>
+          <div class="factor">
+            <div class="rid">J-04<br><span class="tag t-mute">no fire</span></div>
+            <div><b>Early-stage optimism</b>
+              EVT with a Matrix A baseline of 0.35 against an entered 0.50 &mdash; exactly at the 0.15
+              threshold, not past it. Recorded as considered and not applied.</div>
+            <div class="pp">0.0</div>
+          </div>
+          <div class="pfoot">
+            <div>Total &minus;15.0pp, inside the 20pp per-run cap &middot; band <b>designing &rarr; early</b>
+              &middot; claude-opus-5 &middot; schema enforced</div>
+            <div><span class="btn dan">Reject</span> <span class="btn">Override&hellip;</span>
+              <span class="btn pri">Approve &minus;15pp</span></div>
+          </div>
+        </div>
+        <div class="prop">
+          <div class="ph">
+            <div><b>Hermes</b> &middot; <span class="mono">Flextron &rarr; Ford &middot; AX10</span></div>
+            <div><span class="tag t-stop">Band crossing</span><span class="delta">0.30 &rarr; 0.18</span></div>
+          </div>
+          <div class="pfoot"><div>2 factors fired, 4 not assessable &middot; 47.7% of the Korea weighted pipeline</div>
+            <div><span class="btn">Open</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pull">
+    <p>Approving is a decision, not a formality &mdash; so the screen shows the rejected factors as
+    prominently as the accepted ones.</p>
+    <p>A reviewer who only ever sees what the model got right has no way to calibrate how much to trust
+    it next month.</p>
+  </div>
+</section>
+
+<section id="pRUNS">
+  <h2><span class="num">06</span> Screen</h2>
+  <h3>Runs &amp; audit</h3>
+  <p class="lead">
+    A run is a pure function of a snapshot, so it can be opened, read step by step, and re-executed to
+    the same numbers. This screen is where <em>"where did that figure come from"</em> gets answered
+    without anyone reconstructing it &mdash; the ten-step trace, the provenance block, and the
+    append-only event stream underneath.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / runs / 2025-03-r04</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a href="#pOPPS">Opportunities</a>
+        <a class="on" href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+        <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Run 2025-03-r04</h5>
+            <div class="sub">Monthly &middot; 01 Mar 04:12 &middot; snapshot 2025-03-10 &middot; 9 rows &middot; 2m 41s</div></div>
+          <div><span class="btn">Download trace</span> <span class="btn">Re-run snapshot</span></div>
+        </div>
+        <div class="runs">
+          <div class="runlist">
+            <div class="runrow on"><b>2025-03-r04</b>monthly &middot; 4 moved &middot; 2 queued</div>
+            <div class="runrow"><b>2025-02-r19</b>event &middot; Dresden stage change</div>
+            <div class="runrow"><b>2025-02-r03</b>monthly &middot; 3 moved &middot; 1 queued</div>
+            <div class="runrow"><b>2025-01-r02</b>monthly &middot; 6 moved &middot; 0 queued</div>
+            <div class="runrow" style="color:var(--stop)"><b>2025-01-r01</b>failed &middot; reply hit max_tokens</div>
+          </div>
+          <div>
+            <div class="trace">
+              <div class="tstep"><span class="i">01</span><span class="nm"><span class="dot ok"></span>Intake<em>9 rows, 28 parameters, snapshot sealed</em></span><span class="tag t-det">det</span></div>
+              <div class="tstep"><span class="i">02</span><span class="nm"><span class="dot wr"></span>Validate<em>7 findings, 4 blocking &mdash; TBD in numeric fields</em></span><span class="tag t-det">det</span></div>
+              <div class="tstep"><span class="i">03</span><span class="nm"><span class="dot ok"></span>Compute base<em>$82,350.0K sales, $30,915.0K weighted, eff. 0.375</em></span><span class="tag t-det">det</span></div>
+              <div class="tstep skip"><span class="i">04</span><span class="nm"><span class="dot sk"></span>Retrieve precedent<em>skipped &mdash; no resolved outcomes to retrieve from</em></span><span class="tag t-stop">phase 2</span></div>
+              <div class="tstep"><span class="i">05</span><span class="nm"><span class="dot ok"></span>Score factors<em>claude-opus-5 &middot; schema + thinking + fallbacks &middot; 11,204 in / 8,867 out</em></span><span class="tag t-judge">model</span></div>
+              <div class="tstep"><span class="i">06</span><span class="nm"><span class="dot wr"></span>Check the reply<em>17 factors accepted, 41 not assessable, 1 clipped, 2 band crossings</em></span><span class="tag t-det">det</span></div>
+              <div class="tstep"><span class="i">07</span><span class="nm"><span class="dot ok"></span>Recompute<em>$30,173.0K weighted after auto-applied rows</em></span><span class="tag t-det">det</span></div>
+              <div class="tstep skip"><span class="i">08</span><span class="nm"><span class="dot sk"></span>Lifecycle moves<em>skipped &mdash; needs state history and a human gate</em></span><span class="tag t-stop">phase 2</span></div>
+              <div class="tstep"><span class="i">09</span><span class="nm"><span class="dot wr"></span>Human decision<em>2 queued: Dresden, Hermes &middot; 0 cleared</em></span><span class="tag t-human">human</span></div>
+              <div class="tstep"><span class="i">10</span><span class="nm"><span class="dot ok"></span>Log<em>audit record written, 23 events</em></span><span class="tag t-det">det</span></div>
+            </div>
+            <h6 style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:14px 0 7px">Audit stream</h6>
+            <div class="ev">08:41  approve   OPP-0041 Dresden   0.50 -> 0.35   priya.n   note attached
+04:14  propose   OPP-0041 Dresden   0.50 -> 0.35   agent     J-05 -10, J-12 -5
+04:14  clip      OPP-0041 Dresden   J-05 -14.0 -> -10.0      over_factor_cap
+04:13  propose   OPP-0007 Hercules  1.00 -> 0.95   agent     J-03 +8, clamped
+04:12  snapshot  2025-03-10 sealed, 9 rows, sha 7c1f9a2e</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">
+    The failed run stays in the list. A run that raised rather than silently substituting a mock scorer
+    is a successful outcome of the design, and hiding it would remove the only evidence that the
+    no-silent-fallback rule is actually holding.
+  </p>
+</section>
+
+<section id="p4">
+  <h2><span class="num">07</span> Screen</h2>
+  <h3>Ask OppTrack &mdash; the assistant</h3>
+  <p class="lead">
+    The chat panel is a <strong>reader of the system, not a second path into it</strong>. It answers
+    from the same tables the dashboard renders, quotes the same audit events a reviewer would open, and
+    has no tool that writes a confidence value. When it reports a figure it says which snapshot and
+    which engine produced it, so an answer in chat and an answer in a board pack cannot disagree.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / ask</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a class="on" href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+      <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Ask OppTrack</h5>
+            <div class="sub">Scoped to EU and Korea &middot; answers cite the snapshot they came from</div></div>
+          <div><span class="tag t-det">Read only</span></div>
+        </div>
+        <div class="chat">
+          <div class="msg me"><div class="av">RM</div><div class="bub">
+            Why did Dresden drop 15 points this month?</div></div>
+          <div class="msg bot"><div class="av">OT</div><div class="bub">
+            Two factors fired against it in the March run, and one was clipped.<br><br>
+            <b>J-05 concentration, &minus;10pp.</b> Dresden is $1,500K of the $2,175K EU weighted
+            pipeline, so 69.0% of the region. The model asked for &minus;14pp; the factor cap is 10, so
+            the guard clipped it and recorded the ask.<br>
+            <b>J-12 data completeness, &minus;5pp.</b> <code>competitor_part</code> and
+            <code>unit_per_set</code> are both null on the row, which also blocked three other factors
+            from being assessed.<br><br>
+            That takes it from 0.50 to 0.35, which crosses the designing/early band, so it is
+            <b>waiting on your approval</b> rather than applied.
+            <span class="cite">proposal #4471</span><span class="cite">snapshot 2025-03-10</span>
+          </div></div>
+          <div class="msg me"><div class="av">RM</div><div class="bub">
+            What is the Korea weighted pipeline if I approve everything in the queue?</div></div>
+          <div class="msg bot"><div class="av">OT</div><div class="bub">
+            $23,940K, down from $25,140K &mdash; a $1,200K reduction, all of it from Hermes.<br><br>
+            I computed that by re-running the calc engine over the approved values; it is the same
+            function that produced the figure on your dashboard, not an estimate. Dresden is in EU and
+            does not affect the Korea total.
+            <span class="cite">calc_engine</span><span class="cite">snapshot 2025-03-10</span>
+          </div></div>
+          <div class="msg me"><div class="av">RM</div><div class="bub">
+            Set Hermes to 0.4, it will land.</div></div>
+          <div class="msg bot"><div class="av">OT</div><div class="bub">
+            I can't write a confidence value &mdash; that is a reviewer action, and I have no tool for
+            it. Two things I can do instead:<br><br>
+            Open Hermes in the review console with 0.40 pre-filled as an override, ready for you to
+            confirm. Or record your reasoning as evidence on the row now, so the next run's judgment
+            has it in the bundle.<br><br>
+            Worth knowing before you decide: 0.40 would put Hermes above its Matrix A baseline of 0.30
+            for Sample at EVT, so J-04 is likely to fire against it next month unless the stage moves.
+          </div></div>
+        </div>
+        <div class="ask"><span>Ask about a project, a region, a run, or a rubric factor&hellip;</span>
+          <span class="btn pri">Send</span></div>
+      </div>
+    </div>
+  </div>
+  <h4>What the assistant is allowed to do</h4>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Capability</th><th>Backed by</th><th>Bound</th></tr></thead>
+    <tbody>
+      <tr><td><b>Explain a proposal</b></td><td><code>get_proposal</code>, <code>get_audit_events</code></td><td>Quotes the stored factors verbatim; never re-derives them</td></tr>
+      <tr><td><b>Report a figure</b></td><td><code>get_rollup</code>, <code>compute_scenario</code></td><td>Always via the calc engine, always with a snapshot ID</td></tr>
+      <tr><td><b>Run a what-if</b></td><td><code>compute_scenario</code></td><td>Returns a scenario object; writes nothing</td></tr>
+      <tr><td><b>Find precedent</b></td><td><code>search_notes</code></td><td>Prose chunks only, filtered to the user's region scope first</td></tr>
+      <tr><td><b>Draft an override</b></td><td><code>open_review(prefill)</code></td><td>Opens the console; the person confirms</td></tr>
+      <tr><td><b>Attach evidence</b></td><td><code>add_note</code></td><td>Written as the user, timestamped, feeds the next bundle</td></tr>
+      <tr><td><b>Change confidence</b></td><td><span class="tag t-stop">No tool exists</span></td><td>Structurally impossible, not policed at runtime</td></tr>
+      <tr><td><b>Approve or reject</b></td><td><span class="tag t-stop">No tool exists</span></td><td>Nobody approves their own proposal, including the agent</td></tr>
+      <tr><td><b>Cross region scope</b></td><td><span class="tag t-stop">Blocked in the query</span></td><td>Enforced in SQL, not by prompt instruction</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull judge">
+    <p>The assistant refuses the write and offers the two things it can actually do &mdash; then adds
+    the one fact that changes the decision.</p>
+    <p>A chat surface that quietly did the write would put an unaudited number into a board pack. One
+    that only says no is useless. The useful behaviour is the third option.</p>
+  </div>
+</section>
+
+<section id="pROLES">
+  <h2><span class="num">08</span> Screens by role</h2>
+  <h3>Four people, four different applications</h3>
+  <p class="lead">
+    The role does not just gate buttons &mdash; it changes what the landing page is <em>for</em>. An
+    owner opens the app to finish their own rows; a manager opens it to clear a queue; a director opens
+    it to compare regions; finance opens it to pull a feed and never touches a record. Building one
+    dashboard with disabled controls would serve none of them.
+  </p>
+  <div class="roles">
+    <div class="rv">
+      <div class="rvh"><b>Regional sales owner</b><span class="tag t-mute">Ji-woo, Korea</span></div>
+      <div class="rvb">
+        <div class="rvnav"><i class="on">My opportunities</i><i>Stage board</i><i>Ask OppTrack</i></div>
+        <div class="rvmain">
+          <div class="rvt">What needs you</div>
+          <div class="rvi"><span class="dot wr"></span>3 rows missing competitor part&#35;</div>
+          <div class="rvi"><span class="dot wr"></span>Hermes: rationale requested by Marc</div>
+          <div class="rvi"><span class="dot ok"></span>Poseidon PPAP due in 9 days</div>
+          <div class="rvt">Your pipeline</div>
+          <div class="rvk"><b>$25,140K</b><span>Korea weighted</span></div>
+          <div class="rvn">No approve button anywhere. Sees Korea only &mdash; the API returns 404 for
+            anything else, not a filtered list.</div>
+        </div>
+      </div>
+    </div>
+    <div class="rv">
+      <div class="rvh"><b>Sales manager</b><span class="tag t-human">Priya, EU</span></div>
+      <div class="rvb">
+        <div class="rvnav"><i class="on">Review queue</i><i>Opportunities</i><i>Runs &amp; audit</i><i>Ask OppTrack</i></div>
+        <div class="rvmain">
+          <div class="rvt">Queue, 1 waiting</div>
+          <div class="rvi"><span class="dot wr"></span>Dresden 0.50 &rarr; 0.35 &middot; band crossing</div>
+          <div class="rvt">Her owners</div>
+          <div class="rvi">Klaus B. &middot; 4 rows &middot; 2 overdue milestones</div>
+          <div class="rvi">Ana M. &middot; 3 rows &middot; complete</div>
+          <div class="rvk"><b>$2,175K</b><span>EU weighted, &minus;$450K pending</span></div>
+          <div class="rvn">Lands on the queue, not the dashboard. Can approve, reject and override in
+            EU. Cannot edit the rubric that produced the proposal.</div>
+        </div>
+      </div>
+    </div>
+    <div class="rv">
+      <div class="rvh"><b>Regional director</b><span class="tag t-human">Marc, global</span></div>
+      <div class="rvb">
+        <div class="rvnav"><i class="on">Global roll-up</i><i>Review queue</i><i>Runs &amp; audit</i><i>Ask OppTrack</i></div>
+        <div class="rvmain">
+          <div class="rvt">Regions</div>
+          <div class="rvi">Korea $25,140K &middot; <b>Hermes 47.7%</b></div>
+          <div class="rvi">Taiwan $3,600K &middot; <b>Yellowstone 83.3%</b></div>
+          <div class="rvi">EU $2,175K &middot; <b>Dresden 69.0%</b></div>
+          <div class="rvt">Run to run</div>
+          <div class="rvk"><b>0.375 &rarr; 0.366</b><span>effective confidence, Feb to Mar</span></div>
+          <div class="rvn">Concentration surfaces first, because it is what a regional total hides.
+            Approves anywhere. Still cannot edit an audit entry.</div>
+        </div>
+      </div>
+    </div>
+    <div class="rv">
+      <div class="rvh"><b>Finance</b><span class="tag t-det">Dana, read only</span></div>
+      <div class="rvb">
+        <div class="rvnav"><i class="on">Forecast feed</i><i>Roll-ups</i><i>Exports</i></div>
+        <div class="rvmain">
+          <div class="rvt">Feed, by quarter</div>
+          <div class="rvi">2025Q2 &middot; $7,412K &middot; snapshot 03-10</div>
+          <div class="rvi">2025Q3 &middot; $8,190K &middot; snapshot 03-10</div>
+          <div class="rvt">Cross-check</div>
+          <div class="rvi"><span class="dot ok"></span>ROI Agent input matches this vintage</div>
+          <div class="rvn">Every figure carries its snapshot. No edit controls exist in the markup at
+            all &mdash; not disabled ones, absent ones.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="pull">
+    <p>Controls a role cannot use are absent, not greyed out.</p>
+    <p>A disabled approve button teaches an owner that approving is part of their job and someone is
+    withholding it. Removing it teaches them the truth: their job is to supply the evidence, and
+    someone else decides.</p>
+  </div>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Role</th><th>Lands on</th><th>Primary action</th><th>Never sees</th></tr></thead>
+    <tbody>
+      <tr><td><b>Regional sales owner</b></td><td>My opportunities, sorted by what is incomplete</td><td>Finish a row, attach evidence, request a review</td><td>Approve controls, other regions, run triggers</td></tr>
+      <tr><td><b>Sales manager</b></td><td>Review queue</td><td>Approve, reject or override in their region</td><td>Rubric editor, user provisioning, other regions</td></tr>
+      <tr><td><b>Regional director</b></td><td>Global roll-up with concentration first</td><td>Compare regions, approve anywhere, sign off a close</td><td>Rubric editor, audit editing, user provisioning</td></tr>
+      <tr><td><b>Finance</b></td><td>Forecast feed by quarter</td><td>Pull the feed, run the ROI cross-check, export</td><td>Any edit control, the review queue, evidence entry</td></tr>
+      <tr><td><b>Admin</b></td><td>Integrations and access</td><td>Provision users, publish rubric versions, trigger runs</td><td>Pipeline data by default, and every approve control</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section id="p5">
+  <h2><span class="num">09</span> Screen</h2>
+  <h3>Integrations</h3>
+  <p class="lead">
+    Every connector writes <em>provenanced field values</em>, never raw cells. A value carries its
+    source, its timestamp and a trust level, and a connector never silently overwrites a human edit
+    &mdash; a disagreement becomes a conflict a person resolves, which is the only way an automated
+    feed can be trusted with a forecast input.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / admin / integrations</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue <span class="cnt">2</span></a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a class="on" href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+      <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Integrations</h5>
+            <div class="sub">4 connected &middot; 2 available &middot; 1 conflict waiting on a person</div></div>
+          <div><span class="btn pri">Add connector</span></div>
+        </div>
+        <div class="conn">
+          <div class="ccard">
+            <div class="top"><b>Salesforce CRM</b><span class="tag t-ok">Connected</span></div>
+            <p>Opportunity owner, customer, end customer, stage. Syncs every 4 hours.</p>
+            <div class="fields">supplies D1 D2 D3 L1 &middot; trust: authoritative</div>
+          </div>
+          <div class="ccard">
+            <div class="top"><b>SAP ERP</b><span class="tag t-ok">Connected</span></div>
+            <p>Part numbers, distributor ASP, resale ASP, SoP dates. Nightly.</p>
+            <div class="fields">supplies D7 V3 V4 N2 &middot; trust: authoritative</div>
+          </div>
+          <div class="ccard">
+            <div class="top"><b>Distributor POS</b><span class="tag t-stop">1 conflict</span></div>
+            <p>Sell-through actuals by part and region. Weekly report, manual schedule.</p>
+            <div class="fields">supplies T1 actuals &middot; trust: observed</div>
+          </div>
+          <div class="ccard">
+            <div class="top"><b>Excel upload</b><span class="tag t-ok">Connected</span></div>
+            <p>TrackF workbook drop. Kept for the transition, retired at Phase 2.</p>
+            <div class="fields">supplies all 28 &middot; trust: fallback</div>
+          </div>
+          <div class="ccard">
+            <div class="top"><b>Vehicle programme data</b><span class="tag t-mute">Available</span></div>
+            <p>Build volumes for the EAU plausibility cross-check. Needs a licence.</p>
+            <div class="fields">would unblock J-11 &middot; trust: external</div>
+          </div>
+          <div class="ccard">
+            <div class="top"><b>Slack / Teams</b><span class="tag t-mute">Available</span></div>
+            <p>Stall, stage change and win-loss alerts, with the rationale attached.</p>
+            <div class="fields">outbound only &middot; no writes back</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h4>Connector precedence</h4>
+  <p>
+    When two sources supply the same parameter, the winner is decided by this order, not by whichever
+    ran last. A lower-trust source that disagrees with a higher one raises a conflict instead of losing
+    silently, so a wrong ERP price is visible rather than absorbed.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Rank</th><th>Source</th><th>Wins for</th><th>On disagreement</th></tr></thead>
+    <tbody>
+      <tr><td><b>1</b></td><td>Human edit, in-app</td><td>Any field, including confidence</td><td>Always wins; connector raises a conflict and holds</td></tr>
+      <tr><td><b>2</b></td><td>ERP</td><td>Prices, part numbers, dates</td><td>Overwrites CRM, flags if the delta exceeds a threshold</td></tr>
+      <tr><td><b>3</b></td><td>CRM</td><td>Ownership, customer, stage</td><td>Overwrites upload, never overwrites ERP price fields</td></tr>
+      <tr><td><b>4</b></td><td>Distributor POS</td><td>Actuals only</td><td>Never writes a forecast field; feeds accuracy analysis</td></tr>
+      <tr><td><b>5</b></td><td>Workbook upload</td><td>Anything not yet connected</td><td>Lowest trust; every value it sets is marked fallback</td></tr>
+      <tr><td><b>&mdash;</b></td><td>The agent</td><td><span class="tag t-judge">J1 proposals only</span></td><td>Writes to the queue, never to the record</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    Service accounts are scoped to exactly one connector and cannot write confidence, move a record, or
+    act as a person. That is why a compromised integration key cannot change a forecast &mdash; the
+    worst it can do is supply a wrong input that the validation rules then flag.
+  </p>
+</section>
+
+<section id="pRUBRIC">
+  <h2><span class="num">10</span> Screen</h2>
+  <h3>Rubric &amp; Matrix A</h3>
+  <p class="lead">
+    L4 memory with a user interface. Matrix A and the factor rubric are <strong>published versions,
+    not settings</strong> &mdash; editing produces a draft, publishing stamps a version ID, and every
+    proposal ever made records which version produced it. That is what lets two runs be compared rather
+    than argued about.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / admin / rubric</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue</a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a class="on" href="#pRUBRIC">Rubric &amp; Matrix A</a>
+        <a href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Rubric &amp; Matrix A</h5>
+            <div class="sub">Published: opptrack-matrix/2026-08-19 &middot; draft by you, 2 changes</div></div>
+          <div><span class="btn">Discard draft</span> <span class="btn pri">Publish version</span></div>
+        </div>
+        <div class="banner">
+          <span>Publishing does not re-run anything. Existing proposals keep the version that produced
+          them; the next run picks up the new one.</span>
+          <span class="tag t-human">Admin cannot approve proposals</span>
+        </div>
+        <table class="mx">
+          <thead><tr><th>Design status</th><th>Concept</th><th>EVT</th><th>DVT</th><th>PVT</th><th>MP</th></tr></thead>
+          <tbody>
+            <tr><td>Promotion</td><td class="ok">0.10</td><td class="ok">0.15</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td></tr>
+            <tr><td>Sample</td><td class="ok">0.20</td><td class="ok">0.30</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td></tr>
+            <tr><td>Evaluation</td><td class="ok">0.20</td><td class="edit">0.40</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td></tr>
+            <tr><td>Design In</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="ok">0.65</td><td class="ok">0.80</td><td class="no">&mdash;</td></tr>
+            <tr><td>Design Win</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="ok">0.90</td><td class="ok">0.95</td></tr>
+            <tr><td>Mass Production</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="ok">0.95</td></tr>
+            <tr><td>Lost</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr>
+          </tbody>
+        </table>
+        <div style="font-size:10.5px;color:var(--muted);margin:8px 0 14px">
+          Click a cell to edit. A dash means a pairing the rules forbid &mdash; a row landing on one is
+          an internal contradiction that J-01 fires against and validation blocks at intake.
+        </div>
+        <h6 style="font-family:'IBM Plex Sans Condensed',sans-serif;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:0 0 7px">Changes in this draft</h6>
+        <div class="diff"><span class="ctx">  matrix_a["Evaluation"]["EVT"]</span>
+<span class="rem">- 0.35</span>
+<span class="add">+ 0.40      </span><span class="ctx">reason: three EU rows entered at 0.50 with an accepted rationale;
+             the baseline was set below observed practice</span>
+<span class="ctx">  rubric["J-05"].cap</span>
+<span class="rem">- 10</span>
+<span class="add">+ 12        </span><span class="ctx">reason: single-row concentration above 60% is common in EU and
+             the cap was clipping every EU proposal</span>
+
+<span class="ctx">  impact if re-run on snapshot 2025-03-10: 3 rows change, weighted total -$118.0K</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pull">
+    <p>A cap change is a policy change, so it goes through the same publish-and-version path as the
+    baselines, and it shows its impact before anyone commits.</p>
+    <p>The alternative &mdash; tuning a cap quietly until the model agrees with you &mdash; is exactly
+    how a calibration layer stops being evidence and becomes decoration.</p>
+  </div>
+</section>
+
+<section id="pRBAC">
+  <h2><span class="num">11</span> Screen</h2>
+  <h3>Users &amp; access</h3>
+  <p class="lead">
+    There is no public sign-up. Accounts are provisioned against the corporate directory, scoped to a
+    region, and never shared. The rule that shapes the whole screen: <strong>region scope is enforced
+    in the query, not in the interface</strong> &mdash; hiding a region from a dropdown while the API
+    still returns it is the failure worth designing out on day one, because this data contains
+    unannounced design wins and customer pricing.
+  </p>
+  <div class="screen">
+    <div class="chrome"><div class="dots"><i></i><i></i><i></i></div>
+      <div class="url">opptrack.internal / admin / access</div></div>
+    <div class="app">
+      <div class="nav">
+        <div class="brand">Opp<span>Track</span></div>
+        <a href="#p1">Pipeline</a>
+        <a href="#p2">Stage board</a>
+        <a href="#p3">Review queue</a>
+        <a href="#pOPPS">Opportunities</a>
+        <a href="#pRUNS">Runs &amp; audit</a>
+        <div class="grp">Assistant</div>
+        <a href="#p4">Ask OppTrack</a>
+        <div class="grp">Admin</div>
+        <a href="#p5">Integrations</a>
+        <a href="#pRUBRIC">Rubric &amp; Matrix A</a>
+        <a class="on" href="#pRBAC">Users &amp; access</a>
+      </div>
+      <div class="main">
+        <div class="mhead">
+          <div><h5>Users &amp; access</h5>
+            <div class="sub">14 people &middot; 3 service accounts &middot; SSO via Azure AD, provisioning only</div></div>
+          <div><span class="btn">Access review</span> <span class="btn pri">Provision user</span></div>
+        </div>
+        <div class="banner">
+          <span>You hold the Admin role. You can publish rubric versions and set scopes, and you cannot
+          approve a proposal &mdash; so no one can grant themselves sign-off.</span>
+        </div>
+        <table class="dtab">
+          <thead><tr><th>Person</th><th>Role</th><th>Region scope</th><th>Approves</th><th>Last active</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><b>Ji-woo Park</b><div style="font-size:10px;color:var(--muted)">jiwoo.p</div></td>
+              <td><span class="tag t-mute">Sales owner</span></td><td>Korea</td>
+              <td style="color:var(--muted)">no</td><td>2h ago</td><td><span class="btn">Edit</span></td></tr>
+            <tr><td><b>Priya Nair</b><div style="font-size:10px;color:var(--muted)">priya.n</div></td>
+              <td><span class="tag t-human">Sales manager</span></td><td>EU</td>
+              <td><b>EU only</b></td><td>18m ago</td><td><span class="btn">Edit</span></td></tr>
+            <tr><td><b>Marc Vogel</b><div style="font-size:10px;color:var(--muted)">marc.v</div></td>
+              <td><span class="tag t-human">Regional director</span></td><td>All regions</td>
+              <td><b>All regions</b></td><td>yesterday</td><td><span class="btn">Edit</span></td></tr>
+            <tr><td><b>Dana Cole</b><div style="font-size:10px;color:var(--muted)">dana.c</div></td>
+              <td><span class="tag t-det">Finance</span></td><td>All regions, read only</td>
+              <td style="color:var(--muted)">no</td><td>3d ago</td><td><span class="btn">Edit</span></td></tr>
+            <tr><td><b>svc-sap-erp</b><div style="font-size:10px;color:var(--muted)">service account</div></td>
+              <td><span class="tag t-stop">Connector</span></td><td>Scoped to ERP fields</td>
+              <td style="color:var(--muted)">no</td><td>04:00</td><td><span class="btn">Rotate key</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <h4>Permission matrix</h4>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Action</th><th>Owner</th><th>Manager</th><th>Director</th><th>Finance</th><th>Admin</th><th>Service</th></tr></thead>
+    <tbody>
+      <tr><td><b>View own region</b></td><td class="ok">yes</td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>scoped</td></tr>
+      <tr><td><b>View all regions</b></td><td>no</td><td>no</td><td>yes</td><td>yes</td><td>no</td><td>no</td></tr>
+      <tr><td><b>Create / edit opportunity</b></td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>no</td><td>fields only</td></tr>
+      <tr><td><b>Enter confidence at intake</b></td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>no</td><td><b>never</b></td></tr>
+      <tr><td><b>Move stage / status</b></td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>no</td><td>no</td></tr>
+      <tr><td><b>Attach evidence</b></td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>no</td><td>no</td></tr>
+      <tr><td><b>Request a review</b></td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>no</td><td>no</td></tr>
+      <tr><td><b>Approve / reject proposal</b></td><td><b>no</b></td><td>own region</td><td>all regions</td><td>no</td><td><b>no</b></td><td>no</td></tr>
+      <tr><td><b>Override with own value</b></td><td>no</td><td>own region</td><td>all regions</td><td>no</td><td>no</td><td>no</td></tr>
+      <tr><td><b>Close / mark Design Lost</b></td><td>no</td><td>own region</td><td>all regions</td><td>no</td><td>no</td><td>no</td></tr>
+      <tr><td><b>Pull forecast feed</b></td><td>no</td><td>yes</td><td>yes</td><td>yes</td><td>no</td><td>scoped</td></tr>
+      <tr><td><b>Trigger a run</b></td><td>no</td><td>no</td><td>no</td><td>no</td><td>yes</td><td>scheduled</td></tr>
+      <tr><td><b>Publish rubric / Matrix A</b></td><td>no</td><td><b>no</b></td><td>no</td><td>no</td><td>yes</td><td>no</td></tr>
+      <tr><td><b>Provision users, set scope</b></td><td>no</td><td>no</td><td>no</td><td>no</td><td>yes</td><td>no</td></tr>
+      <tr><td><b>Edit an audit entry</b></td><td>no</td><td>no</td><td><b>no</b></td><td>no</td><td><b>no</b></td><td>no</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="pull">
+    <p>Three cells carry the whole separation of duties: an owner cannot approve their own number, a
+    manager cannot edit the rubric that judges it, and an admin who can edit the rubric cannot ratify
+    what it produces.</p>
+    <p>Nobody, at any level, can edit an audit entry. Deleting a person's account anonymises their
+    display name and leaves their decisions in place, because removing the actor would break the chain.</p>
+  </div>
+  <h4>How it is enforced</h4>
+<pre><b>1  Identity</b>     SSO assertion  &rarr;  role + region scope, from the directory. Never self-set.
+<b>2  Query</b>        every SELECT is wrapped: <i>WHERE region = ANY(:scope)</i>. Not a UI filter.
+<b>3  Route</b>        FastAPI dependency asserts the role before the handler runs.
+<b>4  Field</b>        confidence is rejected on <i>PATCH /opportunities</i> for every role, always.
+<b>5  Decision</b>     <i>proposal.owner_id != actor.id</i> is checked in code, not in the interface.
+<b>6  Audit</b>        actor, role and scope are written with every mutation, before it returns.
+
+<u>The test that matters:</u> call the API directly with a manager token for another
+region and you get 404, not a filtered list. A 403 would confirm the row exists.</pre>
+</section>
+
+<section id="p6">
+  <h2><span class="num">12</span> Machine surface</h2>
+  <h3>MCP server</h3>
+  <p class="lead">
+    Sibling agents reach OppTrack over MCP through the Workflow Manager, not by calling the services
+    directly &mdash; so the ROI Agent consumes Adjusted Revenue through the same audited, region-scoped
+    gateway a person does. Every tool below is read-only except the two marked, and neither of those
+    can write a confidence value.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Tool</th><th>Input</th><th>Returns</th><th>Mode</th></tr></thead>
+    <tbody>
+      <tr><td><code>get_pipeline</code></td><td>region?, stage?, snapshot_id?</td><td>Rows with C1, C2, confidence, provenance</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>get_rollup</code></td><td>by: region | stage | customer | part</td><td>&Sigma;C1, &Sigma;C2, count, effective confidence</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>get_forecast_feed</code></td><td>quarters, currency</td><td>T2 quarterly revenue by region &mdash; the ROI Agent's input</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>get_opportunity</code></td><td>opportunity_id</td><td>Full row, state_history, findings, open proposal</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>get_proposal</code></td><td>proposal_id | opportunity_id</td><td>Factors, quotes, violations, model and rubric version</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>get_audit_events</code></td><td>opportunity_id, since?</td><td>Append-only confidence_event stream</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>search_notes</code></td><td>query, region scope applied server-side</td><td>Prose chunks with opportunity and vintage</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>compute_scenario</code></td><td>overrides: [{opportunity_id, confidence}]</td><td>Recomputed roll-ups. Nothing persisted</td><td><span class="tag t-det">Pure</span></td></tr>
+      <tr><td><code>list_findings</code></td><td>severity?, rule?</td><td>Validation findings for the snapshot</td><td><span class="tag t-det">Read</span></td></tr>
+      <tr><td><code>add_note</code></td><td>opportunity_id, text</td><td>Note ID. Attributed to the calling identity</td><td><span class="tag t-human">Write</span></td></tr>
+      <tr><td><code>request_review</code></td><td>opportunity_id, reason</td><td>Queue entry for a human reviewer</td><td><span class="tag t-human">Write</span></td></tr>
+      <tr><td><code>set_confidence</code></td><td colspan="2"><span class="tag t-stop">Not exposed &mdash; there is no such tool</span></td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+  </div>
+<pre><b>{</b>
+  "name": <b>"get_forecast_feed"</b>,
+  "description": "Quarterly weighted revenue by region, computed by the calc engine.
+                  Figures are deterministic; the snapshot_id identifies the vintage.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "quarters":    { "type": "array", "items": { "type": "string" } },   <i>// ["2025Q2","2025Q3"]</i>
+      "currency":    { "type": "string", "enum": ["USD"] },
+      "snapshot_id": { "type": "string" }                                  <i>// omit for latest</i>
+    },
+    "required": ["quarters"]
+  }
+<b>}</b></pre>
+  <h4>REST API</h4>
+  <p>
+    Same authorisation model as the UI: SSO bearer token, RBAC, region scope applied in the query.
+    Mutations are idempotent on <code>Idempotency-Key</code>, and every one of them writes an audit
+    event before it returns.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Method</th><th>Path</th><th>Does</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET</code></td><td><code>/v1/opportunities</code></td><td>List, filtered by region, stage, status, customer</td><td>Owner+</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/opportunities/{id}</code></td><td>One row with history and provenance per field</td><td>Owner+</td></tr>
+      <tr><td><code>POST</code></td><td><code>/v1/opportunities</code></td><td>Create. Owner and region required at intake</td><td>Owner+</td></tr>
+      <tr><td><code>PATCH</code></td><td><code>/v1/opportunities/{id}</code></td><td>Update fields. Confidence rejected here by design</td><td>Owner+</td></tr>
+      <tr><td><code>POST</code></td><td><code>/v1/opportunities/{id}/transition</code></td><td>Move stage or status. Reason code required to leave</td><td>Owner+</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/rollups?by=region</code></td><td>Deterministic aggregates with snapshot ID</td><td>Finance+</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/forecast?quarters=</code></td><td>T2 feed for downstream planning</td><td>Finance+</td></tr>
+      <tr><td><code>POST</code></td><td><code>/v1/runs</code></td><td>Trigger a run over a snapshot. Idempotent</td><td>Admin</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/runs/{id}</code></td><td>Ten-step trace, provenance, token counts</td><td>Manager+</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/proposals?status=pending</code></td><td>The review queue</td><td>Manager+</td></tr>
+      <tr><td><code>POST</code></td><td><code>/v1/proposals/{id}/decision</code></td><td>approve | reject | override with a value</td><td>Manager+</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/audit?opportunity_id=</code></td><td>Append-only event stream. Never deletable</td><td>Manager+</td></tr>
+      <tr><td><code>GET</code></td><td><code>/v1/findings</code></td><td>Validation results for the current snapshot</td><td>Owner+</td></tr>
+      <tr><td><code>POST</code></td><td><code>/v1/scenarios</code></td><td>What-if recompute. Persists nothing</td><td>Finance+</td></tr>
+    </tbody>
+  </table>
+  </div>
+<pre><b>POST</b> /v1/proposals/4471/decision
+Authorization: Bearer &lt;sso-token&gt;
+Idempotency-Key: 9f2c-dresden-mar
+
+<b>{</b> "decision": "approve", "note": "Concentration is real, ODE has no second programme." <b>}</b>
+
+<b>200 OK</b>
+<b>{</b>
+  "proposal_id": 4471, "opportunity_id": "OPP-0041",
+  "confidence": { "was": 0.50, "now": 0.35 },
+  "adjusted_revenue_k": { "was": 1500.0, "now": 1050.0 },   <i>// recomputed, not returned by the model</i>
+  "band": { "was": "designing", "now": "early" },
+  "audit_event_id": 88213,
+  "provenance": {
+    "model": "claude-opus-5", "rubric_version": "opptrack-matrix/2026-08-19",
+    "prompt_version": "opptrack-judgment/2026-08-19", "schema_enforced": true
+  }
+<b>}</b></pre>
+</section>
+
+<section id="p7">
+  <h2><span class="num">13</span> Events and exports</h2>
+  <h3>Webhooks, and the formats people actually ask for</h3>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Event</th><th>Fires when</th><th>Payload carries</th></tr></thead>
+    <tbody>
+      <tr><td><code>run.completed</code></td><td>A monthly or event run finishes</td><td>Snapshot ID, rows moved, rows queued, provenance</td></tr>
+      <tr><td><code>proposal.created</code></td><td>A row gets a pending proposal</td><td>Factors, quotes, violations, band change</td></tr>
+      <tr><td><code>proposal.decided</code></td><td>Approve, reject or override</td><td>Who, what changed, recomputed C2, audit event ID</td></tr>
+      <tr><td><code>opportunity.transitioned</code></td><td>Stage or status moves</td><td>From, to, actor, reason code</td></tr>
+      <tr><td><code>opportunity.stalled</code></td><td>Nightly sweep passes the stage median</td><td>Days in stage, historic median, last activity</td></tr>
+      <tr><td><code>milestone.overdue</code></td><td>A parsed PPAP, ES or SoP date passes</td><td>The source string, never only the parse</td></tr>
+      <tr><td><code>finding.raised</code></td><td>Validation fails on ingest</td><td>Rule, severity, offending value</td></tr>
+      <tr><td><code>connector.conflict</code></td><td>Two sources disagree above threshold</td><td>Both values, both trust levels, the field</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h4>Exports</h4>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Format</th><th>For</th><th>Contains</th></tr></thead>
+    <tbody>
+      <tr><td><b>XLSX</b>, TrackF-shaped</td><td>The transition period</td><td>The same six tabs, plus an Opportunity ID column and a provenance sheet</td></tr>
+      <tr><td><b>CSV</b>, one row per opportunity</td><td>Finance, BI tools</td><td>Flat, snapshot-stamped, no formulas</td></tr>
+      <tr><td><b>PDF</b> board pack</td><td>Leadership review</td><td>Roll-ups, stage mix, concentration, and the run's provenance block</td></tr>
+      <tr><td><b>JSON</b> run trace</td><td>Engineering, audit</td><td>All ten steps with inputs, outputs and every violation</td></tr>
+      <tr><td><b>Parquet</b> snapshot</td><td>Warehouse load</td><td>Immutable vintage, partitioned by snapshot date</td></tr>
+      <tr><td><b>ICS</b> milestones</td><td>Programme managers</td><td>PPAP, ES, design review and SoP dates as calendar entries</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="note">
+    Every export carries the snapshot ID and the rubric version in its header or filename. A forecast
+    that circulates without a vintage is the failure this whole system exists to remove, and an export
+    is exactly where that discipline gets lost.
+  </p>
+</section>
+
+<section id="p8">
+  <h2><span class="num">14</span> Documentation</h2>
+  <h3>What ships alongside the product</h3>
+  <p class="lead">
+    Six documentation surfaces, each with one audience. The split matters because the person ratifying
+    Matrix A and the person integrating the MCP server have almost nothing in common except that both
+    will be blocked without a doc written for them.
+  </p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>Doc</th><th>Audience</th><th>Answers</th><th>Lives</th></tr></thead>
+    <tbody>
+      <tr><td><b>Getting started</b></td><td>Regional sales owner</td><td>How do I enter an opportunity and what happens to it</td><td>In-app, first-run tour</td></tr>
+      <tr><td><b>Reviewer handbook</b></td><td>Sales manager</td><td>What each factor means, when to override, what approving commits you to</td><td>In-app, linked from every proposal</td></tr>
+      <tr><td><b>Matrix A and the rubric</b></td><td>Director, finance</td><td>Baseline per pairing, factor caps, why a number moved</td><td>Versioned page, published by admin</td></tr>
+      <tr><td><b>API and MCP reference</b></td><td>Platform engineers</td><td>Endpoints, tool schemas, auth, idempotency, webhooks</td><td>OpenAPI 3.1 + MCP manifest, generated</td></tr>
+      <tr><td><b>Connector guide</b></td><td>IT, integrators</td><td>Field mapping, trust levels, precedence, conflict resolution</td><td>Repo docs, per-connector page</td></tr>
+      <tr><td><b>Architecture and audit</b></td><td>Engineering, compliance</td><td>The layers, the guards, retention, how to reproduce a run</td><td>Repo docs, this set</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <h4>Generated, not written by hand</h4>
+<pre><b>OpenAPI 3.1</b>      from the FastAPI route signatures      <i>&rarr; /v1/openapi.json</i>
+<b>MCP manifest</b>     from the same tool definitions          <i>&rarr; /mcp/manifest.json</i>
+<b>Rubric page</b>      from registry/rubric.py + Matrix A      <i>&rarr; versioned, diffable</i>
+<b>Parameter dict</b>   from registry/parameters.py ParamSpec    <i>&rarr; one table, 28 live entries</i>
+<b>Validation rules</b> from validate/rules.py REQUIRES          <i>&rarr; what fires, and what it needs</i>
+
+<u>The rule:</u> if a doc can drift from the code, generate it. The rubric page in particular
+must be generated, because a reviewer trusting a stale factor cap is worse than
+having no page at all.</pre>
+  <div class="pull">
+    <p>The reviewer handbook is the one document that decides whether this product works.</p>
+    <p>Everything upstream is engineering discipline; the value only lands if a sales manager reading a
+    proposal at 8am understands what J-05 is claiming and feels able to reject it.</p>
+  </div>
+</section>
+
+<hr>
+<footer>
+  Opportunity Tracking Agent &middot; product surface &middot; companion to the architecture and layer plates
+</footer>
+
+</div>
+<style>
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:11px 14px;margin-bottom:14px}
+.fg{min-width:0}
+.fg label{display:block;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--muted);font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;margin-bottom:3px}
+.fg .inp{border:1px solid var(--line);border-radius:3px;background:var(--surface);
+  padding:6px 9px;font-size:12.5px;color:var(--ink);min-height:31px}
+.fg .inp.sel:after{content:"\25BE";float:right;color:var(--muted);font-size:10px}
+.fg .inp.ph{color:var(--muted)}
+.fg .hint{font-size:10.5px;color:var(--muted);margin-top:3px;font-family:"IBM Plex Sans",sans-serif}
+.fg .hint.ok{color:var(--ok)} .fg .hint.bad{color:var(--stop)} .fg .hint.warn{color:var(--judge)}
+.fg.wide{grid-column:1/-1}
+.fsec{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;grid-column:1/-1;
+  border-top:1px solid var(--line-soft);padding-top:11px;margin-top:3px}
+.fsec:first-child{border-top:0;padding-top:0;margin-top:0}
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:20px 0}
+.path{border:1px solid var(--line);border-radius:3px;padding:12px 13px;background:var(--surface)}
+.path .n{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted)}
+.path b{display:block;font-size:13.5px;margin:4px 0 4px}
+.path p{margin:0;font-size:11.5px;color:var(--muted);max-width:none}
+.path.pri{border-color:var(--det-edge);background:var(--det-soft)}
+.path.pri b{color:var(--det)}
+</style>
+<style>
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:11px}
+.fchip{font-size:11px;padding:3px 9px;border:1px solid var(--line);border-radius:12px;
+  background:var(--surface);color:var(--muted)}
+.fchip.on{border-color:var(--det-edge);background:var(--det-soft);color:var(--det);font-weight:500}
+.fchip .x{color:var(--muted);margin-left:4px}
+.srch{flex:1;min-width:130px;font-size:11.5px;color:var(--muted);border:1px solid var(--line);
+  border-radius:3px;padding:4px 9px;background:var(--surface)}
+.prov{font-family:"IBM Plex Mono",monospace;font-size:9px;padding:0 4px;border-radius:2px;
+  border:1px solid var(--line);color:var(--muted);background:var(--surface-2);margin-left:5px}
+.prov.erp{color:var(--det);border-color:var(--det-edge);background:var(--det-soft)}
+.prov.crm{color:var(--ok);border-color:var(--ok-edge);background:var(--ok-soft)}
+.prov.you{color:var(--human);border-color:var(--human-edge);background:var(--human-soft)}
+.prov.xls{color:var(--judge);border-color:var(--judge-edge);background:var(--judge-soft)}
+.runs{display:grid;grid-template-columns:minmax(0,250px) minmax(0,1fr);gap:14px}
+@media(max-width:820px){.runs{grid-template-columns:1fr}}
+.runlist{border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.runrow{padding:9px 11px;border-bottom:1px solid var(--line-soft);font-size:11.5px;color:var(--muted)}
+.runrow:last-child{border-bottom:0}
+.runrow.on{background:var(--det-soft);border-left:2px solid var(--det)}
+.runrow b{display:block;font-size:12.5px;color:var(--ink);font-weight:600}
+.trace{border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.tstep{display:grid;grid-template-columns:26px 1fr auto;gap:9px;padding:7px 11px;
+  border-bottom:1px solid var(--line-soft);font-size:11.5px;align-items:center}
+.tstep:last-child{border-bottom:0}
+.tstep .i{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted)}
+.tstep .nm{color:var(--ink)}
+.tstep .nm em{font-style:normal;color:var(--muted);font-size:10.5px;display:block}
+.tstep.skip{opacity:.55}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px}
+.dot.ok{background:var(--ok)} .dot.sk{background:var(--line)} .dot.wr{background:var(--judge)}
+.ev{font-family:"IBM Plex Mono",monospace;font-size:10.5px;line-height:1.7;color:var(--ink-2);
+  border:1px solid var(--line);border-radius:3px;padding:10px 12px;background:var(--sunk);
+  overflow-x:auto;white-space:pre}
+.mx{width:100%;border-collapse:collapse;font-size:11.5px;font-family:"IBM Plex Mono",monospace}
+.mx th{padding:6px 8px;font-size:9.5px;text-align:center;background:var(--sunk)}
+.mx th:first-child{text-align:left}
+.mx td{padding:5px 8px;text-align:center;border-bottom:1px solid var(--line-soft);
+  font-variant-numeric:tabular-nums}
+.mx td:first-child{text-align:left;font-family:"IBM Plex Sans",sans-serif;color:var(--ink);font-weight:500}
+.mx td.ok{background:var(--det-soft);color:var(--det);font-weight:600}
+.mx td.no{background:var(--stop-soft);color:var(--stop)}
+.mx td.edit{background:var(--judge-soft);color:var(--judge);font-weight:600;
+  outline:1px solid var(--judge-edge)}
+.diff{font-family:"IBM Plex Mono",monospace;font-size:11px;line-height:1.75;
+  border:1px solid var(--line);border-radius:3px;padding:10px 12px;background:var(--sunk);overflow-x:auto}
+.diff .add{color:var(--ok)} .diff .rem{color:var(--stop)} .diff .ctx{color:var(--muted)}
+.banner{display:flex;flex-wrap:wrap;gap:9px;align-items:center;justify-content:space-between;
+  border:1px solid var(--judge-edge);background:var(--judge-soft);border-radius:3px;
+  padding:9px 12px;margin-bottom:12px;font-size:11.5px;color:var(--judge)}
+</style>
+<style>
+.roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(252px,1fr));gap:12px;margin:24px 0 8px}
+.rv{border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--surface);
+  box-shadow:var(--shadow)}
+.rvh{display:flex;flex-wrap:wrap;gap:7px;align-items:center;justify-content:space-between;
+  padding:9px 11px;background:var(--sunk);border-bottom:1px solid var(--line)}
+.rvh b{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:13px}
+.rvb{display:grid;grid-template-columns:1fr}
+.rvnav{display:flex;flex-wrap:wrap;gap:4px;padding:8px 11px;border-bottom:1px solid var(--line-soft)}
+.rvnav i{font-style:normal;font-size:10px;padding:2px 7px;border-radius:10px;border:1px solid var(--line);
+  color:var(--muted);background:var(--surface)}
+.rvnav i.on{border-color:var(--det-edge);background:var(--det-soft);color:var(--det);font-weight:600}
+.rvmain{padding:10px 11px 12px}
+.rvt{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:9px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);font-weight:600;margin:9px 0 5px}
+.rvt:first-child{margin-top:0}
+.rvi{font-size:11px;color:var(--ink-2);padding:3px 0;border-bottom:1px solid var(--line-soft)}
+.rvi:last-of-type{border-bottom:0}
+.rvi b{color:var(--ink)}
+.rvk{margin:8px 0 0;padding:8px 9px;background:var(--sunk);border:1px solid var(--line-soft);border-radius:3px}
+.rvk b{display:block;font-family:"IBM Plex Sans Condensed",sans-serif;font-size:17px;font-weight:700;
+  font-variant-numeric:tabular-nums}
+.rvk span{display:block;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.rvn{font-size:10.5px;line-height:1.5;color:var(--muted);margin-top:9px;padding-top:8px;
+  border-top:1px dashed var(--line)}
+td.ok{color:var(--ok)}
+</style>
+</body>
+</html>

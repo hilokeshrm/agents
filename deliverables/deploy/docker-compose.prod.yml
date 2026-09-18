@@ -1,0 +1,91 @@
+# Production overlay for a public-IP host (written for the RTX Blackwell
+# machine). Layers on top of ../docker-compose.yml -- it does not replace it.
+#
+#   cd deliverables
+#   cp deploy/.env.production.example deploy/.env.production   # then fill it in
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.prod.yml \
+#     --env-file deploy/.env.production --profile local-model up -d --build
+#
+# What this adds over the base file:
+#   - An `edge` Caddy proxy on 80/443 -- the only container meant to be
+#     reachable from the public IP. Everything else keeps the base file's
+#     127.0.0.1-only port bindings; edge reaches them over the internal
+#     Docker network by service name instead.
+#   - Caddy gets automatic, valid HTTPS (Let's Encrypt) for OPPTRACK_DOMAIN
+#     with zero manual cert handling, including for a free nip.io hostname
+#     if you don't have a real domain yet -- see deploy/README.md.
+#   - AUTH_MODE=local (email + password + one-time code) instead of the
+#     header stand-in docker-compose.yml's backend defaults to, which lets
+#     anyone claim to be any role via a request header -- fine on a laptop,
+#     not fine on a public IP.
+#   - DEV_TOOLS_ENABLED=false: the unauthenticated /dev/* DB browser
+#     (app/api/v1/dev.py) added for local debugging must not be reachable
+#     from the public internet.
+#   - restart: unless-stopped everywhere, so a reboot or crash comes back up
+#     on its own.
+
+services:
+  edge:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      OPPTRACK_DOMAIN: ${OPPTRACK_DOMAIN:?set OPPTRACK_DOMAIN in deploy/.env.production -- see deploy/README.md}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+  backend:
+    restart: unless-stopped
+    environment:
+      AUTH_MODE: local
+      DEV_TOOLS_ENABLED: "false"
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      AUTH_SESSION_HOURS: ${AUTH_SESSION_HOURS:-12}
+      OTP_DELIVERY: ${OTP_DELIVERY:-console}
+      SMTP_HOST: ${SMTP_HOST:-localhost}
+      SMTP_PORT: ${SMTP_PORT:-25}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_SENDER: ${SMTP_SENDER:-opptrack@localhost}
+      JUDGMENT_MODE: ${JUDGMENT_MODE:-live}
+      JUDGMENT_BACKEND: ${JUDGMENT_BACKEND:-vllm}
+      # Decision #35: a failed live judgment call should fail loudly and
+      # create no proposal, not silently fall back to a mock score.
+      JUDGMENT_FALLBACK_TO_MOCK: "false"
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN:-}
+
+  scheduler:
+    restart: unless-stopped
+    environment:
+      JUDGMENT_MODE: ${JUDGMENT_MODE:-live}
+      JUDGMENT_BACKEND: ${JUDGMENT_BACKEND:-vllm}
+      JUDGMENT_FALLBACK_TO_MOCK: "false"
+
+  frontend:
+    restart: unless-stopped
+
+  postgres:
+    restart: unless-stopped
+
+  redis:
+    restart: unless-stopped
+
+  minio:
+    restart: unless-stopped
+
+  # Runs by default under this overlay's documented command (--profile
+  # local-model). Drop that flag to fall back to JUDGMENT_BACKEND=anthropic
+  # instead of a local model.
+  vllm:
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

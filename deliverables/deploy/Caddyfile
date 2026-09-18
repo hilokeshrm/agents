@@ -1,0 +1,24 @@
+# Caddy terminates TLS here and hands everything to the frontend container,
+# which already proxies /api/ and /health to the backend on the internal
+# Docker network (frontend/nginx.conf). One upstream, one hop.
+#
+# OPPTRACK_DOMAIN is read from the environment (see docker-compose.prod.yml
+# and .env.production). Two shapes work:
+#
+#   A real DNS name, including a free nip.io one (turn IP 203.0.113.45 into
+#   203-0-113-45.nip.io -- dashes for dots, no signup, resolves to that IP
+#   automatically): Caddy requests a real Let's Encrypt certificate for it
+#   over port 80 (must be reachable from the internet for that one-time
+#   challenge) and every visit after that is trusted HTTPS with no browser
+#   warning. This is what a cross-origin caller like GitHub Pages needs --
+#   it will not trust a self-signed cert.
+#
+#   A bare IP address (OPPTRACK_DOMAIN=203.0.113.45): Let's Encrypt cannot
+#   issue a certificate for a bare IP, so Caddy just serves plain HTTP on
+#   it -- no encryption. Fine for kicking the tires; get a nip.io hostname
+#   (or a real domain) before anyone signs in for real, since AUTH_MODE=local
+#   passwords and OTP codes would otherwise cross the network in the clear.
+
+{$OPPTRACK_DOMAIN} {
+	reverse_proxy frontend:80
+}

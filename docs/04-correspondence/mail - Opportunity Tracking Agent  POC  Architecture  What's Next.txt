@@ -1,0 +1,160 @@
+Sirena Technologies Pvt Ltd Mail	Lokesh R M <lokesh@sirenatech.com>
+Opportunity Tracking Agent | POC | Architecture | What's Next
+3 messages
+Akanksha Anand <akanksha.anand@sirenatech.com>	Wed, Aug 5, 2026 at 1:33 AM
+To: Atmia Srivastava <atmia@sirenatech.com>, Dimplesai A <dimplesai@sirenatech.com>, Lokesh R M <lokesh@sirenatech.com>, Moumita Chakraborty <moumita@sirenatech.com>
+Cc: Karthikeyan Ponnuswami <karthik@sirenatech.com>, AgentOS <agentos@sirenatech.com>, Gene Sheridan <gene.sheridan@axcelai.com>, David Nam <dnam@axcelai.com>
+Hi Guys,
+
+Opportunity Tracking Agent Team : Lokesh (AI Engineer), Dimple (AI Engineer + UI ), Moumita (QA Lead) and Atmia (Tech Lead)
+Start date : 5th August
+End Date : 5th September
+
+Following the same approach we used for the ROI Agent, I have worked through the architecture for the second agent Gene asked for, the Opportunity Tracking Agent (tracks the sales pipeline from early evaluation through design win to mass production or loss, using David's TrackF_1.xlsx as the template). Here is where things stand.
+The core design decision, same as the ROI Agent: the pipeline math stays deterministic code, the LLM only calibrates one input. TrackF_1.xlsx's ProjectTrack tab computes Sales Revenue as EAU (in thousands of units) times Distributor ASP, then Adjusted Revenue as Sales Revenue times a human-entered Confidence Level, essentially an expected-value weighted pipeline. I reimplemented this in Python (calc_engine.py) and it reproduces the sheet's own numbers exactly for all 9 sample projects, verified with a regression test (test_calc_engine.py). The LLM's job, in judgment.py, is to calibrate that Confidence Level against context: is the Design Status (Design Win, Design In, Sample, Evaluation, Promotion) consistent with the validation Stage (Concept, EVT, DVT, PVT), is a competitor part named against the same socket, does a locked-in Design Win at DVT or PVT deserve support rather than a discount. It returns a structured, cited adjustment, never a raw revenue number.
+
+Running it: python3 run_poc.py runs end to end with zero setup, using a rule-based MOCK judgment layer (clearly labeled in the output) so you can see the whole pipeline shape before touching any API key. It prints the portfolio's weighted pipeline revenue before and after calibration, with the specific factors that moved each project. To go live: pip install anthropic, set ANTHROPIC_API_KEY, rerun, same code path, real reasoning instead of the mock rules.
+
+Two data issues to fix before building further on this template, not blockers for the POC but real before production: the FCST_Revenue tab's regional roll up rows for Europe, Taiwan, and Japan currently throw #REF! errors (broken cell references), and Sheet1's "Projection" versus "Stretch" quarterly numbers do not tie back to any other tab by formula, so their exact definition needs to come from David or Gene directly rather than being reverse-engineered from the file. Both are called out in the attached Step 1 document.
+
+What is next, roughly in priority order: replace the hand-written JSON input with a real intake form covering the Funnel and ProjectTrack fields (region, customer, part number, stage, EAU, ASP, confidence). Stand up Postgres for pipeline records and stage history, treating stage history as an append-only log per project rather than just a current-state field, since win rate and time-in-stage analysis both need that history preserved. Wrap calc_engine.py and judgment.py as two callable services, compute_pipeline_rollup and score_confidence, so the Workflow Manager can call each independently. Build a stage tracking service that watches for projects stalled unusually long in one stage and flags the moment a project resolves to Mass Production or Design Lost, though whether that move should happen automatically or wait for human confirmation is still an open question for David. Require a reason code on Design Lost entries (price, technical fit, relationship, timing) so a win and loss model has something to learn from later. And build the hand-off to the ROI Agent: once a project hits Design Win, its Adjusted Revenue by year is exactly the shape of input the ROI Agent's revenue forecast intake expects, so that contract should be designed once, shared, rather than reinvented on either side.
+
+On hardware: no new purchase needed. This agent's workload is lighter than the ROI Agent's judgment calls, so the same RTX PRO 6000 Blackwell card (96GB) we sized for that agent covers this one too, served through the same shared vLLM deployment rather than a second one. Route through a hosted frontier API as the primary path for the same reasons as the ROI Agent (cost at this volume, and avoiding the Chinese-model security concern entirely), keeping the Blackwell card as the fallback. If we ever do self-host, Western open-weight models only, Llama, Mistral, Gemma, or Command R+, never Qwen or DeepSeek.
+
+Everything referenced, the POC code, the architecture diagram naming every component, and the open questions we still owe David and Gene (including the naming and scope question, and the two data issues above), is attached. Start with the POC and the Step 1 questions, since a couple of those (especially the Projection versus Stretch definition) will change what the calc engine needs to do.
+
+Thanks,
+Akanksha
+
+
+5 attachments
+		Step2_Architecture_Block_Diagram.html
+3331K
+		OppTrack_Step1_Open_Questions.pdf
+75K
+		OppTrack_Step4_ScaleUp_Hardware.pdf
+80K
+		Step3_POC_Code.zip
+10K
+		TrackF (1).xlsx
+44K
+Lokesh R M <lokesh@sirenatech.com>	Fri, Aug 7, 2026 at 2:14 AM
+To: Akanksha Anand <akanksha.anand@sirenatech.com>
+Cc: Atmia Srivastava <atmia@sirenatech.com>, Dimplesai A <dimplesai@sirenatech.com>, Moumita Chakraborty <moumita@sirenatech.com>, Karthikeyan Ponnuswami <karthik@sirenatech.com>
+Hi Akanksha,
+
+I've run the POC, both the offline MOCK version and the live one, against the API. Here's what I found and what I'm starting on.
+
+Running it
+
+The MOCK version runs with no setup, as you said. The regression test passes, so calc_engine produces the same numbers as David's ProjectTrack tab for all 9 projects: $82,350K raw and $30,915K after the confidence weighting.
+
+Live mode failed on all 9 projects the first time and quietly fell back to MOCK. The API was fine, the bug was ours. Claude sent its answer wrapped in a markdown fence, and JSON.loads() choked on the first character. Three
+smaller problems in the same function made it worse. We read the answer from content[0], which breaks as soon as a thinking block comes first. max_tokens was 2000, low enough to cut the JSON off partway. And the error handler
+printed one quiet line, so nine failures scrolled past almost unnoticed.
+
+That's fixed. I now ask the API for a fixed answer shape (a JSON schema) instead of asking for JSON in the prompt, so there's nothing to strip. I also picked the text block by type, raised max_tokens, and made the fallback loud. Upgraded the anthropic package from 0.40 to 0.120 and moved the model from claude-sonnet-4-5 to claude-sonnet-5. All 9 run clean now.
+
+What the live run says
+
+The weighted pipeline went from $30,915K to $29,554K, so the judgment layer removed $1,361K of optimism across five projects. Three of them look right to me: Apollo, Hugo and Dresden are all sitting near 50% confidence while still
+at EVT. Two I'd push back on:
+
+Montana lost 15 points for early_stage_optimism, but Montana is at DVT. The rubric says that the factor is for concept and early evaluation.
+
+Aphrodite lost 12 points for stage_status_mismatch. It's Design In at DVT, which looks like a normal pairing.
+
+Two bigger things worth deciding before we build on this
+
+First, two of the six rubric factors can never fire. score_confidence gets one project at a time, so customer_concentration has nothing to work with. No single row can show that Korea is 89% of the raw pipeline ($73,350K out of $82,350K). And submitter_calibration has no submitter field in the data. This affects how we write the service signature in your item 3, so I'd like to get that right the first time.
+
+Second, positive adjustments currently do nothing. apply_confidence_adjustment clamps the result to [0, 1], and both design wins are already exactly 1.00. So when the agent says a locked design win deserves support, that
+support is thrown away, and the calibrated total can only ever go down. That's your open question 5 to David showing up in the numbers.
+
+One more thing: the AI doesn't give the same answer twice. Two runs over the same data give slightly different totals. That makes the audit log in the Step 4 plan something we need early.
+
+What I'm starting on
+
+Your item 3 first, wrapping calc_engine and judgment as compute_pipeline_rollup and score_confidence. That's the point where the concentration gap above either gets fixed or baked in, so I'll design score_confidence to take portfolio context as well as the single project into account.
+
+After that:
+
+Have score_confidence hand back a suggestion instead of applying it, and let the caller decide. Then, whichever way David answers the calibration question (agent adjusts the number or only flags outliers for review), it's a setting rather than a rewrite. It suits the audit log either way.
+
+Could you tighten the wording on the two factors that misfired, and spell out the stage order so DVT can't be read as early?
+
+Print the model's written reasons in the run output. Right now, we only print factor names and point changes, which is the one thing you'd actually want when checking a call like Montana's.
+
+Could you sort out the intake field list with Dimple, so her form and my service agree from the start?
+
+I'm not waiting on the blocked items. Projection vs Stretch affects the forecast and roll-up side rather than the judgment layer, and the same goes for the stage transition question, so I can keep moving on both counts.
+image.png
+
+Thanks,
+Lokesh
+[Quoted text hidden]
+Lokesh R M <lokesh@sirenatech.com>	Mon, Aug 17, 2026 at 12:04 AM
+To: Akanksha Anand <akanksha.anand@sirenatech.com>
+Cc: Atmia Srivastava <atmia@sirenatech.com>, Dimplesai A <dimplesai@sirenatech.com>, Moumita Chakraborty <moumita@sirenatech.com>, Karthikeyan Ponnuswami <karthik@sirenatech.com>
+Hi all,
+
+Three things: what I found looking into Salesforce, where David's answers left the open questions, and the architecture I've written based on both. A short list at the end details what we need before building starts.
+
+Salesforce
+
+Salesforce already does our arithmetic, and its AI can't help us yet.
+
+Its Opportunity object carries Amount, Stage, Probability and Expected Revenue, where Probability follows Stage, and Expected Revenue is Amount times Probability. That's exactly TrackF's Sales Revenue times Confidence Level, and David told us confidence follows the stage a project sits in. So the stage-to-confidence table we keep asking him for is, in Salesforce terms, just the probability attached to each stage in the picklist. Worth knowing we're not inventing something odd. It also has Forecast Category, which separates how far along a deal is from how confident anyone feels, and that's the Design Status versus Stage tension we keep hitting. Manufacturing Cloud is built for our business model and keeps the design-win pipeline in a separate forecast set from the committed forecast, mirroring the split David made when he handed the forecast to finance.
+
+Where it stops helping: Einstein Opportunity Scoring needs 200 closed-won and 200 closed-lost opportunities from the last two years before it will train on your data. We have nine live projects and one lost record (In the sheet we got for now). Below that bar, it falls back to a generic model built on other companies' data, and its known weakness is that you can't tell it which fields matter. Our judgment layer requires no history because it reasons from a written rubric and must cite a source for every adjustment.
+
+Open questions
+
+Of the thirteen we put to David, six are properly answered, and seven have a direction, but not enough to build from. Fifteen more have never been asked. Four to send him this week:
+
+What confidence number goes with each stage? He said confidence follows the stage, but never gave the table, and Concept, EVT, DVT, PVT and MP each need a figure. Without them, the agent invents a number instead of justifying a deviation from an agreed-upon one.
+If a design win isn't 1.00, what's the ceiling, and how much does dual sourcing and cancellation risk take off?
+Does anything stop a person, or does the agent close and promote records on its own?
+Is there a corrected workbook? He wrote, "I don't see it in the sheet I updated", and ours still has the broken roll-up rows.
+Worth raising the third one carefully. He answered "auto-enter confidence" and "auto-move records" as separate questions. Read together, nobody signs off before an opportunity is closed as lost or promoted to mass production. I doubt that's what he meant.
+
+Reading the workbook cell by cell also turned up five things nobody has asked about, including a whole revenue type for NRE and licences that has no volume and no confidence, and Funnel and FCST_Revenue disagreeing by a factor of ten on EAU for the same part. All five are written up in the tab and field map.
+
+Architecture
+
+Step 5 doc attached, six diagrams. It covers what Step 2 named but didn't specify: how someone gets an account, what the tables look like, what the agent remembers between runs, and how evidence reaches the model.
+
+Four decisions worth arguing about. No public sign-up, with region scope enforced in the SQL rather than by hiding things in the UI, because this pipeline holds unannounced design wins and customer pricing. Memory is six tiers, and only one is a vector store, since most of what the agent needs to recall is exact and relational. state_history is the piece that earns its keep first, because it turns Design Status from a cell that gets overwritten into an event stream, which gives us stall detection, time in stage, win rate and the outcome labels calibration will need. Retrieval filters by region and recency before it searches. Numbers are never embedded, since a figure recovered from a vector search is one nobody can audit.
+
+Phase 0 needs none of it. No database, no auth, no model. Run it against today's workbook, and it already finds a company total that won't compute, seven TBD values in numeric fields, five skeleton rows carrying design wins worth zero, and a Funnel row implying a third of global light-vehicle production. That's a demo we could show next week.
+
+Before we start building
+
+We run to 5 September, so three weeks, and the plan has six phases. Phases 0 and 1 are realistic, Phase 2 is possible, and Phase 3 can't start until David sends the baseline table. Worth agreeing now on what we're presenting on the 5th.
+
+Security sign-off is the long pole and should start today. The pipeline holds unannounced design wins and customer pricing, some under NDA with MOBIS and Hyundai, and nobody has approved sending that class of data to a hosted API. If the answer is no, the judgment layer moves to the local vLLM path.
+
+Also this week: get the infrastructure requests in, ask David whether anyone kept the monthly TrackF files from the past year (they're the only place historical state exists), and put the code under source control, which I'll do unless someone has a preferred home for it.
+
+What I need
+
+Dimple, let's lock the intake field list. It's grown: opportunity ID, owner, Unit/Set, competitor part, loss reason and revenue type.
+
+Akanksha, the four questions, plus the workbook history request, and whether we have a history of data (Good for writing the matrix).
+
+Thanks,
+Lokesh
+
+[Quoted text hidden]
+
+5 attachments
+		Step5_Platform_Architecture.html
+50K
+		Opportunity_Tracking_Agent_Tab_and_Field_Map.docx
+45K
+		Opportunity_Tracking_Agent_Open_Questions_Status.docx
+44K
+		TrackF_Parameter_Relation_Model.html
+55K
+		TrackF_Agent_Build_Structure.html
+51K
